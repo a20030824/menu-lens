@@ -1,5 +1,6 @@
 import { referenceMenu } from "../domain/reference-menu.js";
 import {
+  categoryAtlasSize,
   categoryScrollBehavior,
   closeProduct,
   createCompleteMenuModel,
@@ -28,14 +29,75 @@ test("complete menu model contains all 30 canonical products", () => {
   );
 });
 
-test("directory and menu use the same ordered category collection", () => {
+test("atlas and menu use the same ordered category collection", () => {
   const model = createCompleteMenuModel(referenceMenu);
   const expectedCounts = [8, 6, 6, 4, 4, 2];
   assert(model.categories.length === referenceMenu.categories.length, "all categories must appear");
+  assert(
+    model.atlasCategories.length === model.categories.length,
+    "atlas must represent every complete-menu category",
+  );
+
   model.categories.forEach((category, index) => {
+    const atlasCategory = model.atlasCategories[index];
     assert(category.id === referenceMenu.categories[index]?.id, "category order must stay canonical");
     assert(category.productCount === expectedCounts[index], "category count must be correct");
+    assert(atlasCategory?.id === category.id, "atlas order must match the complete menu");
+    assert(
+      atlasCategory.availableCount + atlasCategory.soldOutCount === category.productCount,
+      "atlas availability counts must cover the whole category",
+    );
   });
+});
+
+test("atlas size tiers reflect category scale without reordering", () => {
+  const model = createCompleteMenuModel(referenceMenu);
+  const sizes = model.atlasCategories.map((category) => category.size);
+  assert(
+    JSON.stringify(sizes) ===
+      JSON.stringify(["large", "medium", "medium", "medium", "medium", "small"]),
+    "atlas size tiers must reflect the canonical category counts",
+  );
+  assert(categoryAtlasSize(7) === "large", "seven products should be a large region");
+  assert(categoryAtlasSize(4) === "medium", "four products should be a medium region");
+  assert(categoryAtlasSize(3) === "small", "three products should be a small region");
+});
+
+test("atlas summaries and representatives use only supported menu data", () => {
+  const model = createCompleteMenuModel(referenceMenu);
+  model.atlasCategories.forEach((atlasCategory, index) => {
+    const menuCategory = model.categories[index];
+    const expectedRepresentatives = menuCategory?.products
+      .filter((product) => !product.isSoldOut)
+      .slice(0, 3)
+      .map((product) => product.name);
+
+    assert(atlasCategory.structuralSummary.length > 0, "atlas summary must not be empty");
+    assert(
+      JSON.stringify(atlasCategory.representativeProducts) ===
+        JSON.stringify(expectedRepresentatives),
+      "representative products must keep canonical available-product order",
+    );
+  });
+
+  const visibleText = JSON.stringify(model.atlasCategories);
+  ["personal_main", "shared_main", "merchant_confirmed", "category_default"].forEach(
+    (rawValue) => assert(!visibleText.includes(rawValue), `atlas must not expose ${rawValue}`),
+  );
+});
+
+test("atlas keeps sold-out and incomplete metadata visible as aggregate signals", () => {
+  const model = createCompleteMenuModel(referenceMenu);
+  const soldOutCount = model.atlasCategories.reduce(
+    (total, category) => total + category.soldOutCount,
+    0,
+  );
+  const partialMetadataCount = model.atlasCategories.reduce(
+    (total, category) => total + category.partialMetadataCount,
+    0,
+  );
+  assert(soldOutCount === 2, "atlas must account for both sold-out products");
+  assert(partialMetadataCount === 6, "atlas must account for all partial metadata products");
 });
 
 test("sold-out products remain at their canonical positions", () => {
@@ -93,7 +155,7 @@ test("Escape is the keyboard close command", () => {
   assert(!isDetailCloseKey("Enter"), "Enter must not be treated as close");
 });
 
-test("the first slice contains no ordering workspace state", () => {
+test("the menu-map slice contains no ordering workspace state", () => {
   const state = createInitialMenuReadingState(referenceMenu);
   const serialized = JSON.stringify(state);
   assert(!serialized.includes("candidate"), "Candidate state must not start in this slice");
