@@ -1,0 +1,12 @@
+{
+  "name": "menu-lens",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsc && node dist/src/domain/menu-validation.test.js"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}
