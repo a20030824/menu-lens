@@ -34,7 +34,6 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   let openTrigger: HTMLButtonElement | null = null;
 
   const categoryButtons = new Map<string, HTMLButtonElement>();
-  const productButtons = new Map<ProductId, HTMLButtonElement>();
   const categorySections = new Map<string, HTMLElement>();
 
   const updateActiveCategory = (categoryId: string): void => {
@@ -267,7 +266,6 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
       price.append(visuallyHiddenText("，開啟詳情"));
       button.append(main, price);
       button.addEventListener("click", () => openDetail(product, button));
-      productButtons.set(product.id, button);
       item.append(button);
       productList.append(item);
     });
