@@ -96,6 +96,7 @@ export type Candidate = Readonly<{
   productId: ProductId;
   quantity?: never;
   configuration?: never;
+  selections?: never;
 }>;
 
 export type ModifierSelection = Readonly<{
@@ -108,7 +109,7 @@ export type DraftOrderItem = Readonly<{
   id: DraftOrderItemId;
   productId: ProductId;
   quantity: number;
-  selections: ReadonlyArray<ModifierSelection>;
+  selections?: never;
   configuration?: never;
 }>;
 
