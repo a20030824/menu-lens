@@ -27,7 +27,6 @@ export type AtlasRegionSize = "small" | "medium" | "large";
 export type CategoryAtlasModel = Readonly<{
   id: CategoryId;
   name: string;
-  description: string | null;
   productCount: number;
   availableCount: number;
   soldOutCount: number;
@@ -215,7 +214,6 @@ const createCategoryAtlasModel = (
   return {
     id: category.id,
     name: category.name,
-    description: category.description ?? null,
     productCount: products.length,
     availableCount: availableProducts.length,
     soldOutCount: products.length - availableProducts.length,
