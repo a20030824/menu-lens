@@ -1,5 +1,6 @@
 import { referenceMenu } from "../domain/reference-menu.js";
 import {
+  categoryScrollBehavior,
   closeProduct,
   createCompleteMenuModel,
   createInitialMenuReadingState,
@@ -70,6 +71,20 @@ test("display transformations never expose domain enum strings", () => {
   const visibleText = JSON.stringify(detail);
   ["personal_main", "shared_main", "two_to_three", "large_shared", "merchant_confirmed", "category_default"].forEach(
     (rawValue) => assert(!visibleText.includes(rawValue), `must not expose ${rawValue}`),
+  );
+});
+
+test("category scrolling uses auto for reduced motion", () => {
+  assert(
+    categoryScrollBehavior(true) === "auto",
+    "reduced motion must disable smooth category scrolling",
+  );
+});
+
+test("category scrolling uses smooth for normal motion", () => {
+  assert(
+    categoryScrollBehavior(false) === "smooth",
+    "normal motion may use smooth category scrolling",
   );
 });
 
