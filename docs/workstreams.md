@@ -16,7 +16,7 @@ It exists to prevent parallel conversations from redefining the product, duplica
 ## Current sequence
 
 ```text
-foundation memory
+[complete] foundation memory
 → domain schema and reference dataset
 → formative evaluation protocol
 → customer decision spine
@@ -30,7 +30,7 @@ foundation memory
 
 | Workstream | Status | Scope | Depends on | Primary output |
 |---|---|---|---|---|
-| Foundation memory | Active | product contract, glossary, workstream boundaries, handoff protocol | existing design core | stable cross-conversation reference |
+| Foundation memory | Complete | product contract, glossary, workstream boundaries, handoff protocol | existing design core | stable cross-conversation reference |
 | Domain and reference data | Next | types, validation, 30-product fictional menu, incomplete metadata cases | product contract | local typed dataset and tests |
 | Formative evaluation | Next | task scripts, observation notes, lightweight local events, falsification signals | product contract | protocol that can shape implementation |
 | Customer decision spine | Blocked | full menu → inline detail → candidates → comparison → decision → configuration → current order | domain dataset | one complete interactive flow |
@@ -42,7 +42,7 @@ foundation memory
 
 ## Foundation completion criteria
 
-Foundation memory is complete when a new conversation can determine, without relying on chat history:
+Foundation memory is complete because a new conversation can determine, without relying on chat history:
 
 - what Menu Lens is investigating
 - which states must remain distinct
@@ -50,6 +50,13 @@ Foundation memory is complete when a new conversation can determine, without rel
 - which workstream is currently allowed to proceed
 - which work is deferred or out of scope
 - how to report changes and unresolved questions
+
+The authoritative entry points are:
+
+- `docs/product-contract.md`
+- `docs/glossary.md`
+- `docs/workstreams.md`
+- `docs/handoff.md`
 
 ## Next workstream: domain and reference data
 
