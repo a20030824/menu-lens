@@ -112,6 +112,20 @@ test("duplicate product IDs are rejected", () => {
   expectValidationError(input, ["duplicate product ID"]);
 });
 
+test("category, modifier group, and modifier option IDs are unique", () => {
+  const category = cloneReferenceData();
+  category.categories[1].id = category.categories[0].id;
+  expectValidationError(category, ["duplicate category ID"]);
+
+  const group = cloneReferenceData();
+  group.modifierGroups[1].id = group.modifierGroups[0].id;
+  expectValidationError(group, ["duplicate modifier group ID"]);
+
+  const option = cloneReferenceData();
+  option.modifierGroups[1].options[0].id = option.modifierGroups[0].options[0].id;
+  expectValidationError(option, ["duplicate modifier option ID"]);
+});
+
 test("negative and non-finite prices are rejected", () => {
   const negative = cloneReferenceData();
   negative.products[0].price = -1;
@@ -133,6 +147,34 @@ test("invalid modifier cardinality is rejected", () => {
   input.modifierGroups[0].minimumSelections = 2;
   input.modifierGroups[0].maximumSelections = 1;
   expectValidationError(input, ["minimumSelections must not exceed maximumSelections"]);
+});
+
+test("modifier cardinality values are finite non-negative integers", () => {
+  const negative = cloneReferenceData();
+  negative.modifierGroups[0].minimumSelections = -1;
+  expectValidationError(negative, ["minimumSelections", "non-negative integer"]);
+
+  const nonFinite = cloneReferenceData();
+  nonFinite.modifierGroups[0].maximumSelections = Number.POSITIVE_INFINITY;
+  expectValidationError(nonFinite, ["maximumSelections", "non-negative integer"]);
+
+  const fractional = cloneReferenceData();
+  fractional.modifierGroups[0].minimumSelections = 0.5;
+  expectValidationError(fractional, ["minimumSelections", "non-negative integer"]);
+});
+
+test("modifier cardinality respects option count and required state", () => {
+  const tooMany = cloneReferenceData();
+  tooMany.modifierGroups[0].maximumSelections = 3;
+  expectValidationError(tooMany, ["must not exceed the number of options"]);
+
+  const requiredMinimum = cloneReferenceData();
+  requiredMinimum.modifierGroups[0].minimumSelections = 0;
+  expectValidationError(requiredMinimum, ["must be at least 1 for a required group"]);
+
+  const optionalMinimum = cloneReferenceData();
+  optionalMinimum.modifierGroups[5].minimumSelections = 1;
+  expectValidationError(optionalMinimum, ["must be 0 for an optional group"]);
 });
 
 test("required modifier groups without options are rejected", () => {
@@ -177,7 +219,6 @@ test("candidate, draft, configured, and submitted concepts remain distinct", () 
     id: "draft-1",
     productId,
     quantity: 1,
-    selections: [],
   };
   const configured: ConfiguredOrderItem = {
     state: "configured",
@@ -195,7 +236,9 @@ test("candidate, draft, configured, and submitted concepts remain distinct", () 
 
   assert(!("quantity" in candidate), "candidate must not contain quantity");
   assert(!("configuration" in candidate), "candidate must not contain configuration");
+  assert(!("selections" in candidate), "candidate must not contain modifier selections");
   assert(draft.state === "draft", "draft item must retain the draft state boundary");
+  assert(!("selections" in draft), "draft item must not contain modifier selections");
   assert(!("configuration" in draft), "draft item must not masquerade as configured");
   assert(
     configured.state === "configured" && "configuration" in configured,
@@ -217,6 +260,22 @@ test("metadata source and confidence values are restricted", () => {
   expectValidationError(invalidConfidence, ["must be one of: high, medium, low"]);
 });
 
+test("metadata sources are restricted by category-default and product-override context", () => {
+  const categoryDefault = cloneReferenceData();
+  categoryDefault.categories[0].semanticDefaults.mealRole.source = "merchant_confirmed";
+  expectValidationError(categoryDefault, ['must be "category_default" in this context']);
+
+  const productOverride = cloneReferenceData();
+  productOverride.products[0].semanticOverrides.traits.source = "category_default";
+  expectValidationError(productOverride, ['must be "merchant_confirmed" in this context']);
+});
+
+test("malformed nested semantic data is rejected before return", () => {
+  const input = cloneReferenceData();
+  input.products[0].semanticOverrides.traits.value = ["rich", { unexpected: true }];
+  expectValidationError(input, ["semanticOverrides.traits.value[1]", "must be one of"]);
+});
+
 test("unknown availability values are rejected", () => {
   const input = cloneReferenceData();
   input.products[0].availability = "hidden";
@@ -233,10 +292,42 @@ test("dangling modifier references and option defaults are rejected", () => {
   expectValidationError(defaultReference, ["references unknown option"]);
 });
 
-test("default modifier selections must respect cardinality", () => {
+test("default modifier selections must not exceed maximum cardinality", () => {
   const input = cloneReferenceData();
   input.modifierGroups[0].defaultOptionIds = ["white-rice", "multigrain-rice"];
   expectValidationError(input, ["default selections must not exceed maximumSelections"]);
+});
+
+test("default modifier selections must satisfy minimum cardinality", () => {
+  const input = cloneReferenceData();
+  input.modifierGroups[0].minimumSelections = 2;
+  input.modifierGroups[0].maximumSelections = 2;
+  input.modifierGroups[0].defaultOptionIds = ["white-rice"];
+  expectValidationError(input, ["default selections must satisfy minimumSelections"]);
+});
+
+test("contract-critical field typos are rejected instead of silently ignored", () => {
+  const availability = cloneReferenceData();
+  availability.products[0].availablity = "sold_out";
+  expectValidationError(availability, ["products[0].availablity", 'use "availability"']);
+
+  const minimumSelection = cloneReferenceData();
+  minimumSelection.modifierGroups[0].minimumSelection = 0;
+  expectValidationError(minimumSelection, ["minimumSelection", 'use "minimumSelections"']);
+
+  const modifierGroupId = cloneReferenceData();
+  modifierGroupId.products[0].modifierGroupId = "spice-level";
+  expectValidationError(modifierGroupId, ["modifierGroupId", 'use "modifierGroupIds"']);
+
+  const semanticOverride = cloneReferenceData();
+  semanticOverride.products[0].semanticOverride = {
+    traits: {
+      value: ["light"],
+      source: "merchant_confirmed",
+      confidence: "high",
+    },
+  };
+  expectValidationError(semanticOverride, ["semanticOverride", 'use "semanticOverrides"']);
 });
 
 let failureCount = 0;
