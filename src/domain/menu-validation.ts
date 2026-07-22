@@ -71,6 +71,23 @@ const addIssue = (context: ValidationContext, path: string, message: string): vo
   context.issues.push(`${path}: ${message}`);
 };
 
+const rejectKnownFieldTypos = (
+  object: JsonObject,
+  path: string,
+  typos: Readonly<Record<string, string>>,
+  context: ValidationContext,
+): void => {
+  Object.entries(typos).forEach(([typo, expected]) => {
+    if (Object.hasOwn(object, typo)) {
+      addIssue(
+        context,
+        `${path}.${typo}`,
+        `is not a recognized field; use "${expected}"`,
+      );
+    }
+  });
+};
+
 const readObject = (
   value: unknown,
   path: string,
@@ -349,6 +366,13 @@ const validateModifierGroup = (
     return undefined;
   }
 
+  rejectKnownFieldTypos(
+    object,
+    path,
+    { minimumSelection: "minimumSelections" },
+    context,
+  );
+
   const id = readNonEmptyString(object.id, `${path}.id`, context);
   readNonEmptyString(object.name, `${path}.name`, context);
   const required = readBoolean(object.required, `${path}.required`, context);
@@ -463,6 +487,17 @@ const validateProduct = (
   if (!object) {
     return undefined;
   }
+
+  rejectKnownFieldTypos(
+    object,
+    path,
+    {
+      availablity: "availability",
+      modifierGroupId: "modifierGroupIds",
+      semanticOverride: "semanticOverrides",
+    },
+    context,
+  );
 
   const id = readNonEmptyString(object.id, `${path}.id`, context);
   readNonEmptyString(object.name, `${path}.name`, context);
