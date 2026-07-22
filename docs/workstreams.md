@@ -19,7 +19,10 @@ It exists to prevent parallel conversations from redefining the product, duplica
 [complete] foundation memory
 → [complete] domain schema and reference dataset
 → [complete] formative evaluation protocol
-→ [next] customer decision spine
+→ [active] customer decision spine
+    [complete] complete menu + inline detail
+    → [next] Candidate + comparison
+    → Decision + Configuration + Current order
 → continuity and table state
 → thin alternative lenses
 → merchant-authoring test
@@ -33,7 +36,7 @@ It exists to prevent parallel conversations from redefining the product, duplica
 | Foundation memory | Complete | product contract, glossary, workstream boundaries, handoff protocol | existing design core | stable cross-conversation reference |
 | Domain and reference data | Complete | types, validation, 30-product fictional menu, incomplete metadata cases | product contract | local typed dataset and tests |
 | Formative evaluation | Complete | task scripts, observation notes, lightweight local events, falsification signals | product contract | protocol that shapes implementation |
-| Customer decision spine | Next | full menu → inline detail → candidates → comparison → decision → configuration → current order | domain dataset and formative protocol | one complete interactive flow |
+| Customer decision spine | In progress | full menu → inline detail → candidates → comparison → decision → configuration → current order | domain dataset and formative protocol | one complete interactive flow |
 | Continuity and table state | Deferred | scroll restoration, preserved candidates, submitted rounds, coarse table composition | customer decision spine | continuity behavior over the same state model |
 | Alternative lenses | Deferred | thin quick, shared-table, and featured views | stable decision spine | views over the same canonical menu |
 | Merchant authoring | Deferred | category defaults, exceptions, confidence, incomplete-data preview | proven useful semantic fields | small authoring test, not production CMS |
@@ -79,7 +82,19 @@ The formative-evaluation workstream now provides:
 - observation and session-summary templates
 - explicit criteria for redesigning, simplifying, or removing a feature
 
-## Next workstream: customer decision spine
+The first customer-facing slice now provides:
+
+- one static local client using the validated canonical menu
+- restaurant overview and complete-menu trust cues
+- all six categories and all 30 products in one stable document
+- category navigation that moves without filtering or replacing products
+- inline product detail resolved by stable `ProductId`
+- sold-out and incomplete-metadata behavior
+- keyboard open, Escape close, and focus return
+- reduced-motion-aware category scrolling
+- focused menu-reading tests and a static build path
+
+## Active workstream: customer decision spine
 
 ### Goal
 
@@ -95,18 +110,26 @@ complete menu
 → Current order
 ```
 
+### Progress
+
+```text
+[complete] complete menu + inline detail
+→ [next] Candidate + comparison
+→ [pending] explicit Decision + Configuration + Current order
+```
+
 ### Required outputs
 
-- one client application
-- complete-menu overview with stable category navigation
-- inline product detail without losing browsing context
-- Candidate add, remove, and workspace behavior
-- comparison for genuine Candidate differences
-- explicit transition from consideration to Decision
-- Configuration only after Decision
-- Current order clearly separated from Candidates
-- local-only observation events aligned with `docs/evaluation-plan.md`
-- focused tests for state transitions and preserved invariants
+- **Complete:** one client application
+- **Complete:** complete-menu overview with stable category navigation
+- **Complete:** inline product detail without losing browsing context
+- **Next:** Candidate add, remove, and workspace behavior
+- **Next:** comparison for genuine Candidate differences
+- **Pending:** explicit transition from consideration to Decision
+- **Pending:** Configuration only after Decision
+- **Pending:** Current order clearly separated from Candidates
+- **Pending:** local-only observation events aligned with `docs/evaluation-plan.md`
+- focused tests for every implemented state transition and preserved invariant
 
 ### Constraints
 
@@ -119,14 +142,54 @@ complete menu
 - do not add abstractions for deferred work
 - preserve `Product ≠ Candidate ≠ DraftOrderItem ≠ ConfiguredOrderItem ≠ SubmittedOrderRound`
 
-## Implementation gate
+## Next implementation slice: Candidate and comparison
 
-The customer decision-spine workstream is now open because:
+### Goal
 
-1. canonical Product identity and state terms are stable
-2. the reference dataset supports the complete flow
-3. required Configuration examples exist
-4. incomplete metadata behavior is represented
-5. the formative protocol defines what should be observable
+Extend the existing complete-menu client from reading into reversible consideration:
 
-It does not need alternative lenses, merchant tooling, production integration, or a baseline comparison before starting.
+```text
+Product
+→ Candidate
+→ Candidate workspace
+→ comparison
+```
+
+### Required behavior
+
+- add an available Product as a Candidate using stable `ProductId`
+- remove a Candidate without affecting the canonical menu
+- keep Candidate separate from Current order and purchase commitment
+- do not request quantity or modifiers when adding a Candidate
+- keep browsing context while opening and closing the Candidate workspace
+- compare a small set of genuine Candidate differences using only supported metadata
+- omit unsupported comparison fields instead of guessing
+- return from comparison without clearing Candidates or changing the complete menu
+- add the bounded local events already defined for Candidate and comparison observation
+- add focused state and interaction tests
+
+### Explicit exclusions
+
+- no `DraftOrderItem` creation
+- no Configuration form
+- no quantity controls
+- no modifier selection
+- no order total
+- no Current order
+- no submitted rounds
+- no persistence, URL state, router, backend, or remote analytics
+- no alternative lenses
+
+### Completion gate
+
+The next slice is complete when a tester can:
+
+1. preserve two or more possible products as Candidates
+2. continue browsing the same complete menu
+3. open a clearly separate Candidate workspace
+4. compare supported differences without seeing invented metadata
+5. remove or retain Candidates reversibly
+6. return to the original browsing context
+7. avoid interpreting Candidate as a placed order
+
+It does not need Decision, Configuration, Current order, continuity persistence, alternative lenses, merchant tooling, production integration, or a baseline comparison before completion.
