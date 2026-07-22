@@ -332,7 +332,9 @@ Do not require use of the comparison surface. Whether the participant finds or a
 
 **Participant script**
 
-> Formally decide to order one dish and complete any choices needed to place it in your current order.
+> Decide to order one dish, then complete any choices the prototype asks you to make.
+
+If the product chosen in Task 3 does not require Configuration, run this task with another genuinely acceptable dish that does. Record the second pass as a planned Configuration probe, not as evidence that the participant changed their original preference.
 
 After the participant first enters Configuration, ask them to cancel or go back once, then continue and complete the task. This is a planned task probe, not a rescue intervention. Do not tell them what state should remain.
 
