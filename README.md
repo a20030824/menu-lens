@@ -22,40 +22,52 @@ A digital menu can preserve the overview, density, spatial memory, and editorial
 
 The experience should feel like **reading and arranging a meal**, not operating a miniature self-checkout terminal.
 
-## Design principles
+## Product invariants
 
 - The full menu is a first-class experience, not a fallback.
 - Browsing is not ordering.
-- A candidate list is not a cart.
+- A candidate is not an order item.
 - Product details should not destroy browsing position or spatial memory.
-- Modifiers should appear after explicit purchase intent.
-- Quick, shared-table, and featured views are lenses over one menu—not separate catalogs.
-- Switching lenses must preserve candidates, selected items, constraints, and browsing context.
-- Recommendations must explain why an item is shown.
-- Merchant data requirements should support progressive enhancement.
-- Missing metadata should reduce features gracefully, not make products disappear.
+- Required configuration begins after explicit purchase intent.
+- Lenses are views over one canonical menu, not separately maintained catalogs.
+- Switching views must preserve candidates, order state, constraints, and browsing context.
+- Merchant data supports progressive enhancement.
+- Missing semantic metadata should degrade enhanced features without breaking complete-menu browsing.
 - Wrong operational information is worse than absent information.
+
+The authoritative version of these rules is [`docs/product-contract.md`](docs/product-contract.md).
+
+## First research questions
+
+The initial implementation investigates only three primary questions:
+
+1. Can a dense, stable full-menu view establish overview without making users fear that products are hidden?
+2. Does separating candidates from order items support genuine consideration without using the cart as a bookmark?
+3. Can inline detail and preserved browsing context improve comparison without destroying spatial memory?
+
+A conventional comparison interface is deliberately parked. The project should first make the Menu Lens interaction internally coherent and observable before deciding whether a formal baseline is useful.
 
 ## Initial demo scope
 
-### Customer experience
+### Primary customer flow
 
-- menu overview and category map
-- dense full-menu browsing
-- inline product details
-- candidate list separate from the cart
-- meaningful comparison between candidates
-- configuration only after deciding to order
-- visible table composition and order state
-- lightweight quick-decision, shared-table, and featured lenses
+```text
+full menu
+→ inline detail
+→ candidate workspace
+→ candidate comparison
+→ explicit decision
+→ required configuration
+→ current order
+```
 
-### Merchant experience
+### Later, only after the decision spine works
 
-- imported basic product data
-- category-level semantic defaults
-- exception-based product editing
-- confidence and source of metadata
-- preview of how incomplete data affects the customer experience
+- preserved state across views
+- submitted order rounds
+- coarse table composition
+- thin quick, shared-table, and featured lenses
+- merchant category defaults and exception editing
 
 ### Explicitly out of scope
 
@@ -66,31 +78,57 @@ The experience should feel like **reading and arranging a meal**, not operating 
 - real-time multi-device collaboration
 - opaque AI recommendations
 - production restaurant operations
+- a conventional comparison implementation in the first build
+
+## Low-entropy implementation direction
+
+The first coded version should remain easy to read, test, change, and delete:
+
+- one client application
+- one local canonical dataset
+- one explicit application state model
+- one end-to-end decision flow
+- no backend
+- no premature monorepo
+- no generic plugin system
+- no separate design-system package
+- no abstraction justified only by hypothetical future scale
+
+See the detailed implementation contract in [`docs/product-contract.md`](docs/product-contract.md).
+
+## Shared project memory
+
+The repository, not chat history, is the shared memory across conversations.
+
+Every workstream should begin with:
+
+1. [`README.md`](README.md)
+2. [`docs/product-contract.md`](docs/product-contract.md)
+3. [`docs/glossary.md`](docs/glossary.md)
+4. [`docs/workstreams.md`](docs/workstreams.md)
+5. the documents directly related to its scope
+
+Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate workstream conversation.
 
 ## Core documents
 
-- [`docs/problem-framing.md`](docs/problem-framing.md) — why current QR ordering often feels harder to read than paper, and which claims this project intends to test
-- [`docs/interaction-model.md`](docs/interaction-model.md) — the menu map, candidate workspace, lens behavior, table state, and reversibility contract
-- [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata tiers, category defaults, confidence, governance, and graceful degradation
-- [`docs/demo-scope.md`](docs/demo-scope.md) — the reference restaurant, first customer flow, merchant demo, baseline, exclusions, and build sequence
-- [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — comparison tasks, behavioral measures, merchant study, instrumentation, and falsification signals
+- [`docs/product-contract.md`](docs/product-contract.md) — authoritative product invariants, first research questions, state boundaries, and low-entropy implementation contract
+- [`docs/glossary.md`](docs/glossary.md) — shared terminology for documents, data, code, issues, and conversations
+- [`docs/workstreams.md`](docs/workstreams.md) — current sequencing, active scope, parked work, and entry criteria
+- [`docs/handoff.md`](docs/handoff.md) — required reading, opening prompt, escalation rules, and closing report
+- [`docs/problem-framing.md`](docs/problem-framing.md) — why current QR ordering often feels harder to read than paper
+- [`docs/interaction-model.md`](docs/interaction-model.md) — menu map, candidate workspace, lens behavior, table state, and reversibility
+- [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
+- [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
+- [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
 
-## Repository status
+## Current status
 
-This repository currently contains the design and research core. Product architecture and implementation should be added only after preserving the distinctions documented here:
+The cross-conversation foundation is being established before implementation begins.
 
-```text
-browsing ≠ considering ≠ deciding ≠ configuring ≠ submitting
-```
+The next bounded workstreams are:
 
-The next implementation milestone is the **decision spine**:
+1. **Domain and reference data** — typed product schema, validation, and a credible 30-product fictional menu.
+2. **Formative evaluation** — task scripts, observable failure signals, and a compact local event vocabulary.
 
-```text
-full menu
-→ inline detail
-→ candidate workspace
-→ comparison
-→ explicit decision
-→ configuration
-→ current order
-```
+The customer decision spine begins after those two workstreams establish the data and observation contracts.
