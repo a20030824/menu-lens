@@ -1,5 +1,6 @@
 import type { Menu, ProductId } from "../domain/menu-types.js";
 import {
+  categoryScrollBehavior,
   closeProduct,
   createCompleteMenuModel,
   createInitialMenuReadingState,
@@ -210,8 +211,12 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
       const section = categorySections.get(category.id);
       if (!section) return;
       updateActiveCategory(category.id);
-      section.scrollIntoView({ block: "start", behavior: "smooth" });
-      window.setTimeout(() => section.focus({ preventScroll: true }), 250);
+      const prefersReducedMotion =
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const behavior = categoryScrollBehavior(prefersReducedMotion);
+      section.focus({ preventScroll: true });
+      section.scrollIntoView({ block: "start", behavior });
     });
     categoryButtons.set(category.id, categoryButton);
     directoryList.append(categoryButton);
