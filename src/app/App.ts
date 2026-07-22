@@ -8,6 +8,7 @@ import {
   isDetailCloseKey,
   openProduct,
   setActiveCategory,
+  type CategoryAtlasModel,
   type MenuReadingState,
   type ProductReadingModel,
 } from "../customer/menu-reading.js";
@@ -28,24 +29,57 @@ const visuallyHiddenText = (text: string): HTMLSpanElement => {
   return span;
 };
 
+const atlasSignalText = (category: CategoryAtlasModel): string => {
+  const signals: string[] = [];
+  if (category.soldOutCount > 0) signals.push(`${category.soldOutCount} 道售完`);
+  if (category.partialMetadataCount > 0) {
+    signals.push(`${category.partialMetadataCount} 道部分資訊`);
+  }
+  return signals.length > 0 ? signals.join(" · ") : `${category.availableCount} 道供應中`;
+};
+
 export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   const model = createCompleteMenuModel(menu);
   let state: MenuReadingState = createInitialMenuReadingState(menu);
   let openDetailPanel: HTMLElement | null = null;
   let openTrigger: HTMLButtonElement | null = null;
 
-  const categoryButtons = new Map<string, HTMLButtonElement>();
+  const categoryControls = new Map<string, HTMLButtonElement[]>();
   const categorySections = new Map<string, HTMLElement>();
+
+  const registerCategoryControl = (
+    categoryId: string,
+    control: HTMLButtonElement,
+  ): void => {
+    const controls = categoryControls.get(categoryId) ?? [];
+    controls.push(control);
+    categoryControls.set(categoryId, controls);
+  };
 
   const updateActiveCategory = (categoryId: string): void => {
     state = setActiveCategory(state, categoryId);
-    categoryButtons.forEach((button, id) => {
-      if (id === categoryId) {
-        button.setAttribute("aria-current", "true");
-      } else {
-        button.removeAttribute("aria-current");
-      }
+    categoryControls.forEach((controls, id) => {
+      controls.forEach((control) => {
+        if (id === categoryId) {
+          control.setAttribute("aria-current", "true");
+        } else {
+          control.removeAttribute("aria-current");
+        }
+      });
     });
+  };
+
+  const moveToCategory = (categoryId: string): void => {
+    const section = categorySections.get(categoryId);
+    if (!section) return;
+
+    updateActiveCategory(categoryId);
+    const prefersReducedMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const behavior = categoryScrollBehavior(prefersReducedMotion);
+    section.focus({ preventScroll: true });
+    section.scrollIntoView({ block: "start", behavior });
   };
 
   const closeDetail = (restoreFocus: boolean): void => {
@@ -121,7 +155,9 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
       panel.append(element("p", "detail-note", detail.metadataNotice));
     }
     if (detail.configurationNotice) {
-      panel.append(element("p", "detail-note detail-note--configuration", detail.configurationNotice));
+      panel.append(
+        element("p", "detail-note detail-note--configuration", detail.configurationNotice),
+      );
     }
 
     panel.addEventListener("keydown", (event) => {
@@ -162,11 +198,14 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   const shell = element("div", "menu-shell");
   const header = element("header", "restaurant-summary");
   const headerInner = element("div", "restaurant-summary__inner");
-  const eyebrow = element("p", "eyebrow", "完整菜單 · 所有品項都在這一頁");
+  const summaryTop = element("div", "restaurant-summary__top");
+  const summaryCopy = element("div", "restaurant-summary__copy");
+  const eyebrow = element("p", "eyebrow", "完整菜單 · 先看餐廳的菜單形狀");
   const title = element("h1", "restaurant-title", model.restaurantName);
   const description = element("p", "restaurant-description", model.restaurantDescription);
-  const metrics = element("dl", "menu-metrics");
+  summaryCopy.append(eyebrow, title, description);
 
+  const metrics = element("dl", "menu-metrics");
   const metricValues = [
     ["菜單品項", `${model.productCount} 道`],
     ["分類", `${model.categoryCount} 類`],
@@ -174,18 +213,78 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   ] as const;
   metricValues.forEach(([label, value]) => {
     const item = element("div", "menu-metric");
-    item.append(element("dt", "menu-metric__label", label), element("dd", "menu-metric__value", value));
+    item.append(
+      element("dt", "menu-metric__label", label),
+      element("dd", "menu-metric__value", value),
+    );
     metrics.append(item);
   });
-  headerInner.append(eyebrow, title, description, metrics);
+  summaryTop.append(summaryCopy, metrics);
+
+  const atlas = element("nav", "menu-atlas");
+  atlas.setAttribute("aria-label", "菜單全貌");
+  const atlasHeading = element("div", "menu-atlas__heading");
+  const atlasHeadingCopy = element("div");
+  atlasHeadingCopy.append(
+    element("p", "eyebrow", "Menu atlas"),
+    element("h2", "menu-atlas__title", "先看六個菜單區域，再進入完整菜單"),
+  );
+  atlasHeading.append(
+    atlasHeadingCopy,
+    element(
+      "p",
+      "menu-atlas__hint",
+      "區域大小反映品項數量；點選只會移動到同一份完整菜單，不會篩掉其他料理。",
+    ),
+  );
+
+  const atlasGrid = element("div", "menu-atlas__grid");
+  model.atlasCategories.forEach((category, index) => {
+    const region = element(
+      "button",
+      `menu-atlas__region menu-atlas__region--${category.size}`,
+    ) as HTMLButtonElement;
+    region.type = "button";
+    region.setAttribute("aria-controls", `category-${category.id}`);
+    region.setAttribute(
+      "aria-label",
+      `${category.name}，${category.productCount} 道，${category.priceRange}，${category.structuralSummary}。前往完整菜單中的這個分類。`,
+    );
+    region.append(
+      element("span", "menu-atlas__index", String(index + 1).padStart(2, "0")),
+      element("span", "menu-atlas__name", category.name),
+      element(
+        "span",
+        "menu-atlas__meta",
+        `${category.productCount} 道 · ${category.priceRange}`,
+      ),
+      element("span", "menu-atlas__summary", category.structuralSummary),
+      element(
+        "span",
+        "menu-atlas__products",
+        category.representativeProducts.join("・"),
+      ),
+      element("span", "menu-atlas__signals", atlasSignalText(category)),
+    );
+    region.addEventListener("click", () => moveToCategory(category.id));
+    registerCategoryControl(category.id, region);
+    atlasGrid.append(region);
+  });
+
+  atlas.append(atlasHeading, atlasGrid);
+  headerInner.append(summaryTop, atlas);
   header.append(headerInner);
 
   const layout = element("div", "menu-layout");
   const directory = element("nav", "category-directory");
-  directory.setAttribute("aria-label", "菜單分類導覽");
+  directory.setAttribute("aria-label", "完整菜單位置");
   directory.append(
-    element("p", "category-directory__label", "分類導覽"),
-    element("p", "category-directory__hint", "移動到同一份完整菜單中的分類，不會隱藏其他品項。"),
+    element("p", "category-directory__label", "菜單位置"),
+    element(
+      "p",
+      "category-directory__hint",
+      "標示目前所在區域；所有分類仍保留在同一份完整菜單。",
+    ),
   );
   const directoryList = element("div", "category-directory__list");
 
@@ -199,26 +298,17 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   );
   menuDocument.append(menuHeading);
 
-  model.categories.forEach((category) => {
+  model.categories.forEach((category, index) => {
     const categoryButton = element("button", "category-link") as HTMLButtonElement;
     categoryButton.type = "button";
     categoryButton.setAttribute("aria-controls", `category-${category.id}`);
     categoryButton.append(
+      element("span", "category-link__index", String(index + 1).padStart(2, "0")),
       element("span", "category-link__name", category.name),
       element("span", "category-link__meta", `${category.productCount} 道 · ${category.priceRange}`),
     );
-    categoryButton.addEventListener("click", () => {
-      const section = categorySections.get(category.id);
-      if (!section) return;
-      updateActiveCategory(category.id);
-      const prefersReducedMotion =
-        typeof window.matchMedia === "function" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const behavior = categoryScrollBehavior(prefersReducedMotion);
-      section.focus({ preventScroll: true });
-      section.scrollIntoView({ block: "start", behavior });
-    });
-    categoryButtons.set(category.id, categoryButton);
+    categoryButton.addEventListener("click", () => moveToCategory(category.id));
+    registerCategoryControl(category.id, categoryButton);
     directoryList.append(categoryButton);
 
     const section = element("section", "menu-category");
@@ -233,7 +323,9 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     categoryTitle.id = `category-title-${category.id}`;
     categoryTitleGroup.append(categoryTitle);
     if (category.description) {
-      categoryTitleGroup.append(element("p", "menu-category__description", category.description));
+      categoryTitleGroup.append(
+        element("p", "menu-category__description", category.description),
+      );
     }
     categoryHeader.append(
       categoryTitleGroup,
@@ -243,7 +335,10 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
 
     const productList = element("ul", "product-list");
     category.products.forEach((product) => {
-      const item = element("li", product.isSoldOut ? "product-row product-row--sold-out" : "product-row");
+      const item = element(
+        "li",
+        product.isSoldOut ? "product-row product-row--sold-out" : "product-row",
+      );
       item.dataset.productId = product.id;
       const button = element("button", "product-button") as HTMLButtonElement;
       button.type = "button";
@@ -259,9 +354,15 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
           ? element("span", "status status--sold-out", product.availabilityLabel)
           : visuallyHiddenText(product.availabilityLabel),
       );
-      const descriptionLine = element("span", "product-button__description", product.description);
+      const descriptionLine = element(
+        "span",
+        "product-button__description",
+        product.description,
+      );
       const traits = element("span", "product-button__traits");
-      product.traits.slice(0, 2).forEach((trait) => traits.append(element("span", "trait", trait)));
+      product.traits
+        .slice(0, 2)
+        .forEach((trait) => traits.append(element("span", "trait", trait)));
       if (product.metadataCompleteness === "partial") {
         traits.append(element("span", "trait trait--muted", "部分資訊"));
       }
