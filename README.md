@@ -124,7 +124,7 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 
 ## Current status
 
-The cross-conversation foundation is being established before implementation begins.
+The cross-conversation foundation is complete. New workstreams can rely on the repository instead of prior chat history.
 
 The next bounded workstreams are:
 
