@@ -67,8 +67,30 @@ The experience should feel like **reading and arranging a meal**, not operating 
 - opaque AI recommendations
 - production restaurant operations
 
+## Core documents
+
+- [`docs/problem-framing.md`](docs/problem-framing.md) — why current QR ordering often feels harder to read than paper, and which claims this project intends to test
+- [`docs/interaction-model.md`](docs/interaction-model.md) — the menu map, candidate workspace, lens behavior, table state, and reversibility contract
+- [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata tiers, category defaults, confidence, governance, and graceful degradation
+- [`docs/demo-scope.md`](docs/demo-scope.md) — the reference restaurant, first customer flow, merchant demo, baseline, exclusions, and build sequence
+- [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — comparison tasks, behavioral measures, merchant study, instrumentation, and falsification signals
+
 ## Repository status
 
-This repository begins as a design and research core. The product architecture will be added only after the primary interaction model and evaluation plan are clear.
+This repository currently contains the design and research core. Product architecture and implementation should be added only after preserving the distinctions documented here:
 
-See [`docs/`](docs/) for the problem framing, interaction model, merchant data strategy, demo scope, and evaluation plan.
+```text
+browsing ≠ considering ≠ deciding ≠ configuring ≠ submitting
+```
+
+The next implementation milestone is the **decision spine**:
+
+```text
+full menu
+→ inline detail
+→ candidate workspace
+→ comparison
+→ explicit decision
+→ configuration
+→ current order
+```
