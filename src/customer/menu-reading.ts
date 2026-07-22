@@ -160,6 +160,9 @@ export const setActiveCategory = (
   categoryId: CategoryId,
 ): MenuReadingState => ({ ...state, activeCategoryId: categoryId });
 
+export const categoryScrollBehavior = (prefersReducedMotion: boolean): ScrollBehavior =>
+  prefersReducedMotion ? "auto" : "smooth";
+
 export const isDetailCloseKey = (key: string): boolean => key === "Escape";
 
 export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => ({
