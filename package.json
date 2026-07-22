@@ -3,8 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "npm run build && node scripts/serve.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "tsc && node dist/src/domain/menu-validation.test.js"
+    "test": "node scripts/clean.mjs && tsc && node dist/src/domain/menu-validation.test.js && node dist/src/customer/menu-reading.test.js",
+    "build": "node scripts/clean.mjs && tsc && node scripts/build-static.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"
