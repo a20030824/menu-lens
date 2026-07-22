@@ -17,9 +17,9 @@ It exists to prevent parallel conversations from redefining the product, duplica
 
 ```text
 [complete] foundation memory
-→ domain schema and reference dataset
-→ formative evaluation protocol
-→ customer decision spine
+→ [complete] domain schema and reference dataset
+→ [complete] formative evaluation protocol
+→ [next] customer decision spine
 → continuity and table state
 → thin alternative lenses
 → merchant-authoring test
@@ -31,18 +31,18 @@ It exists to prevent parallel conversations from redefining the product, duplica
 | Workstream | Status | Scope | Depends on | Primary output |
 |---|---|---|---|---|
 | Foundation memory | Complete | product contract, glossary, workstream boundaries, handoff protocol | existing design core | stable cross-conversation reference |
-| Domain and reference data | Next | types, validation, 30-product fictional menu, incomplete metadata cases | product contract | local typed dataset and tests |
-| Formative evaluation | Next | task scripts, observation notes, lightweight local events, falsification signals | product contract | protocol that can shape implementation |
-| Customer decision spine | Blocked | full menu → inline detail → candidates → comparison → decision → configuration → current order | domain dataset | one complete interactive flow |
+| Domain and reference data | Complete | types, validation, 30-product fictional menu, incomplete metadata cases | product contract | local typed dataset and tests |
+| Formative evaluation | Complete | task scripts, observation notes, lightweight local events, falsification signals | product contract | protocol that shapes implementation |
+| Customer decision spine | Next | full menu → inline detail → candidates → comparison → decision → configuration → current order | domain dataset and formative protocol | one complete interactive flow |
 | Continuity and table state | Deferred | scroll restoration, preserved candidates, submitted rounds, coarse table composition | customer decision spine | continuity behavior over the same state model |
 | Alternative lenses | Deferred | thin quick, shared-table, and featured views | stable decision spine | views over the same canonical menu |
 | Merchant authoring | Deferred | category defaults, exceptions, confidence, incomplete-data preview | proven useful semantic fields | small authoring test, not production CMS |
 | Conventional baseline | Parked | credible conventional ordering flow using the same data | coherent Menu Lens demo and explicit study need | optional comparison condition |
 | Production integration | Out of scope | payment, POS, KDS, inventory, auth, deployment operations | none in current demo | none |
 
-## Foundation completion criteria
+## Completed foundation work
 
-Foundation memory is complete because a new conversation can determine, without relying on chat history:
+A new conversation can determine, without relying on chat history:
 
 - what Menu Lens is investigating
 - which states must remain distinct
@@ -58,62 +58,75 @@ The authoritative entry points are:
 - `docs/workstreams.md`
 - `docs/handoff.md`
 
-## Next workstream: domain and reference data
+The domain and reference-data workstream now provides:
 
-### Goal
-
-Create the smallest credible typed dataset that supports the primary decision spine.
-
-### Required outputs
-
-- TypeScript product and menu types
-- runtime validation for local data
-- one fictional restaurant with approximately 30 products
-- required modifier examples
+- canonical TypeScript menu and order-state types
+- runtime validation for the local dataset boundary
+- one fictional restaurant with 30 products
+- required and optional modifier examples
 - personal and shared portion examples
-- availability examples, including sold-out items
-- approximately 20% incomplete semantic metadata
-- metadata source or confidence representation where needed by the first flow
-- focused tests for invariants and malformed data
+- sold-out products that remain in the canonical collection
+- intentionally incomplete semantic metadata
+- metadata source and confidence representation
+- focused compile-time and runtime invariant tests
 
-### Constraints
+The formative-evaluation workstream now provides:
 
-- no UI implementation
-- no API layer
-- no database
-- no generic schema framework unless a concrete validation need justifies it
-- no data fields added solely for a deferred lens
-- no inferred medical, allergy, or legal claims
+- four moderated task scripts for overview, consideration, comparison, and Configuration
+- neutral moderator and think-aloud guidance
+- observable success, failure, and falsification signals
+- a bounded local event vocabulary
+- observation and session-summary templates
+- explicit criteria for redesigning, simplifying, or removing a feature
 
-## Parallel workstream: formative evaluation
+## Next workstream: customer decision spine
 
 ### Goal
 
-Define how the first interaction will be inspected before a formal comparative study exists.
+Implement one coherent mobile-first interaction using the canonical reference menu:
+
+```text
+complete menu
+→ inline detail
+→ Candidate
+→ comparison
+→ explicit Decision
+→ Configuration
+→ Current order
+```
 
 ### Required outputs
 
-- a small set of task scripts for overview, consideration, comparison, and commitment
-- observable failure signals
-- a compact local event vocabulary
-- a note-taking template
-- explicit criteria for redesigning or removing a feature
+- one client application
+- complete-menu overview with stable category navigation
+- inline product detail without losing browsing context
+- Candidate add, remove, and workspace behavior
+- comparison for genuine Candidate differences
+- explicit transition from consideration to Decision
+- Configuration only after Decision
+- Current order clearly separated from Candidates
+- local-only observation events aligned with `docs/evaluation-plan.md`
+- focused tests for state transitions and preserved invariants
 
 ### Constraints
 
-- no conventional baseline yet
-- no claims of superiority
-- no remote analytics requirement
-- no optimization around average basket size or speed alone
+- no backend, database, authentication, payment, POS, or KDS integration
+- no conventional baseline
+- no Quick, Shared-table, or Featured lens implementation
+- no merchant CMS
+- no remote analytics
+- no generic state-machine, repository, plugin, or design-system framework
+- do not add abstractions for deferred work
+- preserve `Product ≠ Candidate ≠ DraftOrderItem ≠ ConfiguredOrderItem ≠ SubmittedOrderRound`
 
-## Opening implementation work
+## Implementation gate
 
-The customer decision-spine workstream may begin when:
+The customer decision-spine workstream is now open because:
 
-1. the canonical product identity and state terms are stable
+1. canonical Product identity and state terms are stable
 2. the reference dataset supports the complete flow
-3. required configuration examples exist
-4. incomplete metadata behavior is known
-5. the formative protocol identifies what should be observable
+3. required Configuration examples exist
+4. incomplete metadata behavior is represented
+5. the formative protocol defines what should be observable
 
-It does not need alternative lenses, merchant tooling, or a baseline comparison before starting.
+It does not need alternative lenses, merchant tooling, production integration, or a baseline comparison before starting.
