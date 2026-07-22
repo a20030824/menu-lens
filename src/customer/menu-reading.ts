@@ -1,4 +1,5 @@
 import type {
+  Category,
   CategoryId,
   CoarseTrait,
   MealRole,
@@ -19,6 +20,22 @@ import {
 export type MenuReadingState = Readonly<{
   expandedProductId: ProductId | null;
   activeCategoryId: CategoryId | null;
+}>;
+
+export type AtlasRegionSize = "small" | "medium" | "large";
+
+export type CategoryAtlasModel = Readonly<{
+  id: CategoryId;
+  name: string;
+  description: string | null;
+  productCount: number;
+  availableCount: number;
+  soldOutCount: number;
+  partialMetadataCount: number;
+  priceRange: string;
+  size: AtlasRegionSize;
+  structuralSummary: string;
+  representativeProducts: ReadonlyArray<string>;
 }>;
 
 export type CategoryReadingModel = Readonly<{
@@ -65,6 +82,7 @@ export type CompleteMenuModel = Readonly<{
   productCount: number;
   categoryCount: number;
   priceRange: string;
+  atlasCategories: ReadonlyArray<CategoryAtlasModel>;
   categories: ReadonlyArray<CategoryReadingModel>;
 }>;
 
@@ -135,6 +153,97 @@ const priceRange = (products: ReadonlyArray<Product>): string => {
     : `${formatPrice(minimum)}–${formatPrice(maximum)}`;
 };
 
+const metadataCompleteness = (
+  menu: Menu,
+  product: Product,
+): ProductReadingModel["metadataCompleteness"] =>
+  hasCompleteComparisonSemantics(resolveProductSemantics(menu, product)) ? "complete" : "partial";
+
+export const categoryAtlasSize = (productCount: number): AtlasRegionSize => {
+  if (productCount >= 7) return "large";
+  if (productCount >= 4) return "medium";
+  return "small";
+};
+
+const dominantMealRole = (
+  menu: Menu,
+  products: ReadonlyArray<Product>,
+): MealRole | null => {
+  const availableProducts = products.filter((product) => product.availability === "available");
+  const counts = new Map<MealRole, number>();
+
+  availableProducts.forEach((product) => {
+    const mealRole = resolveProductSemantics(menu, product).mealRole;
+    if (!mealRole || mealRole.confidence === "low") return;
+    counts.set(mealRole.value, (counts.get(mealRole.value) ?? 0) + 1);
+  });
+
+  let strongestRole: MealRole | null = null;
+  let strongestCount = 0;
+  for (const [role, count] of counts) {
+    if (count > strongestCount) {
+      strongestRole = role;
+      strongestCount = count;
+    }
+  }
+
+  if (!strongestRole || availableProducts.length === 0) return null;
+  return strongestCount >= Math.ceil(availableProducts.length / 2) ? strongestRole : null;
+};
+
+const categoryStructuralSummary = (
+  menu: Menu,
+  category: Category,
+  products: ReadonlyArray<Product>,
+): string => {
+  const role = dominantMealRole(menu, products);
+  if (role) return `以${roleLabels[role]}為主`;
+  if (category.description) return category.description;
+
+  const availableCount = products.filter((product) => product.availability === "available").length;
+  return `${availableCount} 道目前供應`;
+};
+
+const createCategoryAtlasModel = (
+  menu: Menu,
+  category: Category,
+  products: ReadonlyArray<Product>,
+): CategoryAtlasModel => {
+  const availableProducts = products.filter((product) => product.availability === "available");
+  const representativeSource = availableProducts.length > 0 ? availableProducts : products;
+
+  return {
+    id: category.id,
+    name: category.name,
+    description: category.description ?? null,
+    productCount: products.length,
+    availableCount: availableProducts.length,
+    soldOutCount: products.length - availableProducts.length,
+    partialMetadataCount: products.filter(
+      (product) => metadataCompleteness(menu, product) === "partial",
+    ).length,
+    priceRange: priceRange(products),
+    size: categoryAtlasSize(products.length),
+    structuralSummary: categoryStructuralSummary(menu, category, products),
+    representativeProducts: representativeSource.slice(0, 3).map((product) => product.name),
+  };
+};
+
+const createProductReadingModel = (
+  menu: Menu,
+  product: Product,
+): ProductReadingModel => ({
+  id: product.id,
+  categoryId: product.categoryId,
+  name: product.name,
+  description: product.description,
+  price: formatPrice(product.price),
+  availabilityLabel: product.availability === "sold_out" ? "已售完" : "供應中",
+  isSoldOut: product.availability === "sold_out",
+  traits: productTraits(menu, product),
+  metadataCompleteness: metadataCompleteness(menu, product),
+});
+
 export const createInitialMenuReadingState = (menu: Menu): MenuReadingState => ({
   expandedProductId: null,
   activeCategoryId: menu.categories[0]?.id ?? null,
@@ -165,13 +274,8 @@ export const categoryScrollBehavior = (prefersReducedMotion: boolean): ScrollBeh
 
 export const isDetailCloseKey = (key: string): boolean => key === "Escape";
 
-export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => ({
-  restaurantName: menu.restaurant.name,
-  restaurantDescription: menu.restaurant.description,
-  productCount: menu.products.length,
-  categoryCount: menu.categories.length,
-  priceRange: priceRange(menu.products),
-  categories: menu.categories.map((category) => {
+export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
+  const categories = menu.categories.map((category) => {
     const products = categoryProducts(menu, category.id);
     return {
       id: category.id,
@@ -179,25 +283,22 @@ export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => ({
       description: category.description ?? null,
       productCount: products.length,
       priceRange: priceRange(products),
-      products: products.map((product) => {
-        const semantics = resolveProductSemantics(menu, product);
-        return {
-          id: product.id,
-          categoryId: product.categoryId,
-          name: product.name,
-          description: product.description,
-          price: formatPrice(product.price),
-          availabilityLabel: product.availability === "sold_out" ? "已售完" : "供應中",
-          isSoldOut: product.availability === "sold_out",
-          traits: productTraits(menu, product),
-          metadataCompleteness: hasCompleteComparisonSemantics(semantics)
-            ? "complete"
-            : "partial",
-        };
-      }),
+      products: products.map((product) => createProductReadingModel(menu, product)),
     };
-  }),
-});
+  });
+
+  return {
+    restaurantName: menu.restaurant.name,
+    restaurantDescription: menu.restaurant.description,
+    productCount: menu.products.length,
+    categoryCount: menu.categories.length,
+    priceRange: priceRange(menu.products),
+    atlasCategories: menu.categories.map((category) =>
+      createCategoryAtlasModel(menu, category, categoryProducts(menu, category.id)),
+    ),
+    categories,
+  };
+};
 
 export const createProductDetailModel = (
   menu: Menu,
