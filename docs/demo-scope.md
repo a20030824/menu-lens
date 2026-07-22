@@ -2,17 +2,27 @@
 
 ## Purpose
 
-The first demo is not a miniature production ordering system.
+The first demo is not a miniature production ordering system and not yet a comparison study.
 
-It is a test of the decision model:
+It tests whether the Menu Lens decision model is internally coherent:
 
-> Does adding a menu map, candidate workspace, preserved browsing context, and visible table composition help people understand and choose without creating unacceptable merchant maintenance cost?
+> Can a stable full-menu view, preserved browsing context, and a candidate workspace help people understand and choose before transaction mechanics begin?
+
+Merchant maintenance cost remains an important later question, but the first coded slice should not expand into a merchant CMS before the customer decision spine establishes which metadata is actually useful.
+
+## Primary research questions
+
+The first implementation investigates only three questions:
+
+1. Can a dense, stable full-menu view help people establish an overview without making them fear that products are hidden?
+2. Does separating candidates from order items support genuine consideration without turning the cart into a bookmark?
+3. Can inline product detail and preserved browsing context improve comparison without destroying spatial memory?
 
 ## Reference restaurant
 
 Use one fictional casual restaurant with enough variety to expose the problem without introducing complex operations.
 
-Suggested menu size: **30 products**.
+Suggested menu size: **approximately 30 products**.
 
 ```text
 Personal mains       8
@@ -29,16 +39,18 @@ The dataset should deliberately include:
 - personal and shared portions
 - spicy, non-spicy, and vegetarian items
 - fast, normal, and slow preparation classes
-- products with and without required modifiers
+- products with and without required configuration
 - two sold-out products
 - four editorially featured products
 - approximately 20% incomplete semantic metadata
 
-The menu must be realistic enough that testers can form genuine preferences, but it does not need to represent a real restaurant.
+The menu must be realistic enough that a tester can form genuine preferences, but it does not need to represent a real restaurant.
+
+Do not add data fields solely for a deferred lens or hypothetical production integration.
 
 ## Primary customer flow
 
-The first implementation should prioritize one complete flow:
+The first implementation should prioritize one complete path:
 
 ```text
 full menu
@@ -46,129 +58,114 @@ full menu
 → add candidate
 → compare candidates
 → decide to order
-→ configure modifiers
+→ configure required choices
 → add to current order
-→ review table state
 ```
 
-This flow tests the core distinctions:
-
-1. browsing is not purchasing
-2. candidates are not cart items
-3. product detail should not destroy menu context
-
-## Customer surfaces
-
-### Required for the first usable demo
-
-1. **Menu overview**
-   - category map
-   - item counts
-   - price ranges
-   - direct access to the full menu
-
-2. **Dense full menu**
-   - stable category ordering
-   - category anchors
-   - compact product rows
-   - optional image mode without reordering
-
-3. **Inline product detail**
-   - description and decision-relevant metadata
-   - add to candidates
-   - decide to order
-   - close without losing position
-
-4. **Candidate workspace**
-   - candidate count
-   - candidate list
-   - removal without affecting the order
-   - comparison entry point
-
-5. **Candidate comparison**
-   - up to three products
-   - price, portion, role, flavor, preparation, dietary fit
-   - visible missing or low-confidence values
-
-6. **Configuration boundary**
-   - required modifiers only after explicit decision
-   - reversible return to candidate or menu context
-
-7. **Current order and table state**
-   - decided items
-   - candidates
-   - category or meal-role composition
-   - total
-   - simulated submit action
-
-8. **Submitted round state**
-   - submitted items remain visible
-   - candidates remain available
-   - user can continue browsing and add another round
-
-### Lightweight lenses
-
-The first demo may include thin versions of these lenses after the primary flow works:
-
-#### Quick decision
-
-Visible conditions such as:
-
-- available now
-- individual main
-- under a budget
-- coarse preparation class
-
-Show three to five results and explain why each qualifies.
-
-#### Shared-table planning
-
-Use party size and coarse portion roles to show:
-
-- personal versus shared items
-- currently represented meal roles
-- modest guidance about possible gaps
-
-Do not implement multi-device synchronization in the first demo.
-
-#### Featured
-
-Show four editorially selected products with short explanations of how they represent the restaurant.
-
-## Merchant surfaces
-
-The merchant demo should remain small:
-
-1. imported product table
-2. category-level semantic defaults
-3. detected or manually selected exceptions
-4. per-product override
-5. metadata source and confirmation state
-6. customer preview
-7. example of graceful degradation for incomplete data
-
-The merchant workflow should answer:
-
-- How many actions are required for 30 products?
-- How much can be handled by category defaults?
-- Which fields create hesitation or disagreement?
-
-## Baseline comparison
-
-Build a conventional version from the same data:
+This path must preserve the following distinctions:
 
 ```text
-horizontal category tabs
-→ large product cards
-→ separate product page
-→ required modifiers
-→ add to cart
-→ checkout summary
+product ≠ candidate ≠ draft order item ≠ submitted item
 ```
 
-The baseline should be credible and visually competent. It must not be intentionally degraded.
+## Required first surfaces
 
-The comparison is intended to isolate information architecture and decision flow, not visual polish.
+### 1. Menu overview
+
+- category map
+- item counts
+- price ranges
+- direct entry to the complete menu
+
+### 2. Dense full menu
+
+- stable category ordering
+- category anchors
+- compact product rows
+- no adaptive reordering in the first slice
+
+### 3. Inline product detail
+
+- description and decision-relevant metadata
+- add to candidates
+- explicit decide-to-order action
+- close without losing browsing position
+
+### 4. Candidate workspace
+
+- candidate count
+- candidate list
+- removal without affecting the order
+- comparison entry point
+
+Candidates do not have quantity, required configuration, or an order total.
+
+### 5. Candidate comparison
+
+- two or three products
+- only decision-relevant attributes
+- visible missing or low-confidence values
+- no commitment implied by comparison
+
+### 6. Configuration boundary
+
+- required configuration appears only after explicit decision
+- cancellation returns to the prior decision context
+- configuration does not silently remove the candidate until the transition is complete
+
+### 7. Current order
+
+- configured draft order items
+- total
+- clear separation from candidates
+
+A simulated submit action is optional in the first slice. Submitted rounds belong to the continuity phase rather than the first decision-spine milestone.
+
+## Deferred customer surfaces
+
+These remain valid but should not expand the first implementation:
+
+### Continuity and table state
+
+- submitted order rounds
+- coarse meal composition
+- party-size guidance
+- state preservation across alternative lenses
+
+### Alternative lenses
+
+- quick-decision lens
+- shared-table lens
+- featured editorial lens
+
+The first code may define the `Lens` vocabulary while implementing only `full-menu`.
+
+## Deferred merchant work
+
+Do not build a production merchant interface in the first implementation.
+
+Later merchant research may include:
+
+- imported product table
+- category-level semantic defaults
+- exception editing
+- metadata source and confirmation state
+- incomplete-data preview
+
+This work should begin only after the customer flow identifies which semantic fields produce real value.
+
+## Conventional comparison
+
+A conventional comparison interface is **parked**, not rejected.
+
+Do not build it during the initial implementation. First establish:
+
+- a coherent Menu Lens decision spine
+- a stable reference dataset
+- observable interaction behavior
+- credible failure and redesign criteria
+
+A baseline should be added only when there is a specific comparative research question that cannot be answered through formative testing of Menu Lens itself.
 
 ## Explicit exclusions
 
@@ -177,8 +174,7 @@ Do not implement in the first demo:
 - real payment
 - authentication
 - loyalty or membership
-- POS integration
-- KDS integration
+- POS or KDS integration
 - exact preparation-time prediction
 - live inventory
 - delivery or pickup logistics
@@ -188,101 +184,103 @@ Do not implement in the first demo:
 - production analytics
 - mandatory conversational assistant
 - personalized machine-learning recommendations
+- a generic design system or plugin architecture
+- a conventional comparison interface
 
-## Technical starting point
+## Low-entropy technical starting point
 
-A local mobile-first single-page prototype is sufficient.
+A local mobile-first client is sufficient.
 
-Suggested initial constraints:
+Initial constraints:
 
 - TypeScript
-- Vite
-- local JSON data
-- in-memory application state
+- Vite or an equivalently small client setup
+- one local canonical dataset
+- one explicit in-memory application state
 - no backend
-- primary viewport around 390 × 844, while remaining responsive
-- deterministic explainable filtering rules
+- no authentication
+- no persistence requirement beyond the active session
+- deterministic, explainable domain rules
+- primary viewport around 390 × 844 while remaining responsive
 
-Possible initial structure:
+Prefer a small initial structure:
 
 ```text
 menu-lens/
 ├─ src/
-│  ├─ app/
 │  ├─ domain/
-│  ├─ features/
-│  │  ├─ menu-overview/
-│  │  ├─ menu-browse/
-│  │  ├─ candidates/
-│  │  ├─ comparison/
-│  │  ├─ order-workspace/
-│  │  └─ merchant-authoring/
-│  └─ styles/
+│  ├─ app/
+│  └─ features/
 ├─ data/
-│  ├─ menu.json
-│  ├─ merchant-metadata.json
-│  └─ scenarios.json
 ├─ docs/
 └─ README.md
 ```
 
-This is a provisional shape, not an architectural commitment. The repository should not become a monorepo until customer and merchant demos actually require separate applications.
+Do not create a monorepo, package boundary, API layer, repository abstraction, or design-system package until a current requirement makes it necessary.
 
 ## Build sequence
 
-### Phase 0 — written model
+### Phase 0 — shared memory
 
-- problem framing
-- interaction contract
-- merchant data strategy
-- evaluation plan
+- product contract
+- glossary
+- workstream sequencing
+- cross-conversation handoff
 
-### Phase 1 — decision spine
+### Phase 1 — domain and reference data
 
-- reference dataset
-- full-menu browsing
+- canonical product types
+- runtime data validation
+- realistic 30-product dataset
+- configuration examples
+- incomplete metadata cases
+- focused invariant tests
+
+### Phase 2 — decision spine
+
+- menu overview
+- dense full-menu browsing
 - inline detail
-- candidates
+- candidate workspace
 - comparison
 - decision/configuration boundary
 - current order
 
-### Phase 2 — continuity and table state
+### Phase 3 — continuity
 
 - preserved scroll and expanded state
-- lens state preservation
 - submitted order rounds
 - coarse table composition
 
-### Phase 3 — alternative lenses
+### Phase 4 — thin lenses
 
 - quick decision
 - shared-table planning
 - featured editorial view
 
-### Phase 4 — merchant authoring test
+### Phase 5 — merchant-authoring test
 
 - category defaults
 - exception editing
 - incomplete metadata preview
 
-### Phase 5 — baseline and user study
+### Later decision — comparative study
 
-- conventional comparison interface
-- scripted tasks
-- instrumentation and observation
+Decide whether a conventional baseline is useful only after the previous phases produce a coherent and testable Menu Lens experience.
 
-No later phase should be used to postpone testing the Phase 1 interaction spine.
+No later phase should be used to postpone testing the Phase 2 interaction spine.
 
-## Definition of demo-ready
+## Definition of decision-spine ready
 
-The demo is ready for an initial study when a tester can:
+The first implementation milestone is ready for formative use when a tester can:
 
-- understand the restaurant's menu shape and price range
+- understand the menu's broad shape and price range
 - browse all products without losing context
-- place several items into a candidate workspace
+- place several products into a candidate workspace
 - compare candidates
-- commit one item and only then configure it
-- understand candidate, decided, and submitted states
-- switch at least one lens without losing work
-- observe how incomplete merchant metadata changes, but does not break, the experience
+- explicitly decide on one product
+- configure it only after that decision
+- distinguish candidates from current-order items
+- cancel or return without losing prior browsing context
+
+Alternative lenses, merchant authoring, submitted rounds, and a conventional baseline are not required for this milestone.
