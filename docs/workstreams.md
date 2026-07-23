@@ -30,10 +30,10 @@ It exists to prevent parallel conversations from redefining the product, duplica
         → [rejected] desktop-first static workspace
         → [passed] M1 compressed overview + shared ledger
         → [rejected] M2 modal product detail
-        → [rejected] C1 fixed product focus rail
+        → [rejected, removed] C1 fixed product focus rail
         → [current research] relational menu reading
-            [planned] Prototype A — Axis-only score
-            → [planned] Prototype B — Anchor-only relation
+            [implemented, awaiting review] Prototype A — Axis-only score
+            → [blocked] Prototype B — Anchor-only relation
             → [blocked] Prototype C — Combined relational score
         → [blocked] attached Candidate marks
         → [blocked] bounded comparison
@@ -53,7 +53,7 @@ It exists to prevent parallel conversations from redefining the product, duplica
 | Domain and reference data | Complete | types, validation, 30-product fictional menu, incomplete metadata cases | product contract | local typed dataset and tests |
 | Formative evaluation | Complete | task scripts, observation notes, local events, falsification signals | product contract | protocol that shapes implementation |
 | Customer decision spine | In progress | menu overview → relational reading → consideration → comparison → decision → configuration → current order | domain dataset and formative protocol | one coherent mobile-first flow |
-| Relational menu research | Active | shared axes, anchor relations, stable row projection, failure gates | M1 shared ledger | evidence for or against relation-first menu reading |
+| Relational menu research | Active, review-gated | shared axes, stable row projection, failure gates | M1 shared ledger | evidence for or against relation-first menu reading |
 | Continuity and table state | Deferred | preserved candidates, submitted rounds, coarse table composition | customer decision spine | continuity over a validated state model |
 | Alternative lenses | Deferred | thin quick, shared-table, and featured views | stable decision spine | views over the same canonical menu |
 | Merchant authoring | Deferred | category defaults, exceptions, confidence, incomplete-data preview | proven useful semantic fields | small authoring test, not production CMS |
@@ -95,7 +95,7 @@ The domain and reference-data workstream provides:
 
 The formative-evaluation workstream provides:
 
-- four moderated task scripts for overview, consideration, comparison, and Configuration
+- moderated task scripts for overview, consideration, comparison, and Configuration
 - neutral moderator and think-aloud guidance
 - observable success, failure, and falsification signals
 - a bounded local event vocabulary
@@ -114,59 +114,31 @@ The complete-menu technical baseline proved:
 
 ### Rejected: large category Atlas
 
-The first deployed attempt placed six large category regions before the existing complete-menu list.
-
-Pages review showed that it behaved as:
-
-```text
-large category controls
-→ conventional complete-menu list
-```
-
-Region size, counts, price ranges, and representative products did not create a different reading model.
+The first deployed attempt placed six large category regions before the existing complete-menu list. It behaved as large category controls followed by a conventional complete-menu list. Region size, counts, price ranges, and representative products did not create a different reading model.
 
 ### Rejected: desktop-first static workspace
 
-The second deployed attempt used a desktop structure rail, dense center field, and category summary inspector.
+The second deployed attempt used a desktop structure rail, dense center field, and category summary inspector. On mobile, the meaningful differences disappeared and the interface collapsed to horizontal category controls followed by a single-column product list. Desktop-only layout is not evidence for the mobile product model.
 
-On mobile, the meaningful differences disappeared and the interface collapsed to:
-
-```text
-horizontal category chips
-→ single-column product list
-```
-
-Desktop-only layout is not evidence for the mobile product model.
-
-### Passed: M1 compressed overview
+### Passed: M1 compressed overview + shared ledger
 
 The compressed whole-menu overview preserved the restaurant's six-region shape, approximate menu size, and price range without implying hidden products.
 
-### Rejected then corrected: M1 product presentation
+The expanded-category correction became structural:
 
-The first expanded-category attempt remained an ordinary product-card feed.
-
-The correction was structural:
-
-- each category became one semantic table surface
+- each category is one semantic table surface
 - sequence, dish name, bounded reading cues, and price use shared columns
 - sold-out and incomplete-data status remain inside the shared lane
 - individual products do not receive separate card surfaces
 - canonical order and one continuous reading order remain stable
 
-The shared ledger is treated as a passed **coordinate plane**, not a complete product.
+The shared ledger is a passed coordinate plane, not a completed product.
 
 ### Rejected: M2 modal product detail
 
-The modal detail experiment failed because:
+The modal detail experiment failed because closing detail moved the source row severely, the interaction remained a conventional single-product reader, and detail did not reduce repeated opening, memory work, or product relocation. Geometry fixes were infrastructure, not product evidence.
 
-- closing detail moved the source row severely
-- the interaction remained a conventional single-product reader
-- detail did not reduce repeated opening, memory work, or product relocation
-
-Geometry fixes were infrastructure, not product evidence.
-
-### Rejected: C1 fixed product focus rail
+### Rejected and removed: C1 fixed product focus rail
 
 The fixed rail experiment failed because:
 
@@ -177,19 +149,15 @@ The fixed rail experiment failed because:
 - replacing one product summary with another did not expose relationships
 - the interaction still did not solve comprehension linearity
 
-C1 must not be treated as the substrate for Candidate work.
+Phase 0 removed the rail module, fixed rail DOM and CSS, permanent `8.75rem` bottom clearance, `preserveSourceRow()`, rail-specific scroll correction and focus restoration, product-focus state, C1-only tests, and the rejected modal detail entry from the primary flow. C1 is not a substrate for Candidate work.
 
 ## Current research question
 
-The current work no longer asks:
-
-> Can one product be opened more cleanly?
-
-It asks:
+The current work asks:
 
 > Can one stable menu surface make relationships among several products visible at once, without changing canonical order, moving rows, filtering products, or requiring a second comparison list?
 
-The immediate target is **comprehension linearity**:
+The immediate target is comprehension linearity:
 
 ```text
 inspect A
@@ -199,26 +167,17 @@ inspect A
 → repeat
 ```
 
-The next prototypes must transform this into direct visible comparison.
+The prototype must transform this into direct visible comparison.
 
-## Current research slice: relational menu reading
+## Prototype A — Axis-only score
 
-The full design record is in `docs/relational-menu-research.md`.
+Status:
 
-### Shared principles
+```text
+[implemented, awaiting review]
+```
 
-- canonical product rows remain the substrate
-- one interaction should expose relationships among at least three products
-- row identity, order, width, and height remain stable
-- no fixed rail, inline expansion row, or scroll correction
-- missing or low-confidence data remains unknown
-- no filtering, ranking, recommendation, or hidden subset
-- mobile evidence is required
-- Candidate remains blocked until relational reading shows value
-
-### Prototype A — Axis-only score
-
-The same category ledger is projected through one shared reading dimension:
+One shared category ledger can be read through:
 
 ```text
 default
@@ -228,79 +187,59 @@ meal role
 preparation
 ```
 
-No product becomes selected or anchored.
+Implementation rules:
 
-Gate:
+- the control is a labeled native `<select>` shown only in single-category mode
+- overview does not show the control
+- all-expanded mode uses `default`
+- entering overview, all-expanded mode, or another category resets the axis to `default`
+- the same table, rows, canonical order, columns, widths, and price cells remain
+- only one bounded relation lane changes
+- price uses one category min–max scale; a single-price category uses a centered neutral marker
+- portion, role, and preparation use only trusted formal metadata
+- missing or low-confidence metadata displays `未提供`
+- sold-out products retain their canonical position and axis evidence
+- no filtering, sorting, ranking, recommendation, anchor, Candidate, Comparison, or order state exists
+
+Pages gate:
 
 - users can answer category-structure questions without opening products
 - the control is not mistaken for a filter
 - all products remain visibly present
-- switching axes causes no row movement
+- switching axes causes no row, column, or scroll movement
 - missing data is understood as unknown
 - the result supports scanning rather than only resembling a spreadsheet
+- feedback must indicate lower comprehension work, not merely a prettier or more convenient interface
 
-### Prototype B — Anchor-only relation
+Prototype A has not passed this gate yet.
 
-One product becomes an explicit comparison baseline.
+## Prototype B — Anchor-only relation
 
-Other rows display:
+Status:
 
 ```text
-price difference
-＋ one bounded semantic relationship
+[blocked]
 ```
 
-No sorting, filtering, recommendation, fixed rail, or modal is introduced.
+No anchor state, baseline styling, relationship phrases, or product click behavior may be added until Prototype A has been reviewed and explicitly dispositioned.
 
-Gate:
+## Prototype C and later states
 
-- users understand the baseline without teaching
-- at least three products can be compared on one stable ledger
-- changing the anchor does not move rows
-- the anchor is not mistaken for recommendation, commitment, or order state
-- repeated product-detail openings decrease
-
-### Prototype C — Combined relational score
-
-Axis and Anchor may be combined only after both produce useful evidence independently.
-
-This prototype is blocked by default. It must not be implemented merely because both concepts exist in code.
-
-## Required outputs before Candidate resumes
-
-- remove or isolate the failed C1 focus rail
-- remove fixed rail spacing and rail-specific scroll choreography
-- retain the passed M1 overview and shared ledger
-- implement pure relation projections with explicit uncertainty
-- expose Axis-only and Anchor-only as bounded prototypes
-- run the existing comparison-oriented evaluation tasks
-- record failure as readily as success
-- select one relation grammar only after observable evidence
+Prototype C remains blocked until Axis-only and Anchor-only each produce useful independent evidence. Candidate, Comparison, Decision, Configuration, Current order, quantity, modifiers, recommendation, ranking, filtering, product networks, scatterplots, and shared-table composition remain blocked.
 
 ## Evaluation focus
 
-Do not begin with preference questions.
-
 Observe:
 
-- product-detail openings
-- backtracking
-- attempts to relocate products
-- recall language such as "I think the previous one was..."
-- ability to explain price and semantic differences
-- understanding of missing metadata
-- belief that products were filtered or recommended
-- visible row movement
+- whether one action exposes relationships among several products
+- product-by-product reading and backtracking
+- recall language such as “I think the previous one was…”
+- ability to identify lower-priced products, shared portions, faster preparation, and missing data
+- belief that products were filtered, sorted, ranked, recommended, or selected
+- visible row, column, or scroll movement
 - whether the result only feels prettier or more convenient
 
-A prototype fails if:
-
-- users still inspect one product at a time
-- relationship labels add more reading work than they remove
-- row content changes create perceived jumping
-- missing metadata produces false conclusions
-- users believe products were hidden, sorted, ranked, or selected
-- feedback remains limited to ordinary usability improvement
+A prototype fails if users still inspect one product at a time, relationship marks add more reading work than they remove, row content creates perceived jumping, missing metadata produces false conclusions, or users believe items were hidden or ranked.
 
 ## Constraints
 
@@ -321,12 +260,4 @@ A prototype fails if:
 
 None.
 
-The product contract already requires:
-
-- complete-menu access
-- browsing distinct from ordering
-- preserved browsing context
-- comparison support
-- explicit uncertainty for incomplete metadata
-
-The current change is the experimental route used to investigate those requirements. It does not change the requirements or authorize deferred states.
+The product contract already requires complete-menu access, browsing distinct from ordering, preserved browsing context, comparison support, and explicit uncertainty for incomplete metadata. Prototype A changes the experimental route used to investigate those requirements; it does not change the requirements or authorize deferred states.
