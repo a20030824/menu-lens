@@ -1,4 +1,4 @@
-import type { CategoryId } from "../domain/menu-types.js";
+import type { CategoryId, ProductId } from "../domain/menu-types.js";
 import type { CategoryReadingModel } from "../customer/menu-reading.js";
 
 const element = <K extends keyof HTMLElementTagNameMap>(
@@ -18,13 +18,15 @@ const visuallyHiddenText = (text: string): HTMLSpanElement =>
 export type MenuCategorySection = Readonly<{
   element: HTMLElement;
   categoryId: CategoryId;
-  setState: (expanded: boolean, current: boolean) => void;
+  setState: (expanded: boolean, current: boolean, focusedProductId: ProductId | null) => void;
+  productButtonFor: (productId: ProductId) => HTMLButtonElement | null;
 }>;
 
 export const createMenuCategorySection = (
   category: CategoryReadingModel,
   index: number,
-  onSelect: (categoryId: CategoryId) => void,
+  onSelectCategory: (categoryId: CategoryId) => void,
+  onSelectProduct: (productId: ProductId) => void,
 ): MenuCategorySection => {
   const section = element("section", "menu-category-zone");
   section.id = `category-${category.id}`;
@@ -65,7 +67,7 @@ export const createMenuCategorySection = (
   meter.append(meterFill);
 
   band.append(top, meta, preview, meter);
-  band.addEventListener("click", () => onSelect(category.id));
+  band.addEventListener("click", () => onSelectCategory(category.id));
 
   const reveal = element("div", "category-reveal");
   reveal.id = `category-products-${category.id}`;
@@ -94,18 +96,31 @@ export const createMenuCategorySection = (
   });
   ledgerHead.append(ledgerHeadRow);
 
+  const productButtons = new Map<ProductId, HTMLButtonElement>();
+  const productRows = new Map<ProductId, HTMLTableRowElement>();
   const ledgerBody = element("tbody");
   category.products.forEach((product, productIndex) => {
-    const row = element("tr", product.isSoldOut ? "product-row product-row--sold-out" : "product-row");
+    const row = element(
+      "tr",
+      product.isSoldOut ? "product-row product-row--sold-out" : "product-row",
+    );
     row.dataset.productId = product.id;
+    row.dataset.focused = "false";
 
     const indexCell = element(
       "td",
       "product-row__index",
       String(productIndex + 1).padStart(2, "0"),
     );
-    const nameCell = element("th", "product-row__name", product.name);
+    const nameCell = element("th", "product-row__name");
     nameCell.scope = "row";
+    const productButton = element("button", "product-row__button", product.name) as HTMLButtonElement;
+    productButton.type = "button";
+    productButton.setAttribute(
+      "aria-label",
+      `${product.name}，${product.price}，${product.availabilityLabel}，查看商品資訊`,
+    );
+    nameCell.append(productButton);
 
     const cueCell = element("td", "product-row__cues");
     const cueParts = [product.primaryCue, product.secondaryCue].filter(
@@ -133,7 +148,10 @@ export const createMenuCategorySection = (
 
     const priceCell = element("td", "product-row__price", product.price);
     row.append(indexCell, nameCell, cueCell, priceCell);
+    row.addEventListener("click", () => onSelectProduct(product.id));
     ledgerBody.append(row);
+    productButtons.set(product.id, productButton);
+    productRows.set(product.id, row);
   });
 
   ledger.append(caption, columns, ledgerHead, ledgerBody);
@@ -141,7 +159,11 @@ export const createMenuCategorySection = (
   reveal.append(revealInner);
   section.append(band, reveal);
 
-  const setState = (expanded: boolean, current: boolean): void => {
+  const setState = (
+    expanded: boolean,
+    current: boolean,
+    focusedProductId: ProductId | null,
+  ): void => {
     section.dataset.expanded = String(expanded);
     section.dataset.current = String(current);
     band.setAttribute("aria-expanded", String(expanded));
@@ -150,7 +172,22 @@ export const createMenuCategorySection = (
     reveal.setAttribute("aria-hidden", String(!expanded));
     if (expanded) reveal.removeAttribute("inert");
     else reveal.setAttribute("inert", "");
+
+    productRows.forEach((row, productId) => {
+      const isFocused = focusedProductId === productId;
+      row.dataset.focused = String(isFocused);
+      const button = productButtons.get(productId);
+      if (button) {
+        if (isFocused) button.setAttribute("aria-current", "true");
+        else button.removeAttribute("aria-current");
+      }
+    });
   };
 
-  return { element: section, categoryId: category.id, setState };
+  return {
+    element: section,
+    categoryId: category.id,
+    setState,
+    productButtonFor: (productId) => productButtons.get(productId) ?? null,
+  };
 };
