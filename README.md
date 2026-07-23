@@ -43,23 +43,25 @@ The initial implementation investigates only three primary questions:
 
 1. Can a dense, stable full-menu view establish overview without making users fear that products are hidden?
 2. Does separating candidates from order items support genuine consideration without using the cart as a bookmark?
-3. Can inline detail and preserved browsing context improve comparison without destroying spatial memory?
+3. Can relational reading, detail, and preserved browsing context improve comparison without destroying spatial memory?
 
 A conventional comparison interface is deliberately parked. The project should first make the Menu Lens interaction internally coherent and observable before deciding whether a formal baseline is useful.
 
 ## Initial demo scope
 
-### Primary customer flow
+### Product-level decision spine
 
 ```text
 full menu
-→ inline detail
-→ candidate workspace
-→ candidate comparison
+→ relational reading
+→ reversible consideration
+→ bounded comparison
 → explicit decision
 → required configuration
 → current order
 ```
+
+The exact interaction route remains under investigation. The current branch is testing whether product relationships can appear on the stable menu surface before Candidate or transaction work begins.
 
 ### Later, only after the decision spine works
 
@@ -87,12 +89,13 @@ The first coded version should remain easy to read, test, change, and delete:
 - one client application
 - one local canonical dataset
 - one explicit application state model
-- one end-to-end decision flow
+- one bounded experimental slice at a time
 - no backend
 - no premature monorepo
 - no generic plugin system
 - no separate design-system package
 - no abstraction justified only by hypothetical future scale
+- failed interaction experiments should be removed or isolated rather than accumulated
 
 See the detailed implementation contract in [`docs/product-contract.md`](docs/product-contract.md).
 
@@ -118,17 +121,26 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/handoff.md`](docs/handoff.md) — required reading, opening prompt, escalation rules, and closing report
 - [`docs/problem-framing.md`](docs/problem-framing.md) — why current QR ordering often feels harder to read than paper
 - [`docs/interaction-model.md`](docs/interaction-model.md) — menu map, candidate workspace, lens behavior, table state, and reversibility
+- [`docs/relational-menu-research.md`](docs/relational-menu-research.md) — failed menu-reading hypotheses, cross-domain inspirations, relational design space, and prototype gates
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
 
 ## Current status
 
-The cross-conversation foundation is complete. New workstreams can rely on the repository instead of prior chat history.
+The foundation, domain schema, reference dataset, and formative evaluation protocol are complete.
 
-The next bounded workstreams are:
+The customer decision spine is active on Draft PR #4. Current evidence is:
 
-1. **Domain and reference data** — typed product schema, validation, and a credible 30-product fictional menu.
-2. **Formative evaluation** — task scripts, observable failure signals, and a compact local event vocabulary.
+```text
+passed: compressed menu overview
+passed: shared category ledger as a stable coordinate plane
+rejected: large category Atlas
+rejected: desktop-first workspace
+rejected: modal product detail as the primary interaction
+rejected: fixed product focus rail
+current research: Axis-only, Anchor-only, and Combined relational-score prototypes
+blocked: Candidate, Comparison, Decision, Configuration, and Current order
+```
 
-The customer decision spine begins after those two workstreams establish the data and observation contracts.
+See [`docs/workstreams.md`](docs/workstreams.md) for the authoritative sequence and [`docs/relational-menu-research.md`](docs/relational-menu-research.md) for the current design record.
