@@ -17,7 +17,11 @@
   --focus: #245b88;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; background: var(--paper); }
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+  background: var(--paper);
+}
 body {
   margin: 0;
   color: var(--ink);
@@ -107,8 +111,10 @@ button:focus-visible, a:focus-visible, [tabindex="-1"]:focus-visible {
     justify-content: center;
     align-items: start;
   }
-  .reading-workspace:has(.product-detail-host[data-open="true"]) {
-    grid-template-columns: minmax(0, 1fr) 20rem;
+}
+@media (min-width: 84rem) {
+  .reading-workspace {
+    grid-template-columns: minmax(0, 60rem) 20rem;
     gap: 1.5rem;
     padding-inline: 1.25rem;
   }
