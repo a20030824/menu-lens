@@ -33,23 +33,11 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
 
   const render = (): void => overview.render(state);
 
-  const scrollToCategory = (categoryId: CategoryId): void => {
-    const section = overview.sectionFor(categoryId);
-    if (!section) return;
-    window.requestAnimationFrame(() => {
-      section.scrollIntoView({
-        block: "start",
-        behavior: categoryScrollBehavior(reducedMotion()),
-      });
-    });
-  };
-
   const selectCategory = (categoryId: CategoryId): void => {
     const isSameFocusedCategory =
       state.expansion.kind === "category" && state.expansion.categoryId === categoryId;
     state = isSameFocusedCategory ? showMenuOverview(state) : focusCategory(state, categoryId);
     render();
-    if (!isSameFocusedCategory) scrollToCategory(categoryId);
   };
 
   const showOverviewFromContext = (): void => {
