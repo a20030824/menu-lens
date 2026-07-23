@@ -96,8 +96,14 @@ export const updateMenuStructureActive = (
 ): void => {
   controls.forEach((entries, id) => {
     entries.forEach((entry) => {
-      if (id === categoryId) entry.setAttribute("aria-current", "true");
-      else entry.removeAttribute("aria-current");
+      if (id === categoryId) {
+        entry.setAttribute("aria-current", "true");
+        if (entry.classList.contains("category-locator__link")) {
+          entry.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "auto" });
+        }
+      } else {
+        entry.removeAttribute("aria-current");
+      }
     });
   });
 };
