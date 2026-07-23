@@ -121,7 +121,7 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/handoff.md`](docs/handoff.md) — required reading, opening prompt, escalation rules, and closing report
 - [`docs/problem-framing.md`](docs/problem-framing.md) — why current QR ordering often feels harder to read than paper
 - [`docs/interaction-model.md`](docs/interaction-model.md) — menu map, candidate workspace, lens behavior, table state, and reversibility
-- [`docs/relational-menu-research.md`](docs/relational-menu-research.md) — failed menu-reading hypotheses, cross-domain inspirations, relational design space, and prototype gates
+- [`docs/relational-menu-research.md`](docs/relational-menu-research.md) — failed menu-reading hypotheses, relational design space, prototype implementation, and review gates
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
@@ -133,14 +133,18 @@ The foundation, domain schema, reference dataset, and formative evaluation proto
 The customer decision spine is active on Draft PR #4. Current evidence is:
 
 ```text
-passed: compressed menu overview
-passed: shared category ledger as a stable coordinate plane
-rejected: large category Atlas
-rejected: desktop-first workspace
-rejected: modal product detail as the primary interaction
-rejected: fixed product focus rail
-current research: Axis-only, Anchor-only, and Combined relational-score prototypes
-blocked: Candidate, Comparison, Decision, Configuration, and Current order
+[passed] M1 compressed overview + shared ledger
+→ [rejected] M2 modal product detail
+→ [rejected, removed] C1 fixed product focus rail
+→ [current research] relational menu reading
+    [implemented, awaiting review] Prototype A — Axis-only score
+    → [blocked] Prototype B — Anchor-only relation
+    → [blocked] Prototype C — Combined relational score
+→ [blocked] Candidate / Comparison / Decision / Configuration / Current order
 ```
 
-See [`docs/workstreams.md`](docs/workstreams.md) for the authoritative sequence and [`docs/relational-menu-research.md`](docs/relational-menu-research.md) for the current design record.
+Prototype A keeps every product row in canonical order and changes only one bounded relation lane in a single expanded category. It provides `一般`, `價格`, `份量`, `餐點角色`, and `準備節奏` reading modes. It does not filter, rank, recommend, anchor, persist across categories, or introduce transaction state.
+
+Prototype A is not passed until the branch Pages mobile review confirms that switching axes creates no visible row jump and is understood as a reading mode rather than a filter.
+
+See [`docs/workstreams.md`](docs/workstreams.md) for the authoritative sequence and [`docs/relational-menu-research.md`](docs/relational-menu-research.md) for the implementation and review record.
