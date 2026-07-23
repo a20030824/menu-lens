@@ -5,35 +5,39 @@ import type {
   MealRole,
   Menu,
   MetadataConfidence,
-  MetadataSource,
   PortionClass,
-  PreparationClass,
   Product,
-  ProductId,
-  ProductSemantics,
 } from "../domain/menu-types.js";
 import {
   hasCompleteComparisonSemantics,
-  productRequiresConfiguration,
   resolveProductSemantics,
 } from "../domain/menu-validation.js";
+import {
+  axisValueFor,
+  type AxisValue,
+  type MenuReadingAxis,
+} from "./menu-relations.js";
 
 export type MenuExpansion =
   | Readonly<{ kind: "overview" }>
   | Readonly<{ kind: "category"; categoryId: CategoryId }>
   | Readonly<{ kind: "all" }>;
 
-export type ProductDetailLevel = "closed" | "summary" | "full";
-
 export type MenuReadingState = Readonly<{
   activeCategoryId: CategoryId | null;
   expansion: MenuExpansion;
-  focusedProductId: ProductId | null;
-  detailLevel: ProductDetailLevel;
+  readingAxis: MenuReadingAxis;
+}>;
+
+export type ProductAxisValues = Readonly<{
+  price: AxisValue;
+  portion: AxisValue;
+  role: AxisValue;
+  preparation: AxisValue;
 }>;
 
 export type ProductNodeModel = Readonly<{
-  id: ProductId;
+  id: string;
   categoryId: CategoryId;
   name: string;
   price: string;
@@ -42,35 +46,7 @@ export type ProductNodeModel = Readonly<{
   primaryCue: string | null;
   secondaryCue: string | null;
   metadataCompleteness: "complete" | "partial";
-}>;
-
-export type DetailFact = Readonly<{
-  label: string;
-  value: string;
-}>;
-
-export type EvidenceFact = Readonly<{
-  label: string;
-  value: string;
-  sourceLabel: string;
-  confidenceLabel: string;
-}>;
-
-export type ProductDetailModel = Readonly<{
-  id: ProductId;
-  categoryId: CategoryId;
-  categoryName: string;
-  name: string;
-  description: string;
-  price: string;
-  availabilityLabel: "供應中" | "已售完";
-  isSoldOut: boolean;
-  summaryFacts: ReadonlyArray<DetailFact>;
-  facts: ReadonlyArray<DetailFact>;
-  evidenceFacts: ReadonlyArray<EvidenceFact>;
-  featuredNote: string | null;
-  metadataNotice: string | null;
-  configurationNotice: string | null;
+  axisValues: ProductAxisValues;
 }>;
 
 export type CategoryReadingModel = Readonly<{
@@ -94,12 +70,6 @@ export type CompleteMenuModel = Readonly<{
   categoryCount: number;
   priceRange: string;
   categories: ReadonlyArray<CategoryReadingModel>;
-  productDetails: ReadonlyArray<ProductDetailModel>;
-}>;
-
-export type CloseProductDetailResult = Readonly<{
-  state: MenuReadingState;
-  focusProductId: ProductId | null;
 }>;
 
 const moneyFormatter = new Intl.NumberFormat("zh-TW", {
@@ -124,28 +94,11 @@ const portionLabels: Record<PortionClass, string> = {
   large_shared: "多人分享",
 };
 
-const preparationLabels: Record<PreparationClass, string> = {
-  fast: "較快",
-  normal: "一般準備",
-  slow: "需要較久",
-};
-
 const traitLabels: Record<CoarseTrait, string> = {
   light: "清爽",
   rich: "濃郁",
   spicy: "辣味",
   vegetarian: "素食",
-};
-
-const sourceLabels: Record<MetadataSource, string> = {
-  merchant_confirmed: "餐廳確認",
-  category_default: "分類預設",
-};
-
-const confidenceLabels: Record<MetadataConfidence, string> = {
-  high: "高可信",
-  medium: "中可信",
-  low: "低可信",
 };
 
 export const formatPrice = (price: number): string => moneyFormatter.format(price);
@@ -239,7 +192,11 @@ const categoryStructuralSummary = (
   return `${products.filter((product) => product.availability === "available").length} 道目前供應`;
 };
 
-const createProductNodeModel = (menu: Menu, product: Product): ProductNodeModel => ({
+const createProductNodeModel = (
+  menu: Menu,
+  product: Product,
+  products: ReadonlyArray<Product>,
+): ProductNodeModel => ({
   id: product.id,
   categoryId: product.categoryId,
   name: product.name,
@@ -248,140 +205,58 @@ const createProductNodeModel = (menu: Menu, product: Product): ProductNodeModel 
   isSoldOut: product.availability === "sold_out",
   ...productCues(menu, product),
   metadataCompleteness: metadataCompleteness(menu, product),
-});
-
-const semanticFacts = (semantics: ProductSemantics): ReadonlyArray<{
-  fact: DetailFact;
-  evidence: EvidenceFact;
-  confidence: MetadataConfidence;
-}> => {
-  const facts: Array<{ fact: DetailFact; evidence: EvidenceFact; confidence: MetadataConfidence }> = [];
-  const add = <T>(
-    label: string,
-    entry: { value: T; source: MetadataSource; confidence: MetadataConfidence } | undefined,
-    format: (value: T) => string,
-  ): void => {
-    if (!entry) return;
-    const value = format(entry.value);
-    facts.push({
-      fact: { label, value },
-      evidence: {
-        label,
-        value,
-        sourceLabel: sourceLabels[entry.source],
-        confidenceLabel: confidenceLabels[entry.confidence],
-      },
-      confidence: entry.confidence,
-    });
-  };
-
-  add("份量", semantics.portionClass, (value) => portionLabels[value]);
-  add("餐點角色", semantics.mealRole, (value) => roleLabels[value]);
-  add("特徵", semantics.traits, (value) => value.map((trait) => traitLabels[trait]).join("、"));
-  add("準備節奏", semantics.preparationClass, (value) => preparationLabels[value]);
-  add("分享方式", semantics.shareable, (value) => (value ? "適合分享" : "以個人食用為主"));
-  return facts;
-};
-
-const createProductDetailModel = (
-  menu: Menu,
-  product: Product,
-  categoryName: string,
-): ProductDetailModel => {
-  const semantics = resolveProductSemantics(menu, product);
-  const semanticEntries = semanticFacts(semantics);
-  const trustedFacts = semanticEntries
-    .filter((entry) => isTrusted(entry.confidence))
-    .map((entry) => entry.fact);
-  const referencedGroups = menu.modifierGroups.filter((group) =>
-    (product.modifierGroupIds ?? []).includes(group.id),
-  );
-  const configurationNotice = referencedGroups.length === 0
-    ? null
-    : productRequiresConfiguration(menu, product)
-      ? "決定點餐後需要選擇規格；目前查看不會建立訂單。"
-      : "決定點餐後可選擇額外規格；目前查看不會建立訂單。";
-
-  return {
-    id: product.id,
-    categoryId: product.categoryId,
-    categoryName,
-    name: product.name,
-    description: product.description,
-    price: formatPrice(product.price),
-    availabilityLabel: product.availability === "sold_out" ? "已售完" : "供應中",
-    isSoldOut: product.availability === "sold_out",
-    summaryFacts: trustedFacts.slice(0, 3),
-    facts: trustedFacts,
-    evidenceFacts: semanticEntries.map((entry) => entry.evidence),
-    featuredNote: product.featured?.note ?? null,
-    metadataNotice: hasCompleteComparisonSemantics(semantics)
-      ? null
-      : "部分比較資訊尚未提供；未顯示的欄位不作推測。",
-    configurationNotice,
-  };
-};
-
-export const clearProductFocus = (state: MenuReadingState): MenuReadingState => ({
-  ...state,
-  focusedProductId: null,
-  detailLevel: "closed",
+  axisValues: {
+    price: axisValueFor(menu, product, products, "price"),
+    portion: axisValueFor(menu, product, products, "portion"),
+    role: axisValueFor(menu, product, products, "role"),
+    preparation: axisValueFor(menu, product, products, "preparation"),
+  },
 });
 
 export const createInitialMenuReadingState = (menu: Menu): MenuReadingState => ({
   activeCategoryId: menu.categories[0]?.id ?? null,
   expansion: { kind: "overview" },
-  focusedProductId: null,
-  detailLevel: "closed",
+  readingAxis: "default",
 });
 
-export const focusCategory = (state: MenuReadingState, categoryId: CategoryId): MenuReadingState => ({
-  ...clearProductFocus(state),
+export const focusCategory = (
+  state: MenuReadingState,
+  categoryId: CategoryId,
+): MenuReadingState => ({
+  ...state,
   activeCategoryId: categoryId,
   expansion: { kind: "category", categoryId },
+  readingAxis: "default",
 });
 
 export const showMenuOverview = (state: MenuReadingState): MenuReadingState => ({
-  ...clearProductFocus(state),
+  ...state,
   expansion: { kind: "overview" },
+  readingAxis: "default",
 });
 
 export const showAllCategories = (state: MenuReadingState): MenuReadingState => ({
-  ...clearProductFocus(state),
+  ...state,
   expansion: { kind: "all" },
+  readingAxis: "default",
 });
 
 export const setActiveCategory = (
   state: MenuReadingState,
   categoryId: CategoryId,
-): MenuReadingState => ({ ...state, activeCategoryId: categoryId });
-
-export const focusProduct = (
-  state: MenuReadingState,
-  productId: ProductId,
 ): MenuReadingState => ({
   ...state,
-  focusedProductId: productId,
-  detailLevel: "closed",
+  activeCategoryId: categoryId,
+  readingAxis: state.expansion.kind === "category" ? state.readingAxis : "default",
 });
 
-export const openProductDetail = (state: MenuReadingState): MenuReadingState =>
-  state.focusedProductId ? { ...state, detailLevel: "summary" } : state;
-
-export const expandProductDetail = (state: MenuReadingState): MenuReadingState =>
-  state.focusedProductId && state.detailLevel !== "closed"
-    ? { ...state, detailLevel: "full" }
-    : state;
-
-export const collapseProductDetail = (state: MenuReadingState): MenuReadingState =>
-  state.focusedProductId && state.detailLevel === "full"
-    ? { ...state, detailLevel: "summary" }
-    : state;
-
-export const closeProductDetail = (state: MenuReadingState): CloseProductDetailResult => ({
-  state: { ...state, detailLevel: "closed" },
-  focusProductId: state.focusedProductId,
-});
+export const setReadingAxis = (
+  state: MenuReadingState,
+  readingAxis: MenuReadingAxis,
+): MenuReadingState =>
+  state.expansion.kind === "category"
+    ? { ...state, readingAxis }
+    : { ...state, readingAxis: "default" };
 
 export const categoryIsExpanded = (
   state: MenuReadingState,
@@ -393,19 +268,13 @@ export const categoryIsExpanded = (
 export const categoryScrollBehavior = (prefersReducedMotion: boolean): ScrollBehavior =>
   prefersReducedMotion ? "auto" : "smooth";
 
-export const productDetailFor = (
-  model: CompleteMenuModel,
-  productId: ProductId | null,
-): ProductDetailModel | null =>
-  productId ? model.productDetails.find((detail) => detail.id === productId) ?? null : null;
-
 export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
   const productCounts = menu.categories.map((category) => categoryProducts(menu, category.id).length);
   const maximumProductCount = Math.max(0, ...productCounts);
 
   const categories = menu.categories.map((category) => {
     const products = categoryProducts(menu, category.id);
-    const productModels = products.map((product) => createProductNodeModel(menu, product));
+    const productModels = products.map((product) => createProductNodeModel(menu, product, products));
     const availableCount = products.filter((product) => product.availability === "available").length;
     return {
       id: category.id,
@@ -427,7 +296,6 @@ export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
     } satisfies CategoryReadingModel;
   });
 
-  const categoryNames = new Map(menu.categories.map((category) => [category.id, category.name]));
   return {
     restaurantName: menu.restaurant.name,
     restaurantDescription: menu.restaurant.description,
@@ -435,8 +303,5 @@ export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
     categoryCount: menu.categories.length,
     priceRange: priceRange(menu.products),
     categories,
-    productDetails: menu.products.map((product) =>
-      createProductDetailModel(menu, product, categoryNames.get(product.categoryId) ?? "未分類"),
-    ),
   };
 };
