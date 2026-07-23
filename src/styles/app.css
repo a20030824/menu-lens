@@ -75,21 +75,19 @@ a:focus-visible,
 
 .restaurant-summary {
   border-bottom: 1px solid var(--line-strong);
-  background: rgba(243, 239, 230, 0.97);
+  background: rgba(243, 239, 230, 0.98);
 }
 
 .restaurant-summary__inner {
-  width: min(100%, 86rem);
+  width: min(100%, 60rem);
   margin: 0 auto;
-  padding: 1.35rem 1rem 1.2rem;
+  padding: 0.9rem 0.85rem 0.8rem;
 }
 
-.restaurant-summary__copy { min-width: 0; }
-
 .eyebrow {
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.3rem;
   color: var(--accent-deep);
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 850;
   letter-spacing: 0.11em;
   text-transform: uppercase;
@@ -98,34 +96,33 @@ a:focus-visible,
 .restaurant-title {
   margin: 0;
   font-family: ui-serif, "Noto Serif TC", serif;
-  font-size: clamp(2rem, 8vw, 3.7rem);
+  font-size: clamp(1.7rem, 8vw, 2.65rem);
   line-height: 1;
   letter-spacing: -0.035em;
 }
 
 .restaurant-description {
-  max-width: 44rem;
-  margin: 0.75rem 0 0;
+  max-width: 42rem;
+  margin: 0.45rem 0 0;
   color: var(--ink-soft);
-  font-size: 0.9rem;
-  line-height: 1.65;
+  font-size: 0.76rem;
+  line-height: 1.5;
 }
 
 .menu-metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
-  margin: 1rem 0 0;
+  margin: 0.7rem 0 0;
   border-block: 1px solid var(--line);
 }
 
 .menu-metric {
   min-width: 0;
-  padding: 0.7rem 0.55rem 0.7rem 0;
+  padding: 0.5rem 0.4rem 0.5rem 0;
 }
 
 .menu-metric + .menu-metric {
-  padding-left: 0.65rem;
+  padding-left: 0.55rem;
   border-left: 1px solid var(--line);
 }
 
@@ -134,12 +131,12 @@ a:focus-visible,
 
 .menu-metric__label {
   color: var(--ink-soft);
-  font-size: 0.66rem;
+  font-size: 0.6rem;
 }
 
 .menu-metric__value {
-  margin-top: 0.18rem;
-  font-size: clamp(0.82rem, 3vw, 1rem);
+  margin-top: 0.1rem;
+  font-size: clamp(0.76rem, 3vw, 0.9rem);
   font-weight: 850;
   font-variant-numeric: tabular-nums;
 }
@@ -159,13 +156,13 @@ a:focus-visible,
   overflow-wrap: anywhere;
 }
 
-@media (min-width: 44rem) {
+@media (min-width: 48rem) {
   .restaurant-summary__inner {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 0.75fr);
+    grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.7fr);
     align-items: end;
     gap: 2rem;
-    padding: 1.8rem 1.5rem 1.5rem;
+    padding: 1.25rem 1.25rem 1rem;
   }
 
   .menu-metrics { margin-top: 0; }
