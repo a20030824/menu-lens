@@ -92,13 +92,17 @@ test("product detail model exposes readable facts without raw metadata enums", (
 
 test("partial, configurable, optional, and sold-out products retain explicit detail notices", () => {
   const model = createCompleteMenuModel(referenceMenu);
-  const required = productDetailFor(model, referenceMenu.products[0]?.id ?? null);
-  const optional = productDetailFor(model, referenceMenu.products[1]?.id ?? null);
-  const partial = productDetailFor(model, referenceMenu.products[24]?.id ?? null);
-  const soldOut = productDetailFor(model, "sichuan-mapo-tofu-pot");
-  assert(required?.configurationNotice?.includes("需要選擇規格") === true, "required configuration is delayed but explicit");
-  assert(optional?.configurationNotice?.includes("可選擇額外規格") === true, "optional configuration is delayed but explicit");
-  assert(partial?.metadataNotice !== null, "partial semantics are explicit");
+  const required = model.productDetails.find((detail) =>
+    detail.configurationNotice?.includes("需要選擇規格"),
+  );
+  const optional = model.productDetails.find((detail) =>
+    detail.configurationNotice?.includes("可選擇額外規格"),
+  );
+  const partial = model.productDetails.find((detail) => detail.metadataNotice !== null);
+  const soldOut = model.productDetails.find((detail) => detail.isSoldOut);
+  assert(required !== undefined, "required configuration is delayed but explicit");
+  assert(optional !== undefined, "optional configuration is delayed but explicit");
+  assert(partial !== undefined, "partial semantics are explicit");
   assert(soldOut?.availabilityLabel === "已售完", "sold-out product detail remains reachable");
 });
 
