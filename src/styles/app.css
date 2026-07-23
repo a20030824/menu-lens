@@ -28,9 +28,9 @@ body {
   background: linear-gradient(rgba(88, 74, 52, 0.035) 1px, transparent 1px), var(--paper);
   background-size: 100% 28px;
 }
-button, a { font: inherit; }
+button, a, select { font: inherit; }
 button { color: inherit; }
-button:focus-visible, a:focus-visible, [tabindex="-1"]:focus-visible {
+button:focus-visible, a:focus-visible, select:focus-visible, [tabindex="-1"]:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
@@ -113,10 +113,6 @@ button:focus-visible, a:focus-visible, [tabindex="-1"]:focus-visible {
   }
 }
 @media (min-width: 84rem) {
-  .reading-workspace {
-    grid-template-columns: minmax(0, 60rem) 20rem;
-    gap: 1.5rem;
-    padding-inline: 1.25rem;
-  }
+  .reading-workspace { padding-inline: 1.25rem; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
