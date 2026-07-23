@@ -3,15 +3,13 @@ import {
   categoryScrollBehavior,
   createCompleteMenuModel,
   createInitialMenuReadingState,
+  focusCategory,
   setActiveCategory,
+  showAllCategories,
+  showMenuOverview,
   type MenuReadingState,
 } from "../customer/menu-reading.js";
-import { createMenuField } from "./menu-field.js";
-import {
-  createMenuStructureViews,
-  updateMenuStructureActive,
-} from "./menu-structure.js";
-import { createCategoryInspector } from "./product-inspector.js";
+import { createMenuOverview, type MenuOverviewView } from "./menu-overview.js";
 
 const element = <K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -24,52 +22,69 @@ const element = <K extends keyof HTMLElementTagNameMap>(
   return node;
 };
 
+const reducedMotion = (): boolean =>
+  typeof window.matchMedia === "function" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   const model = createCompleteMenuModel(menu);
   let state: MenuReadingState = createInitialMenuReadingState(menu);
-  const field = createMenuField(model);
-  const inspector = createCategoryInspector();
+  let overview: MenuOverviewView;
 
-  let structureViews: ReturnType<typeof createMenuStructureViews>;
+  const render = (): void => overview.render(state);
 
-  const updateActiveCategory = (categoryId: CategoryId): void => {
-    state = setActiveCategory(state, categoryId);
-    updateMenuStructureActive(structureViews.controls, categoryId);
-    const category = model.categories.find((entry) => entry.id === categoryId);
-    if (category) inspector.render(category);
-  };
-
-  const moveToCategory = (categoryId: CategoryId): void => {
-    const section = field.sections.get(categoryId);
+  const scrollToCategory = (categoryId: CategoryId): void => {
+    const section = overview.sectionFor(categoryId);
     if (!section) return;
-    updateActiveCategory(categoryId);
-    const prefersReducedMotion =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    section.focus({ preventScroll: true });
-    section.scrollIntoView({
-      block: "start",
-      behavior: categoryScrollBehavior(prefersReducedMotion),
+    window.requestAnimationFrame(() => {
+      section.scrollIntoView({
+        block: "start",
+        behavior: categoryScrollBehavior(reducedMotion()),
+      });
     });
   };
 
-  structureViews = createMenuStructureViews(model.categories, moveToCategory);
+  const selectCategory = (categoryId: CategoryId): void => {
+    const isSameFocusedCategory =
+      state.expansion.kind === "category" && state.expansion.categoryId === categoryId;
+    state = isSameFocusedCategory ? showMenuOverview(state) : focusCategory(state, categoryId);
+    render();
+    if (!isSameFocusedCategory) scrollToCategory(categoryId);
+  };
+
+  const showOverviewFromContext = (): void => {
+    state = showMenuOverview(state);
+    render();
+    window.requestAnimationFrame(() => {
+      overview.element.scrollIntoView({
+        block: "start",
+        behavior: categoryScrollBehavior(reducedMotion()),
+      });
+    });
+  };
+
+  const showAll = (): void => {
+    state = showAllCategories(state);
+    render();
+  };
+
+  overview = createMenuOverview(model, selectCategory, showOverviewFromContext, showAll);
 
   const shell = element("div", "menu-shell");
   const header = element("header", "restaurant-summary");
   const headerInner = element("div", "restaurant-summary__inner");
   const summaryCopy = element("div", "restaurant-summary__copy");
   summaryCopy.append(
-    element("p", "eyebrow", "完整菜單閱讀工作區"),
+    element("p", "eyebrow", "完整菜單"),
     element("h1", "restaurant-title", model.restaurantName),
     element("p", "restaurant-description", model.restaurantDescription),
   );
 
   const metrics = element("dl", "menu-metrics");
   const metricValues = [
-    ["菜單品項", `${model.productCount} 道`],
-    ["分類", `${model.categoryCount} 類`],
-    ["價格範圍", model.priceRange],
+    ["品項", `${model.productCount} 道`],
+    ["區域", `${model.categoryCount} 類`],
+    ["價位", model.priceRange],
   ] as const;
   metricValues.forEach(([label, value]) => {
     const item = element("div", "menu-metric");
@@ -79,42 +94,36 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     );
     metrics.append(item);
   });
+
   headerInner.append(summaryCopy, metrics);
   header.append(headerInner);
-
-  const workspace = element("div", "menu-workspace");
-  workspace.append(structureViews.desktop, field.element, inspector.element);
-  shell.append(header, structureViews.mobile, workspace);
+  shell.append(header, overview.element);
   root.replaceChildren(shell);
+  render();
 
-  const initialCategoryId = state.activeCategoryId ?? model.categories[0]?.id;
-  if (initialCategoryId) updateActiveCategory(initialCategoryId);
-
-  let categoryScrollFrame: number | null = null;
-  const syncActiveCategoryToScroll = (): void => {
-    categoryScrollFrame = null;
-    const marker = window.innerHeight * 0.3;
+  let scrollFrame: number | null = null;
+  const syncAllModePosition = (): void => {
+    scrollFrame = null;
+    if (state.expansion.kind !== "all") return;
+    const marker = window.innerHeight * 0.32;
     let activeCategoryId = model.categories[0]?.id ?? null;
-
-    field.sections.forEach((section, categoryId) => {
-      if (section.getBoundingClientRect().top <= marker) activeCategoryId = categoryId;
+    model.categories.forEach((category) => {
+      const section = overview.sectionFor(category.id);
+      if (section && section.getBoundingClientRect().top <= marker) {
+        activeCategoryId = category.id;
+      }
     });
-
-    const atDocumentEnd =
-      window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
-    if (atDocumentEnd) {
-      activeCategoryId = model.categories.at(-1)?.id ?? activeCategoryId;
-    }
     if (activeCategoryId && activeCategoryId !== state.activeCategoryId) {
-      updateActiveCategory(activeCategoryId);
+      state = setActiveCategory(state, activeCategoryId);
+      render();
     }
   };
 
   window.addEventListener(
     "scroll",
     () => {
-      if (categoryScrollFrame !== null) return;
-      categoryScrollFrame = window.requestAnimationFrame(syncActiveCategoryToScroll);
+      if (scrollFrame !== null) return;
+      scrollFrame = window.requestAnimationFrame(syncAllModePosition);
     },
     { passive: true },
   );
