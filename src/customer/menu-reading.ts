@@ -14,8 +14,14 @@ import {
   resolveProductSemantics,
 } from "../domain/menu-validation.js";
 
+export type MenuExpansion =
+  | Readonly<{ kind: "overview" }>
+  | Readonly<{ kind: "category"; categoryId: CategoryId }>
+  | Readonly<{ kind: "all" }>;
+
 export type MenuReadingState = Readonly<{
   activeCategoryId: CategoryId | null;
+  expansion: MenuExpansion;
 }>;
 
 export type ProductNodeModel = Readonly<{
@@ -30,7 +36,7 @@ export type ProductNodeModel = Readonly<{
   metadataCompleteness: "complete" | "partial";
 }>;
 
-export type CategoryOverviewModel = Readonly<{
+export type CategoryReadingModel = Readonly<{
   id: CategoryId;
   name: string;
   productCount: number;
@@ -40,13 +46,9 @@ export type CategoryOverviewModel = Readonly<{
   priceRange: string;
   structuralSummary: string;
   relativeCount: number;
+  previewProductNames: ReadonlyArray<string>;
+  products: ReadonlyArray<ProductNodeModel>;
 }>;
-
-export type CategoryReadingModel = CategoryOverviewModel &
-  Readonly<{
-    description: string | null;
-    products: ReadonlyArray<ProductNodeModel>;
-  }>;
 
 export type CompleteMenuModel = Readonly<{
   restaurantName: string;
@@ -202,12 +204,39 @@ const createProductNodeModel = (menu: Menu, product: Product): ProductNodeModel 
 
 export const createInitialMenuReadingState = (menu: Menu): MenuReadingState => ({
   activeCategoryId: menu.categories[0]?.id ?? null,
+  expansion: { kind: "overview" },
+});
+
+export const focusCategory = (
+  state: MenuReadingState,
+  categoryId: CategoryId,
+): MenuReadingState => ({
+  ...state,
+  activeCategoryId: categoryId,
+  expansion: { kind: "category", categoryId },
+});
+
+export const showMenuOverview = (state: MenuReadingState): MenuReadingState => ({
+  ...state,
+  expansion: { kind: "overview" },
+});
+
+export const showAllCategories = (state: MenuReadingState): MenuReadingState => ({
+  ...state,
+  expansion: { kind: "all" },
 });
 
 export const setActiveCategory = (
   state: MenuReadingState,
   categoryId: CategoryId,
 ): MenuReadingState => ({ ...state, activeCategoryId: categoryId });
+
+export const categoryIsExpanded = (
+  state: MenuReadingState,
+  categoryId: CategoryId,
+): boolean =>
+  state.expansion.kind === "all" ||
+  (state.expansion.kind === "category" && state.expansion.categoryId === categoryId);
 
 export const categoryScrollBehavior = (prefersReducedMotion: boolean): ScrollBehavior =>
   prefersReducedMotion ? "auto" : "smooth";
@@ -220,6 +249,7 @@ export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
 
   const categories = menu.categories.map((category) => {
     const products = categoryProducts(menu, category.id);
+    const productModels = products.map((product) => createProductNodeModel(menu, product));
     const availableCount = products.filter(
       (product) => product.availability === "available",
     ).length;
@@ -227,7 +257,6 @@ export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
     return {
       id: category.id,
       name: category.name,
-      description: category.description ?? null,
       productCount: products.length,
       availableCount,
       soldOutCount: products.length - availableCount,
@@ -237,7 +266,11 @@ export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
       priceRange: priceRange(products),
       structuralSummary: categoryStructuralSummary(menu, category, products),
       relativeCount: maximumProductCount > 0 ? products.length / maximumProductCount : 0,
-      products: products.map((product) => createProductNodeModel(menu, product)),
+      previewProductNames: productModels
+        .filter((product) => !product.isSoldOut)
+        .slice(0, 2)
+        .map((product) => product.name),
+      products: productModels,
     } satisfies CategoryReadingModel;
   });
 
