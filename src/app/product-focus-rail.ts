@@ -54,6 +54,8 @@ export const createProductFocusRail = (
   actions.append(moreInfoButton, clearButton);
   rail.append(copy, actions);
 
+  let renderedProductId: string | null = null;
+
   return {
     element: rail,
     render: (detail) => {
@@ -61,6 +63,7 @@ export const createProductFocusRail = (
       rail.hidden = !isOpen;
       rail.dataset.open = String(isOpen);
       if (!detail) {
+        renderedProductId = null;
         context.textContent = "";
         name.textContent = "";
         price.textContent = "";
@@ -68,6 +71,8 @@ export const createProductFocusRail = (
         return;
       }
 
+      if (renderedProductId === detail.id) return;
+      renderedProductId = detail.id;
       context.textContent = `${detail.categoryName} · ${detail.availabilityLabel}`;
       name.textContent = detail.name;
       price.textContent = detail.price;
