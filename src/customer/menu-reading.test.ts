@@ -1,9 +1,12 @@
 import { referenceMenu } from "../domain/reference-menu.js";
 import {
+  categoryIsExpanded,
   categoryScrollBehavior,
   createCompleteMenuModel,
   createInitialMenuReadingState,
-  setActiveCategory,
+  focusCategory,
+  showAllCategories,
+  showMenuOverview,
 } from "./menu-reading.js";
 
 type TestCase = Readonly<{ name: string; run: () => void }>;
@@ -16,77 +19,98 @@ function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
-test("complete menu keeps all canonical products and ordering", () => {
-  const model = createCompleteMenuModel(referenceMenu);
-  const modelIds = model.categories.flatMap((category) =>
-    category.products.map((product) => product.id),
-  );
-  assert(model.productCount === 30, "product count must stay 30");
-  assert(modelIds.length === 30, "all products must remain visible");
-  assert(
-    JSON.stringify(modelIds) === JSON.stringify(referenceMenu.products.map((product) => product.id)),
-    "product ordering must remain canonical",
+test("initial state starts in compressed menu overview", () => {
+  const state = createInitialMenuReadingState(referenceMenu);
+  assert(state.expansion.kind === "overview", "initial mode must be overview");
+  referenceMenu.categories.forEach((category) =>
+    assert(!categoryIsExpanded(state, category.id), "overview keeps every category compressed"),
   );
 });
 
-test("category structure uses the canonical six-region order", () => {
-  const model = createCompleteMenuModel(referenceMenu);
-  const counts = model.categories.map((category) => category.productCount);
-  const categoryIds = model.categories.map((category) => category.id);
+test("category focus expands exactly one region without removing the others", () => {
+  const initial = createInitialMenuReadingState(referenceMenu);
+  const target = referenceMenu.categories[2]?.id;
+  assert(target !== undefined, "third category must exist");
+  const focused = focusCategory(initial, target);
+  assert(focused.expansion.kind === "category", "state must enter category focus");
+  assert(focused.activeCategoryId === target, "focused category becomes active");
   assert(
-    JSON.stringify(categoryIds) ===
+    referenceMenu.categories.filter((category) => categoryIsExpanded(focused, category.id))
+      .length === 1,
+    "only one category expands",
+  );
+});
+
+test("category focus can move while canonical region order remains stable", () => {
+  const model = createCompleteMenuModel(referenceMenu);
+  const first = referenceMenu.categories[0]?.id;
+  const last = referenceMenu.categories.at(-1)?.id;
+  assert(first !== undefined && last !== undefined, "edge categories must exist");
+  const moved = focusCategory(
+    focusCategory(createInitialMenuReadingState(referenceMenu), first),
+    last,
+  );
+  assert(
+    moved.expansion.kind === "category" && moved.expansion.categoryId === last,
+    "focus moves to requested category",
+  );
+  assert(
+    JSON.stringify(model.categories.map((category) => category.id)) ===
       JSON.stringify(referenceMenu.categories.map((category) => category.id)),
-    "category order must stay canonical",
-  );
-  assert(
-    JSON.stringify(counts) === JSON.stringify([8, 6, 6, 4, 4, 2]),
-    "category counts must remain 8, 6, 6, 4, 4, 2",
+    "category order must remain canonical",
   );
 });
 
-test("category proportions are relative to the largest category", () => {
-  const proportions = createCompleteMenuModel(referenceMenu).categories.map(
-    (category) => category.relativeCount,
-  );
+test("overview and all-expanded modes are reversible", () => {
+  const initial = createInitialMenuReadingState(referenceMenu);
+  const all = showAllCategories(initial);
+  assert(all.expansion.kind === "all", "all mode must be explicit");
   assert(
-    JSON.stringify(proportions) === JSON.stringify([1, 0.75, 0.75, 0.5, 0.5, 0.25]),
-    "relative proportions must be deterministic",
+    referenceMenu.categories.every((category) => categoryIsExpanded(all, category.id)),
+    "all mode expands all six regions",
+  );
+  const overview = showMenuOverview(all);
+  assert(overview.expansion.kind === "overview", "overview must be recoverable");
+  assert(
+    referenceMenu.categories.every((category) => !categoryIsExpanded(overview, category.id)),
+    "overview compresses every region again",
   );
 });
 
-test("compact product nodes expose at most two supported cues", () => {
-  const nodes = createCompleteMenuModel(referenceMenu).categories.flatMap(
-    (category) => category.products,
-  );
-  assert(nodes.some((node) => node.primaryCue !== null), "supported cues should be visible");
-  nodes.forEach((node) => {
-    assert(!("description" in node), "compact nodes must not carry full descriptions");
-    const visibleCues = [node.primaryCue, node.secondaryCue].filter(
-      (cue): cue is string => cue !== null,
+test("compressed overview previews at most two canonical available products", () => {
+  const model = createCompleteMenuModel(referenceMenu);
+  model.categories.forEach((category) => {
+    assert(category.previewProductNames.length <= 2, "preview must remain bounded");
+    const canonicalAvailable = category.products
+      .filter((product) => !product.isSoldOut)
+      .slice(0, 2)
+      .map((product) => product.name);
+    assert(
+      JSON.stringify(category.previewProductNames) === JSON.stringify(canonicalAvailable),
+      "preview must use canonical available products",
     );
-    assert(visibleCues.length <= 2, "compact nodes must expose at most two cues");
   });
 });
 
-test("overview preserves sold-out and partial metadata signals", () => {
-  const categories = createCompleteMenuModel(referenceMenu).categories;
+test("complete model preserves all products, sold-out placement, and partial metadata", () => {
+  const model = createCompleteMenuModel(referenceMenu);
+  const products = model.categories.flatMap((category) => category.products);
+  assert(products.length === 30, "all 30 products remain reachable");
   assert(
-    categories.reduce((sum, category) => sum + category.soldOutCount, 0) === 2,
+    JSON.stringify(products.map((product) => product.id)) ===
+      JSON.stringify(referenceMenu.products.map((product) => product.id)),
+    "product order stays canonical",
+  );
+  assert(
+    model.categories.reduce((sum, category) => sum + category.soldOutCount, 0) === 2,
     "both sold-out products remain represented",
   );
   assert(
-    categories.reduce((sum, category) => sum + category.partialMetadataCount, 0) === 6,
+    model.categories.reduce((sum, category) => sum + category.partialMetadataCount, 0) === 6,
     "all six partial metadata products remain represented",
   );
-});
-
-test("sold-out products remain in their original positions", () => {
-  const products = createCompleteMenuModel(referenceMenu).categories.flatMap(
-    (category) => category.products,
-  );
   const mapoIndex = products.findIndex((product) => product.id === "sichuan-mapo-tofu-pot");
-  assert(mapoIndex === 4, "sold-out mapo tofu must keep its canonical position");
-  assert(products[mapoIndex]?.isSoldOut === true, "sold-out state must remain explicit");
+  assert(mapoIndex === 4, "sold-out mapo tofu keeps its canonical position");
 });
 
 test("display models never expose raw domain values", () => {
@@ -101,15 +125,13 @@ test("display models never expose raw domain values", () => {
   ].forEach((value) => assert(!visible.includes(value), `must not expose ${value}`));
 });
 
-test("active category state changes without ordering state", () => {
-  const initial = createInitialMenuReadingState(referenceMenu);
+test("reading state does not introduce Candidate or ordering state", () => {
   const target = referenceMenu.categories[2]?.id;
   assert(target !== undefined, "reference menu must have a third category");
-  const next = setActiveCategory(initial, target);
-  assert(next.activeCategoryId === target, "active category must update");
-  const serialized = JSON.stringify(next);
-  assert(!serialized.includes("candidate"), "Candidate state must not exist in this slice");
-  assert(!serialized.includes("order"), "ordering state must not exist in this slice");
+  const state = focusCategory(createInitialMenuReadingState(referenceMenu), target);
+  const serialized = JSON.stringify(state);
+  assert(!serialized.includes("candidate"), "Candidate state must not exist in M1");
+  assert(!serialized.includes("order"), "ordering state must not exist in M1");
 });
 
 test("category scrolling respects reduced motion", () => {
