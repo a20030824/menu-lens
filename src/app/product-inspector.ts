@@ -19,9 +19,8 @@ export type CategoryInspectorView = Readonly<{
 export const createCategoryInspector = (): CategoryInspectorView => {
   const inspector = element("aside", "reading-inspector");
   inspector.setAttribute("aria-label", "目前菜單區域摘要");
-  const liveRegion = element("div", "reading-inspector__content");
-  liveRegion.setAttribute("aria-live", "polite");
-  inspector.append(liveRegion);
+  const content = element("div", "reading-inspector__content");
+  inspector.append(content);
 
   const render = (category: CategoryReadingModel): void => {
     const heading = element("div", "reading-inspector__heading");
@@ -56,7 +55,7 @@ export const createCategoryInspector = (): CategoryInspectorView => {
       signals.append(element("p", undefined, "本區商品皆有完整基本比較資訊"));
     }
 
-    liveRegion.replaceChildren(heading, facts, signals);
+    content.replaceChildren(heading, facts, signals);
   };
 
   return { element: inspector, render };
