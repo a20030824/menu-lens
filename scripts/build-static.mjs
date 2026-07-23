@@ -7,7 +7,7 @@ await copyFile(new URL("index.html", root), new URL("dist/index.html", root));
 await Promise.all([
   copyFile(new URL("src/styles/app.css", root), new URL("dist/src/styles/app.css", root)),
   copyFile(
-    new URL("src/styles/menu-atlas.css", root),
-    new URL("dist/src/styles/menu-atlas.css", root),
+    new URL("src/styles/menu-workspace.css", root),
+    new URL("dist/src/styles/menu-workspace.css", root),
   ),
 ]);
