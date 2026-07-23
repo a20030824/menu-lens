@@ -25,10 +25,8 @@ It exists to prevent parallel conversations from redefining the product, duplica
     → [active] mobile-first menu reading
         [rejected] large category Atlas
         → [rejected] desktop-first static workspace
-        → [current] M1 mobile semantic menu zoom
-            [passed] compressed whole-menu overview
-            → [revising] expanded-category ledger
-        → M2 product focus continuity
+        → [passed] M1 mobile semantic menu zoom + shared ledger
+        → [current] M2 product focus continuity
         → M3 accessibility and motion finalization
     → Candidate + comparison
     → Decision + Configuration + Current order
@@ -119,7 +117,7 @@ horizontal category chips
 
 The implementation therefore placed its meaningful differences in desktop columns rather than in the product state model. That hypothesis is also rejected.
 
-## M1 deployed finding
+## M1 deployed findings
 
 The first mobile semantic-zoom Pages review produced a split result:
 
@@ -128,26 +126,18 @@ compressed whole-menu overview → passed
 expanded category content → failed as an ordinary product-card feed
 ```
 
-The overview preserved the six-region mental model, but expanded products still repeated the same per-item pattern:
+The overview preserved the six-region mental model, but expanded products still repeated an isolated per-item pattern. Removing rounded cards did not change the feed reading rhythm.
 
-```text
-name + price
-→ semantic subtitle
-→ status line
-```
+The correction was structural:
 
-Even without rounded cards, each product owned an isolated visual block and the reading rhythm remained a feed. This does not pass M1.
+- each expanded category became one semantic table surface
+- sequence, dish name, supported reading cues, and price use shared columns
+- sold-out and incomplete-data status stay inside the shared cue column
+- individual products do not receive separate surfaces or header/body/status stacks
+- the same category does not split into desktop-only tile columns
+- canonical product order and one continuous table reading order remain stable
 
-The M1 correction is therefore structural rather than decorative:
-
-- render each expanded category as one semantic table surface
-- share fixed columns for sequence, dish name, supported reading cues, and price
-- keep sold-out and incomplete-data status inside the shared cue column
-- do not give individual products separate surfaces, card backgrounds, or independent header/body/status stacks
-- do not split the same category into desktop-only tile columns
-- preserve canonical product order and one continuous table reading order
-
-M1 remains active until the deployed expanded category reads as a menu ledger rather than a product feed.
+The deployed ledger revision was judged to have the intended menu-map character. M1 is therefore treated as passed, while the ledger remains the stable coordinate plane for later states rather than a completed product by itself.
 
 ## Active workstream: customer decision spine
 
@@ -173,10 +163,8 @@ The same state may be displayed more simultaneously on a wide screen, but mobile
 ```text
 [complete] complete-menu technical baseline
 → [active] mobile-first menu reading
-    [current] M1 mobile semantic menu zoom
-        [passed] compressed overview
-        → [current] shared product ledger revision
-    → [pending] M2 product focus continuity
+    [passed] M1 mobile semantic menu zoom + shared ledger
+    → [current] M2 product focus continuity
     → [pending] M3 accessibility and motion finalization
 → [pending] Candidate + comparison
 → [pending] explicit Decision + Configuration + Current order
@@ -186,14 +174,14 @@ The same state may be displayed more simultaneously on a wide screen, but mobile
 
 - **Complete:** one client application using the canonical menu
 - **Complete:** stable category and product ordering
-- **Current:** compressed overview containing all six category regions
-- **Current:** reversible `overview`, single-category, and all-expanded reading modes
-- **Current:** category expansion in place without removing the other five regions
-- **Current:** explicit route to all 30 products
-- **Current:** shared product ledger using no more than two trusted semantic cues
-- **Pending:** product focus using a mobile partial sheet and desktop inspector
-- **Pending:** layered semantic detail with evidence folded separately
-- **Pending:** focus return, scroll preservation, and surrounding-alternative continuity
+- **Complete:** compressed overview containing all six category regions
+- **Complete:** reversible `overview`, single-category, and all-expanded reading modes
+- **Complete:** category expansion in place without removing the other five regions
+- **Complete:** explicit route to all 30 products
+- **Complete:** shared product ledger using no more than two trusted semantic cues
+- **Current:** product focus using a mobile partial sheet and desktop inspector
+- **Current:** layered semantic detail with evidence folded separately
+- **Current:** focus return, scroll preservation, and surrounding-alternative continuity
 - **Pending:** Candidate add, remove, workspace, and bounded comparison
 - **Pending:** explicit transition from consideration to Decision
 - **Pending:** Configuration only after Decision
@@ -213,11 +201,9 @@ The same state may be displayed more simultaneously on a wide screen, but mobile
 - preserve `Product ≠ Candidate ≠ DraftOrderItem ≠ ConfiguredOrderItem ≠ SubmittedOrderRound`
 - do not count desktop-only layout as proof of the interaction model
 
-## Current implementation slice: M1 mobile semantic menu zoom
+## Completed slice: M1 mobile semantic menu zoom
 
-### Goal
-
-Make the first mobile interaction preserve a mental model of the whole menu while allowing one region to be examined:
+M1 established the menu map as a stable mobile-first coordinate plane:
 
 ```text
 six-region compressed overview
@@ -226,83 +212,111 @@ six-region compressed overview
 → return to overview or expand all products
 ```
 
-This slice tests semantic zoom, not product detail or ordering intent.
-
-### Reading modes
-
-#### Overview
+M1 invariants remain active during later work:
 
 - all six canonical categories remain visible in canonical order
-- each compressed band shows category number, name, product count, price range, trustworthy structural summary, and relative product-count bar
-- each band previews at most two currently available products in canonical order
-- sold-out products are not used as preview examples but remain in the canonical category collection
-- the initial screen does not use horizontal category chips
+- single-category focus does not remove the other five regions
+- all-expanded mode keeps all 30 products in one document
+- each category ledger shares visible columns for sequence, dish name, reading cues, and price
+- sold-out and incomplete-data products remain in canonical position
+- unsupported or low-confidence cues are omitted instead of guessed
+- later state markers must attach to existing product rows rather than moving products elsewhere
 
-#### Single-category focus
+## Current implementation slice: M2 product focus continuity
 
-- exactly one category expands at its original position
-- the other five categories remain visible as compressed bands
-- selecting another category changes which region is expanded without reordering regions
-- selecting the focused category again returns to overview
-- a sticky context bar identifies the current region and provides explicit overview and all-expanded actions
+### Goal
 
-#### All-expanded
-
-- all six categories reveal their complete canonical product ledgers
-- all 30 products remain reachable in one document
-- scroll position updates the current category label without filtering or reordering content
-- returning to overview compresses all regions again
-
-### Expanded product-ledger behavior
-
-- use a semantic table per category rather than a list of independently composed product nodes
-- share visible columns for sequence, dish name, reading cues, and price
-- use product name as the row header and category name as the table caption
-- show at most two trusted semantic cues
-- show sold-out and incomplete-data status within the shared cue column
-- omit unsupported or low-confidence cues instead of guessing
-- retain sold-out products in canonical position
-- do not create per-product backgrounds, cards, hover lifts, or desktop tile columns
-- product rows are not interactive during M1
-
-### Meaningful motion
-
-- category reveal may animate only the semantic expansion relationship
-- motion must not reorder categories or products
-- reduced-motion preference removes the reveal transition and smooth scrolling
-- no decorative entrance, hover-lift, parallax, or continuously moving elements
-
-### Explicit exclusions for M1
-
-- no product opening or product detail
-- no bottom sheet or desktop product inspector
-- no Candidate or comparison state
-- no quantity, modifier selection, Configuration, total, Current order, or checkout
-- no product filtering or ranking
-- no persistence, URL state, router, backend, or remote analytics
-- no alternative lenses
-
-### M1 checkpoint gate
-
-M1 is useful only if a mobile tester can:
-
-1. identify all six category regions before opening one
-2. see which regions contain more or fewer products
-3. understand the approximate category price ranges
-4. expand one category at its original location
-5. continue seeing the other five regions in their canonical positions
-6. switch focused categories without interpreting the interaction as mutually exclusive tabs
-7. return clearly to the compressed menu overview
-8. explicitly reveal all 30 products
-9. scan expanded products through shared aligned columns rather than repeated product-card blocks
-10. describe the difference as:
+Allow a user to inspect one product without replacing or deforming the menu map:
 
 ```text
-I first saw the whole menu compressed,
-then enlarged one region while the other regions stayed in place,
-and read its dishes through one shared menu ledger.
+stable category ledger
+→ focus one product row
+→ read bounded summary detail
+→ optionally reveal full semantic evidence
+→ close and return to the exact row and surrounding alternatives
 ```
 
-A response such as `the category buttons look different` does not pass the gate.
+Product focus remains browsing. It does not create Candidate, quantity, configuration selections, totals, or an order item.
 
-If the deployed ledger still reads as a conventional product feed, implementation remains in M1 and does not proceed to product detail, Candidate, or comparison work.
+### State contract
+
+M2 adds only reading state:
+
+```ts
+type ProductDetailLevel = "closed" | "summary" | "full";
+
+type MenuReadingState = {
+  activeCategoryId: CategoryId | null;
+  expansion: MenuExpansion;
+  focusedProductId: ProductId | null;
+  detailLevel: ProductDetailLevel;
+};
+```
+
+Rules:
+
+- opening a product preserves the current category expansion
+- detail initially opens at `summary`
+- `summary` and `full` are reversible for the same `ProductId`
+- closing detail preserves expansion and returns the source `ProductId` for focus restoration
+- changing to a reading mode that hides the focused product closes detail first
+- Product focus must not be represented as Candidate or ordering state
+
+### Presentation
+
+#### Mobile
+
+- selecting a ledger row opens a modal bottom sheet
+- the row remains in place and keeps a persistent focused marker behind the sheet
+- the sheet owns its own scrolling and does not change the document scroll offset
+- Escape, backdrop, and the explicit close control close the sheet
+- closing returns keyboard focus to the original ledger product without scrolling it elsewhere
+
+#### Wide screen
+
+- the same `focusedProductId` renders in a sticky inspector
+- the inspector appears only while a product is focused
+- desktop may show menu and detail simultaneously but does not introduce a separate interaction model
+- the ledger remains one continuous table rather than changing into cards or tiles
+
+### Information layers
+
+Summary detail shows:
+
+- category and product name
+- price and availability
+- description
+- at most three trusted semantic facts
+- incomplete-data and delayed-configuration notices when relevant
+
+Full detail additionally shows:
+
+- all trusted semantic facts
+- a native `<details>` evidence section
+- merchant-confirmed or category-default source labels
+- confidence labels without exposing raw domain enums
+
+Required and optional modifier groups may be mentioned only as future configuration notices. No selection control appears before explicit Decision.
+
+### M2 checkpoint gate
+
+M2 passes only if a mobile tester can:
+
+1. open a product without the ledger row moving or changing height
+2. continue recognizing the category and nearby alternatives behind the sheet
+3. distinguish quick summary from deliberately requested full information
+4. close through the button, Escape, or backdrop
+5. return to the exact product row without a scroll jump
+6. inspect sold-out and incomplete-data products without them disappearing
+7. understand that viewing the product did not add it to a shortlist or order
+
+A detail page, inline accordion that pushes the ledger, or sheet that loses the source row does not pass the gate.
+
+### Explicit exclusions for M2
+
+- no Candidate or comparison state
+- no quantity or modifier controls
+- no explicit Decision
+- no Configuration, total, Current order, or checkout
+- no filtering, ranking, persistence, URL state, router, backend, or remote analytics
+- no alternative lenses
