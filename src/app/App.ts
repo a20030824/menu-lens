@@ -1,15 +1,21 @@
-import type { CategoryId, Menu } from "../domain/menu-types.js";
+import type { CategoryId, Menu, ProductId } from "../domain/menu-types.js";
 import {
   categoryScrollBehavior,
+  closeProductDetail,
+  collapseProductDetail,
   createCompleteMenuModel,
   createInitialMenuReadingState,
+  expandProductDetail,
   focusCategory,
+  focusProduct,
+  productDetailFor,
   setActiveCategory,
   showAllCategories,
   showMenuOverview,
   type MenuReadingState,
 } from "../customer/menu-reading.js";
 import { createMenuOverview, type MenuOverviewView } from "./menu-overview.js";
+import { createProductDetailView, type ProductDetailView } from "./product-detail.js";
 
 const element = <K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -30,13 +36,34 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   const model = createCompleteMenuModel(menu);
   let state: MenuReadingState = createInitialMenuReadingState(menu);
   let overview: MenuOverviewView;
+  let detailView: ProductDetailView;
 
-  const render = (): void => overview.render(state);
+  const render = (): void => {
+    overview.render(state);
+    detailView.render(productDetailFor(model, state.focusedProductId), state.detailLevel);
+  };
+
+  const closeDetail = (): void => {
+    const result = closeProductDetail(state);
+    state = result.state;
+    render();
+    const focusProductId = result.focusProductId;
+    if (focusProductId) {
+      window.requestAnimationFrame(() => {
+        overview.productButtonFor(focusProductId)?.focus({ preventScroll: true });
+      });
+    }
+  };
 
   const selectCategory = (categoryId: CategoryId): void => {
     const isSameFocusedCategory =
       state.expansion.kind === "category" && state.expansion.categoryId === categoryId;
     state = isSameFocusedCategory ? showMenuOverview(state) : focusCategory(state, categoryId);
+    render();
+  };
+
+  const selectProduct = (productId: ProductId): void => {
+    state = focusProduct(state, productId);
     render();
   };
 
@@ -56,7 +83,24 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     render();
   };
 
-  overview = createMenuOverview(model, selectCategory, showOverviewFromContext, showAll);
+  overview = createMenuOverview(
+    model,
+    selectCategory,
+    selectProduct,
+    showOverviewFromContext,
+    showAll,
+  );
+  detailView = createProductDetailView(
+    closeDetail,
+    () => {
+      state = expandProductDetail(state);
+      render();
+    },
+    () => {
+      state = collapseProductDetail(state);
+      render();
+    },
+  );
 
   const shell = element("div", "menu-shell");
   const header = element("header", "restaurant-summary");
@@ -83,9 +127,11 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     metrics.append(item);
   });
 
+  const workspace = element("div", "reading-workspace");
+  workspace.append(overview.element, detailView.element);
   headerInner.append(summaryCopy, metrics);
   header.append(headerInner);
-  shell.append(header, overview.element);
+  shell.append(header, workspace);
   root.replaceChildren(shell);
   render();
 
