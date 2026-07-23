@@ -1,5 +1,6 @@
 name: Deploy GitHub Pages
 
+# The prototype branch uses the same build gate and a separate preview environment.
 on:
   push:
     branches: [main, agent/menu-map-atlas]
