@@ -1,4 +1,4 @@
-import type { CategoryId } from "../domain/menu-types.js";
+import type { CategoryId, ProductId } from "../domain/menu-types.js";
 import {
   categoryIsExpanded,
   type CompleteMenuModel,
@@ -21,11 +21,13 @@ export type MenuOverviewView = Readonly<{
   element: HTMLElement;
   render: (state: MenuReadingState) => void;
   sectionFor: (categoryId: CategoryId) => HTMLElement | null;
+  productButtonFor: (productId: ProductId) => HTMLButtonElement | null;
 }>;
 
 export const createMenuOverview = (
   model: CompleteMenuModel,
   onSelectCategory: (categoryId: CategoryId) => void,
+  onSelectProduct: (productId: ProductId) => void,
   onShowOverview: () => void,
   onShowAll: () => void,
 ): MenuOverviewView => {
@@ -59,7 +61,7 @@ export const createMenuOverview = (
 
   const stack = element("div", "category-stack");
   const sections = model.categories.map((category, index) =>
-    createMenuCategorySection(category, index, onSelectCategory),
+    createMenuCategorySection(category, index, onSelectCategory, onSelectProduct),
   );
   sections.forEach((section) => stack.append(section.element));
 
@@ -102,12 +104,22 @@ export const createMenuOverview = (
       section.setState(
         categoryIsExpanded(state, section.categoryId),
         state.expansion.kind !== "overview" && state.activeCategoryId === section.categoryId,
+        state.focusedProductId,
       );
     });
   };
 
-  const sectionFor = (categoryId: CategoryId): HTMLElement | null =>
-    sections.find((section) => section.categoryId === categoryId)?.element ?? null;
-
-  return { element: root, render, sectionFor };
+  return {
+    element: root,
+    render,
+    sectionFor: (categoryId) =>
+      sections.find((section) => section.categoryId === categoryId)?.element ?? null,
+    productButtonFor: (productId) => {
+      for (const section of sections) {
+        const button = section.productButtonFor(productId);
+        if (button) return button;
+      }
+      return null;
+    },
+  };
 };
