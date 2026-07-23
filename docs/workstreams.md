@@ -2,7 +2,7 @@
 
 This file is the current coordination view for Menu Lens.
 
-It exists to prevent parallel conversations from redefining the product, duplicating work, or expanding the demo before the decision spine is coherent.
+It exists to prevent parallel conversations from redefining the product, duplicating work, preserving failed interaction surfaces, or expanding the demo before the decision spine is coherent.
 
 ## Coordination rules
 
@@ -14,6 +14,8 @@ It exists to prevent parallel conversations from redefining the product, duplica
 - Prefer fewer moving parts, fewer dependencies, and fewer abstractions while the product model is still being tested.
 - A difference that exists only on desktop does not count as a core product difference.
 - A cleaner or more intuitive conventional interaction does not by itself prove a Menu Lens product difference.
+- Failed interaction experiments should be removed or isolated instead of retained as dormant architecture.
+- Candidate, Comparison, Decision, Configuration, and order work remain blocked while the menu-reading hypothesis is unresolved.
 
 ## Current sequence
 
@@ -26,13 +28,17 @@ It exists to prevent parallel conversations from redefining the product, duplica
     → [active] mobile-first menu reading
         [rejected] large category Atlas
         → [rejected] desktop-first static workspace
-        → [passed] M1 mobile semantic menu zoom + shared ledger
-        → [foundation] M2a detail geometry and continuity
-        → [current] C1 non-modal product focus rail
-        → [pending] C2 Candidate persistence
-        → [pending] C3 bounded comparison
-        → [pending] M3 accessibility and motion finalization
-    → [pending] explicit Decision + Configuration + Current order
+        → [passed] M1 compressed overview + shared ledger
+        → [rejected] M2 modal product detail
+        → [rejected] C1 fixed product focus rail
+        → [current research] relational menu reading
+            [planned] Prototype A — Axis-only score
+            → [planned] Prototype B — Anchor-only relation
+            → [blocked] Prototype C — Combined relational score
+        → [blocked] attached Candidate marks
+        → [blocked] bounded comparison
+        → [blocked] M3 accessibility and motion finalization
+    → [blocked] explicit Decision + Configuration + Current order
 → continuity and table state
 → thin alternative lenses
 → merchant-authoring test
@@ -45,22 +51,35 @@ It exists to prevent parallel conversations from redefining the product, duplica
 |---|---|---|---|---|
 | Foundation memory | Complete | product contract, glossary, workstream boundaries, handoff protocol | existing design core | stable cross-conversation reference |
 | Domain and reference data | Complete | types, validation, 30-product fictional menu, incomplete metadata cases | product contract | local typed dataset and tests |
-| Formative evaluation | Complete | task scripts, observation notes, lightweight local events, falsification signals | product contract | protocol that shapes implementation |
-| Customer decision spine | In progress | menu overview → category focus → product focus → candidates → comparison → decision → configuration → current order | domain dataset and formative protocol | one complete mobile-first flow |
-| Continuity and table state | Deferred | scroll restoration, preserved candidates, submitted rounds, coarse table composition | customer decision spine | continuity behavior over the same state model |
+| Formative evaluation | Complete | task scripts, observation notes, local events, falsification signals | product contract | protocol that shapes implementation |
+| Customer decision spine | In progress | menu overview → relational reading → consideration → comparison → decision → configuration → current order | domain dataset and formative protocol | one coherent mobile-first flow |
+| Relational menu research | Active | shared axes, anchor relations, stable row projection, failure gates | M1 shared ledger | evidence for or against relation-first menu reading |
+| Continuity and table state | Deferred | preserved candidates, submitted rounds, coarse table composition | customer decision spine | continuity over a validated state model |
 | Alternative lenses | Deferred | thin quick, shared-table, and featured views | stable decision spine | views over the same canonical menu |
 | Merchant authoring | Deferred | category defaults, exceptions, confidence, incomplete-data preview | proven useful semantic fields | small authoring test, not production CMS |
 | Conventional baseline | Parked | credible conventional ordering flow using the same data | coherent Menu Lens demo and explicit study need | optional comparison condition |
-| Production integration | Out of scope | payment, POS, KDS, inventory, auth, deployment operations | none in current demo | none |
+| Production integration | Out of scope | payment, POS, KDS, inventory, auth, deployment operations | none | none |
 
-## Completed foundation work
-
-The authoritative entry points are:
+## Authoritative entry points
 
 - `docs/product-contract.md`
 - `docs/glossary.md`
 - `docs/workstreams.md`
 - `docs/handoff.md`
+
+Current design research:
+
+- `docs/relational-menu-research.md`
+
+Supporting documents:
+
+- `docs/problem-framing.md`
+- `docs/interaction-model.md`
+- `docs/merchant-data-strategy.md`
+- `docs/demo-scope.md`
+- `docs/evaluation-plan.md`
+
+## Completed foundation work
 
 The domain and reference-data workstream provides:
 
@@ -87,127 +106,203 @@ The complete-menu technical baseline proved:
 
 - one static local client can render the validated canonical menu
 - all six categories and all 30 products can remain in one stable collection
-- stable `ProductId` and `CategoryId` can drive detail behavior
+- stable `ProductId` and `CategoryId` can drive reading behavior
 - sold-out and incomplete metadata can remain explicit
-- keyboard close, focus return, and reduced-motion behavior are feasible
 - the static build path is sufficient for Pages review
 
-## Rejected reading hypotheses
+## Deployed menu-reading findings
 
 ### Rejected: large category Atlas
 
 The first deployed attempt placed six large category regions before the existing complete-menu list.
 
-Pages review showed that it behaved as a larger category selector:
+Pages review showed that it behaved as:
 
 ```text
 large category controls
 → conventional complete-menu list
 ```
 
-Region size, counts, price ranges, and representative products did not create a different reading model. That hypothesis must not be restored by styling changes.
+Region size, counts, price ranges, and representative products did not create a different reading model.
 
 ### Rejected: desktop-first static workspace
 
 The second deployed attempt used a desktop structure rail, dense center field, and category summary inspector.
 
-On mobile, the rail and inspector were hidden and the interface collapsed to:
+On mobile, the meaningful differences disappeared and the interface collapsed to:
 
 ```text
 horizontal category chips
 → single-column product list
 ```
 
-The implementation therefore placed its meaningful differences in desktop columns rather than in the product state model. That hypothesis is also rejected.
+Desktop-only layout is not evidence for the mobile product model.
 
-## M1 deployed findings
+### Passed: M1 compressed overview
 
-The first mobile semantic-zoom Pages review produced a split result:
+The compressed whole-menu overview preserved the restaurant's six-region shape, approximate menu size, and price range without implying hidden products.
 
-```text
-compressed whole-menu overview → passed
-expanded category content → failed as an ordinary product-card feed
-```
+### Rejected then corrected: M1 product presentation
 
-The overview preserved the six-region mental model, but expanded products still repeated an isolated per-item pattern. Removing rounded cards did not change the feed reading rhythm.
+The first expanded-category attempt remained an ordinary product-card feed.
 
 The correction was structural:
 
-- each expanded category became one semantic table surface
-- sequence, dish name, supported reading cues, and price use shared columns
-- sold-out and incomplete-data status stay inside the shared cue column
-- individual products do not receive separate surfaces or header/body/status stacks
-- the same category does not split into desktop-only tile columns
-- canonical product order and one continuous table reading order remain stable
+- each category became one semantic table surface
+- sequence, dish name, bounded reading cues, and price use shared columns
+- sold-out and incomplete-data status remain inside the shared lane
+- individual products do not receive separate card surfaces
+- canonical order and one continuous reading order remain stable
 
-The deployed ledger revision was judged to have the intended menu-map character. M1 is treated as passed, while the ledger remains the stable coordinate plane for later states rather than a completed product by itself.
+The shared ledger is treated as a passed **coordinate plane**, not a complete product.
 
-## M2a finding: detail continuity is infrastructure
+### Rejected: M2 modal product detail
 
-The first product-detail deployment failed because closing detail moved the source ledger row severely. The root causes were conditional desktop geometry and native dialog focus or scroll restoration.
+The modal detail experiment failed because:
 
-The correction:
+- closing detail moved the source row severely
+- the interaction remained a conventional single-product reader
+- detail did not reduce repeated opening, memory work, or product relocation
 
-- reserves the wide-screen inspector column before detail opens
-- keeps 64–84rem layouts on an overlay sheet rather than shrinking the ledger
-- uses stable scrollbar geometry
-- records and restores the source row's viewport coordinate
-- keeps the same ledger DOM nodes throughout
+Geometry fixes were infrastructure, not product evidence.
 
-This is a required continuity invariant, but it does not prove a distinct product capability. A cleaner detail sheet remains conventional unless it contributes to reversible consideration or comparison.
+### Rejected: C1 fixed product focus rail
 
-## Active workstream: customer decision spine
+The fixed rail experiment failed because:
 
-### Goal
+- severe perceived jumping remained
+- fixed viewport occupation changed the effective reading area
+- scroll and focus restoration became compensatory choreography
+- only one current product remained visible in the decision model
+- replacing one product summary with another did not expose relationships
+- the interaction still did not solve comprehension linearity
 
-Implement one coherent mobile-first interaction using the canonical reference menu:
+C1 must not be treated as the substrate for Candidate work.
+
+## Current research question
+
+The current work no longer asks:
+
+> Can one product be opened more cleanly?
+
+It asks:
+
+> Can one stable menu surface make relationships among several products visible at once, without changing canonical order, moving rows, filtering products, or requiring a second comparison list?
+
+The immediate target is **comprehension linearity**:
 
 ```text
-compressed menu overview
-→ category semantic zoom
-→ non-modal product focus
-→ Candidate
-→ comparison
-→ explicit Decision
-→ Configuration
-→ Current order
+inspect A
+→ remember A
+→ inspect B
+→ reconstruct A
+→ repeat
 ```
 
-The same state may be displayed more simultaneously on a wide screen, but mobile defines the core interaction.
+The next prototypes must transform this into direct visible comparison.
 
-### Progress
+## Current research slice: relational menu reading
+
+The full design record is in `docs/relational-menu-research.md`.
+
+### Shared principles
+
+- canonical product rows remain the substrate
+- one interaction should expose relationships among at least three products
+- row identity, order, width, and height remain stable
+- no fixed rail, inline expansion row, or scroll correction
+- missing or low-confidence data remains unknown
+- no filtering, ranking, recommendation, or hidden subset
+- mobile evidence is required
+- Candidate remains blocked until relational reading shows value
+
+### Prototype A — Axis-only score
+
+The same category ledger is projected through one shared reading dimension:
 
 ```text
-[complete] complete-menu technical baseline
-→ [active] mobile-first menu reading
-    [passed] M1 mobile semantic menu zoom + shared ledger
-    → [foundation] M2a detail geometry and continuity
-    → [current] C1 non-modal product focus rail
-    → [pending] C2 Candidate persistence
-    → [pending] C3 bounded comparison
-    → [pending] M3 accessibility and motion finalization
-→ [pending] explicit Decision + Configuration + Current order
+default
+price
+portion
+meal role
+preparation
 ```
 
-### Required outputs
+No product becomes selected or anchored.
 
-- **Complete:** one client application using the canonical menu
-- **Complete:** stable category and product ordering
-- **Complete:** compressed overview containing all six category regions
-- **Complete:** reversible `overview`, single-category, and all-expanded reading modes
-- **Complete:** category expansion in place without removing the other five regions
-- **Complete:** explicit route to all 30 products
-- **Complete:** shared product ledger using no more than two trusted semantic cues
-- **Foundation:** secondary evidence detail with geometry and scroll continuity
-- **Current:** non-modal product focus attached to an existing ledger row
-- **Pending:** Candidate add, remove, persistence, and original-row markers
-- **Pending:** bounded comparison for two or three genuine possibilities
-- **Pending:** explicit transition from consideration to Decision
-- **Pending:** Configuration only after Decision
-- **Pending:** Current order clearly separated from Candidates
-- focused tests for every implemented state transition and preserved invariant
+Gate:
 
-### Constraints
+- users can answer category-structure questions without opening products
+- the control is not mistaken for a filter
+- all products remain visibly present
+- switching axes causes no row movement
+- missing data is understood as unknown
+- the result supports scanning rather than only resembling a spreadsheet
+
+### Prototype B — Anchor-only relation
+
+One product becomes an explicit comparison baseline.
+
+Other rows display:
+
+```text
+price difference
+＋ one bounded semantic relationship
+```
+
+No sorting, filtering, recommendation, fixed rail, or modal is introduced.
+
+Gate:
+
+- users understand the baseline without teaching
+- at least three products can be compared on one stable ledger
+- changing the anchor does not move rows
+- the anchor is not mistaken for recommendation, commitment, or order state
+- repeated product-detail openings decrease
+
+### Prototype C — Combined relational score
+
+Axis and Anchor may be combined only after both produce useful evidence independently.
+
+This prototype is blocked by default. It must not be implemented merely because both concepts exist in code.
+
+## Required outputs before Candidate resumes
+
+- remove or isolate the failed C1 focus rail
+- remove fixed rail spacing and rail-specific scroll choreography
+- retain the passed M1 overview and shared ledger
+- implement pure relation projections with explicit uncertainty
+- expose Axis-only and Anchor-only as bounded prototypes
+- run the existing comparison-oriented evaluation tasks
+- record failure as readily as success
+- select one relation grammar only after observable evidence
+
+## Evaluation focus
+
+Do not begin with preference questions.
+
+Observe:
+
+- product-detail openings
+- backtracking
+- attempts to relocate products
+- recall language such as "I think the previous one was..."
+- ability to explain price and semantic differences
+- understanding of missing metadata
+- belief that products were filtered or recommended
+- visible row movement
+- whether the result only feels prettier or more convenient
+
+A prototype fails if:
+
+- users still inspect one product at a time
+- relationship labels add more reading work than they remove
+- row content changes create perceived jumping
+- missing metadata produces false conclusions
+- users believe products were hidden, sorted, ranked, or selected
+- feedback remains limited to ordinary usability improvement
+
+## Constraints
 
 - no backend, database, authentication, payment, POS, or KDS integration
 - no conventional baseline
@@ -215,115 +310,23 @@ The same state may be displayed more simultaneously on a wide screen, but mobile
 - no merchant CMS
 - no remote analytics
 - no generic state-machine, repository, plugin, animation, or design-system framework
-- do not add abstractions for deferred work
+- no abstractions for deferred Candidate or order work
 - preserve canonical product and category order
 - preserve `Product ≠ Candidate ≠ DraftOrderItem ≠ ConfiguredOrderItem ≠ SubmittedOrderRound`
-- do not count desktop-only layout as proof of the interaction model
-- do not count visual polish or ordinary usability improvement as proof of the consideration model
+- do not count desktop-only layout as proof
+- do not count visual polish as proof
+- no fixed rail, Candidate shelf, comparison modal, filter, ranking, or recommendation during the relational prototype round
 
-## Completed slice: M1 mobile semantic menu zoom
+## Contract impact
 
-M1 established the menu map as a stable mobile-first coordinate plane:
+None.
 
-```text
-six-region compressed overview
-→ expand one category in place
-→ read one shared category ledger
-→ return to overview or expand all products
-```
+The product contract already requires:
 
-M1 invariants remain active during later work:
+- complete-menu access
+- browsing distinct from ordering
+- preserved browsing context
+- comparison support
+- explicit uncertainty for incomplete metadata
 
-- all six canonical categories remain visible in canonical order
-- single-category focus does not remove the other five regions
-- all-expanded mode keeps all 30 products in one document
-- each category ledger shares visible columns for sequence, dish name, reading cues, and price
-- sold-out and incomplete-data products remain in canonical position
-- unsupported or low-confidence cues are omitted instead of guessed
-- later state markers must attach to existing product rows rather than moving products elsewhere
-
-## Current implementation slice: C1 non-modal product focus rail
-
-### Goal
-
-Let a user identify and hold one currently inspected product without entering a product page or modal detail surface:
-
-```text
-stable category ledger
-→ focus one product row
-→ read a bounded bottom rail
-→ continue scrolling or focus another row
-→ optionally request evidence detail
-```
-
-This is still browsing. C1 does not create Candidate, quantity, configuration selections, totals, or an order item.
-
-### State contract
-
-C1 separates product focus from product detail:
-
-```ts
-type ProductDetailLevel = "closed" | "summary" | "full";
-
-type MenuReadingState = {
-  activeCategoryId: CategoryId | null;
-  expansion: MenuExpansion;
-  focusedProductId: ProductId | null;
-  detailLevel: ProductDetailLevel;
-};
-```
-
-Rules:
-
-- selecting a product sets `focusedProductId` but leaves `detailLevel` at `closed`
-- the focus rail is driven by `focusedProductId`
-- `更多資訊` explicitly opens summary detail
-- summary and full detail remain reversible for the same `ProductId`
-- closing detail returns to the rail and preserves product focus
-- `收起` explicitly clears product focus and detail
-- changing to a reading mode that hides the product clears focus first
-- Product focus must not be represented as Candidate or ordering state
-
-### Presentation
-
-- the rail is fixed at the mobile viewport bottom and does not lock background interaction
-- the ledger remains scrollable and another row may be focused directly
-- the focused marker stays attached to the canonical product row
-- the menu reserves stable bottom clearance before the rail opens
-- opening or closing the rail must not change ledger width, row height, or source-row viewport position
-- the rail shows category, availability, name, price, and at most two trusted cue values
-- the rail exposes only `更多資訊` and `收起` during C1
-- no inactive or placeholder Candidate control is shown
-
-### Secondary evidence detail
-
-- evidence detail opens only after `更多資訊`
-- mobile uses a modal sheet; sufficiently wide screens may use the reserved inspector
-- closing evidence returns keyboard focus to the rail's `更多資訊` control
-- closing evidence keeps the focused row and rail active
-- description, trusted facts, source, confidence, incomplete-data notice, and delayed-configuration notice remain available
-- no Candidate, modifier selection, quantity, total, or ordering action appears
-
-### C1 checkpoint gate
-
-C1 passes only if a mobile tester can:
-
-1. tap a product without opening a modal or leaving the menu
-2. continue scrolling and tap another product while the rail is visible
-3. recognize which canonical row owns the rail
-4. open evidence only through the explicit `更多資訊` action
-5. close evidence and return to the same rail without a scroll jump
-6. close the rail and return focus to the exact source product
-7. describe the interaction as remaining inside one menu rather than navigating into a product page
-
-C1 is not evidence that Menu Lens is complete. It only establishes the interaction substrate needed for C2 Candidate persistence.
-
-### Explicit exclusions for C1
-
-- no Candidate or comparison state
-- no `先留著` placeholder before Candidate exists
-- no quantity or modifier controls
-- no explicit Decision
-- no Configuration, total, Current order, or checkout
-- no filtering, ranking, persistence, URL state, router, backend, or remote analytics
-- no alternative lenses
+The current change is the experimental route used to investigate those requirements. It does not change the requirements or authorize deferred states.
