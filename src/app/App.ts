@@ -45,12 +45,29 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
 
   const closeDetail = (): void => {
     const result = closeProductDetail(state);
+    const sourceButton = result.focusProductId
+      ? overview.productButtonFor(result.focusProductId)
+      : null;
+    const sourceTop = sourceButton?.getBoundingClientRect().top ?? null;
+
     state = result.state;
     render();
+
     const focusProductId = result.focusProductId;
     if (focusProductId) {
       window.requestAnimationFrame(() => {
-        overview.productButtonFor(focusProductId)?.focus({ preventScroll: true });
+        const button = overview.productButtonFor(focusProductId);
+        if (!button) return;
+
+        if (sourceTop !== null) {
+          const nextTop = button.getBoundingClientRect().top;
+          const correction = nextTop - sourceTop;
+          if (Math.abs(correction) > 0.5) {
+            window.scrollBy({ top: correction, behavior: "auto" });
+          }
+        }
+
+        button.focus({ preventScroll: true });
       });
     }
   };
