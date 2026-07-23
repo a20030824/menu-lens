@@ -322,7 +322,7 @@ const createProductDetailModel = (
   };
 };
 
-const clearProductFocus = (state: MenuReadingState): MenuReadingState => ({
+export const clearProductFocus = (state: MenuReadingState): MenuReadingState => ({
   ...state,
   focusedProductId: null,
   detailLevel: "closed",
@@ -362,17 +362,24 @@ export const focusProduct = (
 ): MenuReadingState => ({
   ...state,
   focusedProductId: productId,
-  detailLevel: "summary",
+  detailLevel: "closed",
 });
 
-export const expandProductDetail = (state: MenuReadingState): MenuReadingState =>
-  state.focusedProductId ? { ...state, detailLevel: "full" } : state;
-
-export const collapseProductDetail = (state: MenuReadingState): MenuReadingState =>
+export const openProductDetail = (state: MenuReadingState): MenuReadingState =>
   state.focusedProductId ? { ...state, detailLevel: "summary" } : state;
 
+export const expandProductDetail = (state: MenuReadingState): MenuReadingState =>
+  state.focusedProductId && state.detailLevel !== "closed"
+    ? { ...state, detailLevel: "full" }
+    : state;
+
+export const collapseProductDetail = (state: MenuReadingState): MenuReadingState =>
+  state.focusedProductId && state.detailLevel === "full"
+    ? { ...state, detailLevel: "summary" }
+    : state;
+
 export const closeProductDetail = (state: MenuReadingState): CloseProductDetailResult => ({
-  state: clearProductFocus(state),
+  state: { ...state, detailLevel: "closed" },
   focusProductId: state.focusedProductId,
 });
 
