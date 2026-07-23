@@ -1,24 +1,17 @@
-import type { CategoryId, Menu, ProductId } from "../domain/menu-types.js";
+import type { CategoryId, Menu } from "../domain/menu-types.js";
+import type { MenuReadingAxis } from "../customer/menu-relations.js";
 import {
   categoryScrollBehavior,
-  clearProductFocus,
-  closeProductDetail,
-  collapseProductDetail,
   createCompleteMenuModel,
   createInitialMenuReadingState,
-  expandProductDetail,
   focusCategory,
-  focusProduct,
-  openProductDetail,
-  productDetailFor,
   setActiveCategory,
+  setReadingAxis,
   showAllCategories,
   showMenuOverview,
   type MenuReadingState,
 } from "../customer/menu-reading.js";
 import { createMenuOverview, type MenuOverviewView } from "./menu-overview.js";
-import { createProductDetailView, type ProductDetailView } from "./product-detail.js";
-import { createProductFocusRail, type ProductFocusRail } from "./product-focus-rail.js";
 
 const element = <K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -39,59 +32,8 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   const model = createCompleteMenuModel(menu);
   let state: MenuReadingState = createInitialMenuReadingState(menu);
   let overview: MenuOverviewView;
-  let detailView: ProductDetailView;
-  let focusRail: ProductFocusRail;
 
-  const currentDetail = () => productDetailFor(model, state.focusedProductId);
-
-  const render = (): void => {
-    const detail = currentDetail();
-    overview.render(state);
-    focusRail.render(detail);
-    detailView.render(detail, state.detailLevel);
-  };
-
-  const preserveSourceRow = (
-    productId: ProductId | null,
-    afterRender: () => void,
-  ): void => {
-    const sourceButton = productId ? overview.productButtonFor(productId) : null;
-    const sourceTop = sourceButton?.getBoundingClientRect().top ?? null;
-
-    afterRender();
-
-    window.requestAnimationFrame(() => {
-      const button = productId ? overview.productButtonFor(productId) : null;
-      if (button && sourceTop !== null) {
-        const correction = button.getBoundingClientRect().top - sourceTop;
-        if (Math.abs(correction) > 0.5) {
-          window.scrollBy({ top: correction, behavior: "auto" });
-        }
-      }
-    });
-  };
-
-  const closeDetail = (): void => {
-    const result = closeProductDetail(state);
-    preserveSourceRow(result.focusProductId, () => {
-      state = result.state;
-      render();
-    });
-    window.requestAnimationFrame(() => focusRail.focusMoreInfo());
-  };
-
-  const clearFocus = (): void => {
-    const productId = state.focusedProductId;
-    preserveSourceRow(productId, () => {
-      state = clearProductFocus(state);
-      render();
-    });
-    if (productId) {
-      window.requestAnimationFrame(() => {
-        overview.productButtonFor(productId)?.focus({ preventScroll: true });
-      });
-    }
-  };
+  const render = (): void => overview.render(state);
 
   const selectCategory = (categoryId: CategoryId): void => {
     const isSameFocusedCategory =
@@ -100,19 +42,17 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     render();
   };
 
-  const selectProduct = (productId: ProductId): void => {
-    state = focusProduct(state, productId);
+  const selectAxis = (axis: MenuReadingAxis): void => {
+    state = setReadingAxis(state, axis);
     render();
   };
 
   const showOverviewFromContext = (): void => {
     state = showMenuOverview(state);
     render();
-    window.requestAnimationFrame(() => {
-      overview.element.scrollIntoView({
-        block: "start",
-        behavior: categoryScrollBehavior(reducedMotion()),
-      });
+    overview.element.scrollIntoView({
+      block: "start",
+      behavior: categoryScrollBehavior(reducedMotion()),
     });
   };
 
@@ -124,27 +64,9 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   overview = createMenuOverview(
     model,
     selectCategory,
-    selectProduct,
+    selectAxis,
     showOverviewFromContext,
     showAll,
-  );
-  detailView = createProductDetailView(
-    closeDetail,
-    () => {
-      state = expandProductDetail(state);
-      render();
-    },
-    () => {
-      state = collapseProductDetail(state);
-      render();
-    },
-  );
-  focusRail = createProductFocusRail(
-    () => {
-      state = openProductDetail(state);
-      render();
-    },
-    clearFocus,
   );
 
   const shell = element("div", "menu-shell");
@@ -173,10 +95,10 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   });
 
   const workspace = element("div", "reading-workspace");
-  workspace.append(overview.element, detailView.element);
+  workspace.append(overview.element);
   headerInner.append(summaryCopy, metrics);
   header.append(headerInner);
-  shell.append(header, workspace, focusRail.element);
+  shell.append(header, workspace);
   root.replaceChildren(shell);
   render();
 
