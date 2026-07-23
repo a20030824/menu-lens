@@ -13,6 +13,7 @@ It exists to prevent parallel conversations from redefining the product, duplica
 - Conventional-interface comparison is parked until the Menu Lens interaction is coherent enough to evaluate on its own.
 - Prefer fewer moving parts, fewer dependencies, and fewer abstractions while the product model is still being tested.
 - A difference that exists only on desktop does not count as a core product difference.
+- A cleaner or more intuitive conventional interaction does not by itself prove a Menu Lens product difference.
 
 ## Current sequence
 
@@ -26,10 +27,12 @@ It exists to prevent parallel conversations from redefining the product, duplica
         [rejected] large category Atlas
         → [rejected] desktop-first static workspace
         → [passed] M1 mobile semantic menu zoom + shared ledger
-        → [current] M2 product focus continuity
-        → M3 accessibility and motion finalization
-    → Candidate + comparison
-    → Decision + Configuration + Current order
+        → [foundation] M2a detail geometry and continuity
+        → [current] C1 non-modal product focus rail
+        → [pending] C2 Candidate persistence
+        → [pending] C3 bounded comparison
+        → [pending] M3 accessibility and motion finalization
+    → [pending] explicit Decision + Configuration + Current order
 → continuity and table state
 → thin alternative lenses
 → merchant-authoring test
@@ -137,7 +140,21 @@ The correction was structural:
 - the same category does not split into desktop-only tile columns
 - canonical product order and one continuous table reading order remain stable
 
-The deployed ledger revision was judged to have the intended menu-map character. M1 is therefore treated as passed, while the ledger remains the stable coordinate plane for later states rather than a completed product by itself.
+The deployed ledger revision was judged to have the intended menu-map character. M1 is treated as passed, while the ledger remains the stable coordinate plane for later states rather than a completed product by itself.
+
+## M2a finding: detail continuity is infrastructure
+
+The first product-detail deployment failed because closing detail moved the source ledger row severely. The root causes were conditional desktop geometry and native dialog focus or scroll restoration.
+
+The correction:
+
+- reserves the wide-screen inspector column before detail opens
+- keeps 64–84rem layouts on an overlay sheet rather than shrinking the ledger
+- uses stable scrollbar geometry
+- records and restores the source row's viewport coordinate
+- keeps the same ledger DOM nodes throughout
+
+This is a required continuity invariant, but it does not prove a distinct product capability. A cleaner detail sheet remains conventional unless it contributes to reversible consideration or comparison.
 
 ## Active workstream: customer decision spine
 
@@ -148,7 +165,7 @@ Implement one coherent mobile-first interaction using the canonical reference me
 ```text
 compressed menu overview
 → category semantic zoom
-→ product focus
+→ non-modal product focus
 → Candidate
 → comparison
 → explicit Decision
@@ -164,9 +181,11 @@ The same state may be displayed more simultaneously on a wide screen, but mobile
 [complete] complete-menu technical baseline
 → [active] mobile-first menu reading
     [passed] M1 mobile semantic menu zoom + shared ledger
-    → [current] M2 product focus continuity
+    → [foundation] M2a detail geometry and continuity
+    → [current] C1 non-modal product focus rail
+    → [pending] C2 Candidate persistence
+    → [pending] C3 bounded comparison
     → [pending] M3 accessibility and motion finalization
-→ [pending] Candidate + comparison
 → [pending] explicit Decision + Configuration + Current order
 ```
 
@@ -179,10 +198,10 @@ The same state may be displayed more simultaneously on a wide screen, but mobile
 - **Complete:** category expansion in place without removing the other five regions
 - **Complete:** explicit route to all 30 products
 - **Complete:** shared product ledger using no more than two trusted semantic cues
-- **Current:** product focus using a mobile partial sheet and desktop inspector
-- **Current:** layered semantic detail with evidence folded separately
-- **Current:** focus return, scroll preservation, and surrounding-alternative continuity
-- **Pending:** Candidate add, remove, workspace, and bounded comparison
+- **Foundation:** secondary evidence detail with geometry and scroll continuity
+- **Current:** non-modal product focus attached to an existing ledger row
+- **Pending:** Candidate add, remove, persistence, and original-row markers
+- **Pending:** bounded comparison for two or three genuine possibilities
 - **Pending:** explicit transition from consideration to Decision
 - **Pending:** Configuration only after Decision
 - **Pending:** Current order clearly separated from Candidates
@@ -200,6 +219,7 @@ The same state may be displayed more simultaneously on a wide screen, but mobile
 - preserve canonical product and category order
 - preserve `Product ≠ Candidate ≠ DraftOrderItem ≠ ConfiguredOrderItem ≠ SubmittedOrderRound`
 - do not count desktop-only layout as proof of the interaction model
+- do not count visual polish or ordinary usability improvement as proof of the consideration model
 
 ## Completed slice: M1 mobile semantic menu zoom
 
@@ -222,25 +242,25 @@ M1 invariants remain active during later work:
 - unsupported or low-confidence cues are omitted instead of guessed
 - later state markers must attach to existing product rows rather than moving products elsewhere
 
-## Current implementation slice: M2 product focus continuity
+## Current implementation slice: C1 non-modal product focus rail
 
 ### Goal
 
-Allow a user to inspect one product without replacing or deforming the menu map:
+Let a user identify and hold one currently inspected product without entering a product page or modal detail surface:
 
 ```text
 stable category ledger
 → focus one product row
-→ read bounded summary detail
-→ optionally reveal full semantic evidence
-→ close and return to the exact row and surrounding alternatives
+→ read a bounded bottom rail
+→ continue scrolling or focus another row
+→ optionally request evidence detail
 ```
 
-Product focus remains browsing. It does not create Candidate, quantity, configuration selections, totals, or an order item.
+This is still browsing. C1 does not create Candidate, quantity, configuration selections, totals, or an order item.
 
 ### State contract
 
-M2 adds only reading state:
+C1 separates product focus from product detail:
 
 ```ts
 type ProductDetailLevel = "closed" | "summary" | "full";
@@ -255,66 +275,53 @@ type MenuReadingState = {
 
 Rules:
 
-- opening a product preserves the current category expansion
-- detail initially opens at `summary`
-- `summary` and `full` are reversible for the same `ProductId`
-- closing detail preserves expansion and returns the source `ProductId` for focus restoration
-- changing to a reading mode that hides the focused product closes detail first
+- selecting a product sets `focusedProductId` but leaves `detailLevel` at `closed`
+- the focus rail is driven by `focusedProductId`
+- `更多資訊` explicitly opens summary detail
+- summary and full detail remain reversible for the same `ProductId`
+- closing detail returns to the rail and preserves product focus
+- `收起` explicitly clears product focus and detail
+- changing to a reading mode that hides the product clears focus first
 - Product focus must not be represented as Candidate or ordering state
 
 ### Presentation
 
-#### Mobile
+- the rail is fixed at the mobile viewport bottom and does not lock background interaction
+- the ledger remains scrollable and another row may be focused directly
+- the focused marker stays attached to the canonical product row
+- the menu reserves stable bottom clearance before the rail opens
+- opening or closing the rail must not change ledger width, row height, or source-row viewport position
+- the rail shows category, availability, name, price, and at most two trusted cue values
+- the rail exposes only `更多資訊` and `收起` during C1
+- no inactive or placeholder Candidate control is shown
 
-- selecting a ledger row opens a modal bottom sheet
-- the row remains in place and keeps a persistent focused marker behind the sheet
-- the sheet owns its own scrolling and does not change the document scroll offset
-- Escape, backdrop, and the explicit close control close the sheet
-- closing returns keyboard focus to the original ledger product without scrolling it elsewhere
+### Secondary evidence detail
 
-#### Wide screen
+- evidence detail opens only after `更多資訊`
+- mobile uses a modal sheet; sufficiently wide screens may use the reserved inspector
+- closing evidence returns keyboard focus to the rail's `更多資訊` control
+- closing evidence keeps the focused row and rail active
+- description, trusted facts, source, confidence, incomplete-data notice, and delayed-configuration notice remain available
+- no Candidate, modifier selection, quantity, total, or ordering action appears
 
-- the same `focusedProductId` renders in a sticky inspector
-- the inspector appears only while a product is focused
-- desktop may show menu and detail simultaneously but does not introduce a separate interaction model
-- the ledger remains one continuous table rather than changing into cards or tiles
+### C1 checkpoint gate
 
-### Information layers
+C1 passes only if a mobile tester can:
 
-Summary detail shows:
+1. tap a product without opening a modal or leaving the menu
+2. continue scrolling and tap another product while the rail is visible
+3. recognize which canonical row owns the rail
+4. open evidence only through the explicit `更多資訊` action
+5. close evidence and return to the same rail without a scroll jump
+6. close the rail and return focus to the exact source product
+7. describe the interaction as remaining inside one menu rather than navigating into a product page
 
-- category and product name
-- price and availability
-- description
-- at most three trusted semantic facts
-- incomplete-data and delayed-configuration notices when relevant
+C1 is not evidence that Menu Lens is complete. It only establishes the interaction substrate needed for C2 Candidate persistence.
 
-Full detail additionally shows:
-
-- all trusted semantic facts
-- a native `<details>` evidence section
-- merchant-confirmed or category-default source labels
-- confidence labels without exposing raw domain enums
-
-Required and optional modifier groups may be mentioned only as future configuration notices. No selection control appears before explicit Decision.
-
-### M2 checkpoint gate
-
-M2 passes only if a mobile tester can:
-
-1. open a product without the ledger row moving or changing height
-2. continue recognizing the category and nearby alternatives behind the sheet
-3. distinguish quick summary from deliberately requested full information
-4. close through the button, Escape, or backdrop
-5. return to the exact product row without a scroll jump
-6. inspect sold-out and incomplete-data products without them disappearing
-7. understand that viewing the product did not add it to a shortlist or order
-
-A detail page, inline accordion that pushes the ledger, or sheet that loses the source row does not pass the gate.
-
-### Explicit exclusions for M2
+### Explicit exclusions for C1
 
 - no Candidate or comparison state
+- no `先留著` placeholder before Candidate exists
 - no quantity or modifier controls
 - no explicit Decision
 - no Configuration, total, Current order, or checkout
