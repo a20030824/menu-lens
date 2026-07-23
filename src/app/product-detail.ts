@@ -32,7 +32,7 @@ export const createProductDetailView = (
   aside.setAttribute("aria-label", "商品資訊");
   host.append(dialog, aside);
 
-  const desktopQuery = window.matchMedia("(min-width: 64rem)");
+  const desktopQuery = window.matchMedia("(min-width: 84rem)");
   let currentDetail: ProductDetailModel | null = null;
   let currentLevel: ProductDetailLevel = "closed";
   let lastPresentedProductId: string | null = null;
