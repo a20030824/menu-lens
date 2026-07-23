@@ -1,4 +1,5 @@
-import type { CategoryId, ProductId } from "../domain/menu-types.js";
+import type { CategoryId } from "../domain/menu-types.js";
+import type { MenuReadingAxis } from "../customer/menu-relations.js";
 import {
   categoryIsExpanded,
   type CompleteMenuModel,
@@ -21,13 +22,12 @@ export type MenuOverviewView = Readonly<{
   element: HTMLElement;
   render: (state: MenuReadingState) => void;
   sectionFor: (categoryId: CategoryId) => HTMLElement | null;
-  productButtonFor: (productId: ProductId) => HTMLButtonElement | null;
 }>;
 
 export const createMenuOverview = (
   model: CompleteMenuModel,
   onSelectCategory: (categoryId: CategoryId) => void,
-  onSelectProduct: (productId: ProductId) => void,
+  onSelectAxis: (axis: MenuReadingAxis) => void,
   onShowOverview: () => void,
   onShowAll: () => void,
 ): MenuOverviewView => {
@@ -61,7 +61,7 @@ export const createMenuOverview = (
 
   const stack = element("div", "category-stack");
   const sections = model.categories.map((category, index) =>
-    createMenuCategorySection(category, index, onSelectCategory, onSelectProduct),
+    createMenuCategorySection(category, index, onSelectCategory, onSelectAxis),
   );
   sections.forEach((section) => stack.append(section.element));
 
@@ -101,10 +101,12 @@ export const createMenuOverview = (
     }
 
     sections.forEach((section) => {
+      const isCurrent = state.expansion.kind !== "overview" && state.activeCategoryId === section.categoryId;
       section.setState(
         categoryIsExpanded(state, section.categoryId),
-        state.expansion.kind !== "overview" && state.activeCategoryId === section.categoryId,
-        state.focusedProductId,
+        isCurrent,
+        state.expansion.kind === "category" && isCurrent ? state.readingAxis : "default",
+        state.expansion.kind === "category" && isCurrent,
       );
     });
   };
@@ -114,12 +116,5 @@ export const createMenuOverview = (
     render,
     sectionFor: (categoryId) =>
       sections.find((section) => section.categoryId === categoryId)?.element ?? null,
-    productButtonFor: (productId) => {
-      for (const section of sections) {
-        const button = section.productButtonFor(productId);
-        if (button) return button;
-      }
-      return null;
-    },
   };
 };
