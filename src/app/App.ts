@@ -1,6 +1,7 @@
 import type { CategoryId, Menu, ProductId } from "../domain/menu-types.js";
 import {
   categoryScrollBehavior,
+  clearProductFocus,
   closeProductDetail,
   collapseProductDetail,
   createCompleteMenuModel,
@@ -8,6 +9,7 @@ import {
   expandProductDetail,
   focusCategory,
   focusProduct,
+  openProductDetail,
   productDetailFor,
   setActiveCategory,
   showAllCategories,
@@ -16,6 +18,7 @@ import {
 } from "../customer/menu-reading.js";
 import { createMenuOverview, type MenuOverviewView } from "./menu-overview.js";
 import { createProductDetailView, type ProductDetailView } from "./product-detail.js";
+import { createProductFocusRail, type ProductFocusRail } from "./product-focus-rail.js";
 
 const element = <K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -37,37 +40,55 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   let state: MenuReadingState = createInitialMenuReadingState(menu);
   let overview: MenuOverviewView;
   let detailView: ProductDetailView;
+  let focusRail: ProductFocusRail;
+
+  const currentDetail = () => productDetailFor(model, state.focusedProductId);
 
   const render = (): void => {
+    const detail = currentDetail();
     overview.render(state);
-    detailView.render(productDetailFor(model, state.focusedProductId), state.detailLevel);
+    focusRail.render(detail);
+    detailView.render(detail, state.detailLevel);
+  };
+
+  const preserveSourceRow = (
+    productId: ProductId | null,
+    afterRender: () => void,
+  ): void => {
+    const sourceButton = productId ? overview.productButtonFor(productId) : null;
+    const sourceTop = sourceButton?.getBoundingClientRect().top ?? null;
+
+    afterRender();
+
+    window.requestAnimationFrame(() => {
+      const button = productId ? overview.productButtonFor(productId) : null;
+      if (button && sourceTop !== null) {
+        const correction = button.getBoundingClientRect().top - sourceTop;
+        if (Math.abs(correction) > 0.5) {
+          window.scrollBy({ top: correction, behavior: "auto" });
+        }
+      }
+    });
   };
 
   const closeDetail = (): void => {
     const result = closeProductDetail(state);
-    const sourceButton = result.focusProductId
-      ? overview.productButtonFor(result.focusProductId)
-      : null;
-    const sourceTop = sourceButton?.getBoundingClientRect().top ?? null;
+    preserveSourceRow(result.focusProductId, () => {
+      state = result.state;
+      render();
+    });
+    window.requestAnimationFrame(() => focusRail.focusMoreInfo());
+  };
 
-    state = result.state;
-    render();
-
-    const focusProductId = result.focusProductId;
-    if (focusProductId) {
+  const clearFocus = (): void => {
+    const productId = state.focusedProductId;
+    preserveSourceRow(productId, () => {
+      state = clearProductFocus(state);
+      render();
+    });
+    if (productId) {
       window.requestAnimationFrame(() => {
-        const button = overview.productButtonFor(focusProductId);
-        if (!button) return;
-
-        if (sourceTop !== null) {
-          const nextTop = button.getBoundingClientRect().top;
-          const correction = nextTop - sourceTop;
-          if (Math.abs(correction) > 0.5) {
-            window.scrollBy({ top: correction, behavior: "auto" });
-          }
-        }
-
-        button.focus({ preventScroll: true });
+        overview.productButtonFor(productId)?.focus({ preventScroll: true });
       });
     }
   };
@@ -118,6 +139,13 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
       render();
     },
   );
+  focusRail = createProductFocusRail(
+    () => {
+      state = openProductDetail(state);
+      render();
+    },
+    clearFocus,
+  );
 
   const shell = element("div", "menu-shell");
   const header = element("header", "restaurant-summary");
@@ -148,7 +176,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   workspace.append(overview.element, detailView.element);
   headerInner.append(summaryCopy, metrics);
   header.append(headerInner);
-  shell.append(header, workspace);
+  shell.append(header, workspace, focusRail.element);
   root.replaceChildren(shell);
   render();
 
