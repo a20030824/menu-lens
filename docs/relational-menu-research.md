@@ -2,9 +2,9 @@
 
 ## Document status
 
-This is an exploratory design record for the current Menu Lens menu-reading work.
+This is the exploratory design record for the current Menu Lens menu-reading work.
 
-It records observed failures, cross-domain design inspirations, competing hypotheses, prototype order, and falsification criteria. It is **not** a product-contract change and does not authorize Candidate, Comparison, Decision, Configuration, or order implementation.
+It records observed failures, the relational hypothesis, the implemented Axis-only prototype, and its falsification gate. It is **not** a product-contract change and does not authorize Prototype B, Prototype C, Candidate, Comparison, Decision, Configuration, or order implementation.
 
 Current implementation branch:
 
@@ -18,9 +18,21 @@ Current Draft PR:
 #4 — Build menu reading workspace
 ```
 
+Current status:
+
+```text
+[passed] M1 compressed overview + shared ledger
+→ [rejected] M2 modal product detail
+→ [rejected, removed] C1 fixed product focus rail
+→ [implemented, awaiting review] Prototype A — Axis-only score
+→ [blocked] Prototype B — Anchor-only relation
+→ [blocked] Prototype C — Combined relational score
+→ [blocked] Candidate / Comparison / Decision / Configuration / Current order
+```
+
 ## Why this record exists
 
-The menu-reading work has produced one useful substrate and several failed interaction hypotheses.
+The menu-reading work produced one useful substrate and several failed interaction hypotheses.
 
 ```text
 large category Atlas
@@ -45,33 +57,25 @@ C1 fixed product focus rail
 → rejected: severe perceived jumping and no meaningful reduction in linear comparison
 ```
 
-The latest failures show that improving the transition into one product is not the same as helping users compare several products.
+The failures show that improving the transition into one product is not the same as helping users understand several products together.
 
 ## Problem definition
 
-"Linear menu" currently refers to three different problems.
+“Linear menu” currently refers to three different problems.
 
 ### Navigation linearity
 
-The user must move through categories and products as one long sequence.
-
-M1 partly improved this by exposing the complete menu shape before category expansion.
+The user must move through categories and products as one long sequence. M1 partly improved this by exposing the complete menu shape before category expansion.
 
 ### Comprehension linearity
 
-The user must inspect one product, remember it, inspect another, reconstruct the first, and repeat.
-
-This remains unresolved.
+The user must inspect one product, remember it, inspect another, reconstruct the first, and repeat. This remains the immediate research target.
 
 ### Decision linearity
 
-The user moves through a pipeline such as browse → save → comparison page → decide, while the original menu stops participating.
+The user moves through a pipeline such as browse → save → comparison page → decide while the original menu stops participating. This remains deferred because relational reading has not yet proved value.
 
-This may still occur even after Candidate or Comparison is added.
-
-The immediate research target is **comprehension linearity**.
-
-A successful next prototype should let one interaction expose relationships among several products without moving rows, opening a second product list, or requiring the user to retain the previous product in memory.
+A successful relational prototype should let one interaction expose relationships among several products without moving rows, opening a second product list, or requiring the user to retain the previous product in memory.
 
 ## Evidence from the failed detail experiments
 
@@ -83,9 +87,9 @@ one current product
 → replace it with the next product
 ```
 
-The rail reduced modal interruption but did not change the information structure. It still represented only one current product, did not preserve a prior comparison context, and did not reveal relationships among nearby alternatives.
+The rail reduced modal interruption but still represented only one current product, did not preserve prior comparison context, and did not reveal relationships among nearby alternatives.
 
-The scroll-restoration code also became compensatory choreography:
+The scroll-restoration code became compensatory choreography:
 
 ```text
 measure a row
@@ -97,100 +101,32 @@ measure a row
 
 Future prototypes should prefer structures that do not need scroll correction over increasingly complex restoration logic.
 
-## Cross-domain design inspirations
-
-These are design analogies, not adopted solutions.
-
-### Distributed cognition and external representations
-
-A useful interface should move comparison work out of memory and into visible structure.
-
-The target is not merely to store product facts. It is to transform recall into direct visual discrimination.
-
-### Flight progress strips
-
-Operational state is written onto the original object rather than copied into a second list.
-
-This suggests that later consideration marks should remain attached to canonical product rows.
-
-### Musical notation
-
-Several values become comparable because they share a coordinate system.
-
-This suggests common scales or tracks for price, portion, role, or preparation rather than isolated product cards.
-
-### Genome browsers
-
-The same objects remain aligned while different levels of detail or tracks are shown.
-
-This suggests that semantic zoom should add relational resolution without replacing the document or changing identity.
-
-### Ecological interface design
-
-Interfaces can expose constraints and relationships directly rather than requiring users to infer them from separate facts.
-
-This is relevant to later table composition, but that work remains deferred.
-
-### Brushing and linking
-
-Selecting one object can cause related marks elsewhere to update.
-
-For Menu Lens:
-
-```text
-source: selected product
-link: price or semantic relationship
-target: relation lane on other canonical rows
-```
-
-### Schematic transit maps
-
-A useful abstraction may sacrifice literal presentation to clarify task-relevant relationships.
-
-Novel appearance is not enough; performance on comparison and orientation tasks is the relevant evidence.
-
-### Dynamic queries and faceted exploration
-
-Changing a visible reading dimension can support exploration when feedback is immediate.
-
-The first prototypes must change how the complete set is read, not silently filter, rank, or hide products.
-
-### Fisheye and focus-plus-context
-
-Local detail with compressed context is a valid general technique, but it changes geometry and is therefore excluded from the next prototype round.
-
-## Design principles for the next round
+## Design principles
 
 ### Stable substrate
 
 - canonical row order remains unchanged
 - row DOM identity remains unchanged
-- column geometry remains unchanged
+- column structure and geometry remain unchanged
 - interaction does not add inline expansion rows
-- no fixed footer or rail is required
-- no scroll-restoration choreography is required
+- no fixed footer, rail, modal, or sheet is required
+- no axis-specific scroll restoration is required
 
 ### Shared coordinate system
 
 At least one comparison dimension should use a common scale or consistent lane across all products in the category.
 
-### Attached external state
-
-A future anchor or consideration mark should remain attached to the original product row.
-
 ### Multiple simultaneous relationships
 
-One interaction must make relationships among at least three products visible at the same time.
-
-Without this property, the interface remains a single-product reader.
+One interaction must make relationships among at least three products visible at the same time. Without this property, the interface remains a single-product reader.
 
 ### Explicit uncertainty
 
-Missing or low-confidence data must remain unknown. It must not be converted into a negative property, false equivalence, or inferred recommendation.
+Missing or low-confidence data remains unknown. It must not become a negative property, false equivalence, recommendation, or inferred fact.
 
 ### No hidden recommendation
 
-The prototype must not use:
+The prototype must not use or imply:
 
 - best
 - recommended
@@ -201,201 +137,299 @@ The prototype must not use:
 
 ### Complete-menu credibility
 
-Changing a reading mode must not make users believe products were filtered out or that the current view is only a recommendation subset.
+Changing a reading mode must not make users believe products were filtered out or that the view is a recommendation subset.
 
-## Design space
+## Phase 0 implementation result — remove C1
 
-| Direction | Main mechanism | Potential value | Main risk | Current disposition |
-|---|---|---|---|---|
-| Menu score | aligned semantic tracks | simultaneous comparison on a shared scale | may resemble an analytics table | prototype |
-| Anchor brush | one product becomes a comparison baseline | relationships appear across existing rows | baseline may be mistaken for selection or recommendation | prototype |
-| Strip annotations | marks remain on original rows | externalizes consideration history | may become a renamed bookmark | later, only after relation value |
-| Bifocal menu | local detail and compressed context | high density with focus and context | geometry change and renewed jumping | excluded for now |
-| Schematic menu network | products appear on several semantic routes | strongly non-linear structure | likely to repeat the Atlas failure | paper exploration only |
-| Ecological table field | current meal composition and constraints | may support arranging a meal | requires rules and broader table state | deferred |
-| Spatial workbench | users spatially arrange options | externalizes personal reasoning | poor mobile and accessibility fit | not a mobile core |
-| Small multiples | linked microviews for several dimensions | strong multi-dimensional comparison | dashboard-like and space-heavy | possible desktop supplement |
-
-## Current convergence: Relational score
-
-The strongest current hypothesis combines three ideas:
+Status:
 
 ```text
-shared semantic axis
-＋ anchor-based relational reading
-＋ later attached consideration marks
+[complete]
 ```
 
-The intended layers are:
-
-### Layer 1 — Menu structure
-
-The existing M1 compressed overview and shared category ledger remain the substrate.
-
-### Layer 2 — Shared axis
-
-The user changes how every product row is read:
-
-```text
-default
-price
-portion
-meal role
-preparation
-```
-
-The complete product set remains visible and in canonical order.
-
-### Layer 3 — Anchor brush
-
-One product can become a comparison baseline. Other rows display bounded relationships to the anchor.
-
-### Layer 4 — Attached consideration
-
-Only after relational reading proves useful may two or three products be marked for continued comparison. Marks must remain on the original rows.
-
-### Layer 5 — Evidence on demand
-
-Description, metadata source, confidence, and configuration notices remain secondary evidence rather than the default product interaction.
-
-## Prototype sequence
-
-The next implementation should not modify the primary application immediately.
-
-### Phase 0 — Remove the failed C1 experiment
-
-Remove or isolate:
+Removed from the primary flow:
 
 - `src/app/product-focus-rail.ts`
-- fixed rail styles
-- permanent rail bottom clearance
-- rail focus restoration
-- source-row scroll correction added only to support the rail or detail surface
-- C1-specific success claims and tests
+- the rejected modal/inspector product-detail UI
+- rail imports, creation, rendering, and focus callbacks in `App.ts`
+- product-row click and product-focus behavior
+- fixed rail DOM composition and all rail CSS
+- fixed `8.75rem` rail bottom reservation
+- `preserveSourceRow()`
+- rail-specific scroll correction and focus restoration
+- `focusedProductId` and `detailLevel` from menu-reading state
+- C1-only state transitions and tests
+- wide-screen detail-inspector workspace column
 
-Retain:
+Retained:
 
-- M1 overview and shared ledger
-- canonical ordering
-- sold-out and incomplete-data behavior
-- pure product semantics
-- evidence-detail data model where it remains independently useful
+- M1 compressed overview
+- category semantic zoom
+- shared category ledger
+- canonical category and product order
+- sold-out and incomplete-metadata status
+- the canonical Product and semantic metadata model
+- secondary evidence in the domain dataset, without a Prototype A product-detail interaction
 
-### Prototype A — Axis-only score
+The remaining `requestAnimationFrame` use only throttles active-category tracking in all-expanded mode. It does not measure rows, correct scroll, restore focus, or compensate for a rail.
 
-No anchor, Candidate, comparison page, or detail interaction.
+## Prototype A implementation result — Axis-only score
 
-The category ledger exposes one selected reading dimension.
-
-Candidate axes:
-
-```text
-price
-portion
-meal role
-preparation
-```
-
-Success evidence:
-
-- users answer structure questions without opening individual products
-- users do not think products were filtered or reordered
-- switching axes causes no row movement
-- missing data is recognized as unknown
-- the result supports scanning rather than merely adding decoration
-
-Failure evidence:
-
-- axis control is understood as a filter
-- users still read each item sequentially
-- the interface only feels like a spreadsheet
-- axis changes cause content reflow or orientation loss
-
-### Prototype B — Anchor-only relation
-
-The default ledger remains. Selecting one row sets an explicit comparison baseline.
-
-Other rows show:
+Status:
 
 ```text
-price difference
-＋ one bounded semantic relationship
+[implemented, awaiting review]
 ```
 
-No sorting, filtering, recommendation, rail, or modal is introduced.
+### Interaction
 
-Success evidence:
-
-- users understand the baseline
-- users compare at least three products without reopening detail
-- changing the anchor preserves row geometry
-- users do not interpret the anchor as ordered, recommended, or selected for purchase
-
-Failure evidence:
-
-- baseline meaning is unclear
-- relation phrases add more reading work than they remove
-- users still reconstruct each product from memory
-- system-selected differences are perceived as recommendations
-
-### Prototype C — Combined relational score
-
-Only combine Axis and Anchor if both produce useful evidence independently.
-
-Example:
+A single expanded category shows one small native control:
 
 ```text
-reading axis: preparation
-baseline: Product A
-
-Product B  -NT$60 · faster
-Product C  +NT$20 · same preparation class
-Product D  -NT$40 · unknown
+閱讀方式：[一般 ▾]
 ```
 
-The combined version becomes eligible for integration into the main application only after it passes the same mobile tasks.
+Options:
 
-## Evaluation tasks
+```text
+一般
+價格
+份量
+餐點角色
+準備節奏
+```
 
-Do not begin with preference questions.
+Rules:
 
-### Axis task
+- overview mode does not show the control
+- all-expanded mode uses the default ledger and does not show the control
+- entering overview resets the axis to `default`
+- entering all-expanded mode resets the axis to `default`
+- changing category resets the axis to `default`
+- there is no cross-category persistence or URL state
 
-Ask the participant to identify:
+### Ledger invariants
 
-- lower-priced possibilities in one category
-- products suitable for a shared portion
-- products that may prepare more quickly
-- products whose relevant information is missing
+All axes use the same table and canonical product rows:
 
-Observe whether the participant can answer from one stable ledger.
+- same product row DOM
+- same canonical order and row count
+- same four-column structure
+- same column widths
+- same price column
+- same status line
+- no detail row or row expansion
+- no fixed or sticky footer
+- no sorting, filtering, hiding, dimming, or copying products
+- no category expansion changes
+- no axis animation or scroll compensation
 
-### Anchor task
+Only the existing relation lane and its heading are updated. Every value is bounded to one line; the relation lane and status lane reserve stable height.
 
-Ask the participant to compare three named products and explain their main differences.
+### Projection boundary
 
-Observe:
+Pure projection lives in:
 
-- number of product-detail openings
-- number of backtracks
-- product relocation attempts
-- whether price differences are remembered or reread
-- whether semantic differences can be explained
-- whether missing data is treated as uncertainty
-- whether the baseline is mistaken for a recommendation or commitment
+```text
+src/customer/menu-relations.ts
+src/customer/menu-relations.test.ts
+```
 
-### Combined task
+It defines:
 
-Ask the participant to change both the semantic axis and the anchor while preserving orientation.
+```ts
+type MenuReadingAxis =
+  | "default"
+  | "price"
+  | "portion"
+  | "role"
+  | "preparation";
+```
+
+The module contains no DOM, state mutation, sorting, filtering, ranking, recommendation, Candidate state, similarity score, or order state.
+
+### Axis rules
+
+#### Default
+
+The M1 cue grammar remains:
+
+- at most two trusted cues
+- sold-out and incomplete-data status remain visible
+- unsupported and low-confidence cues are omitted rather than guessed
+
+#### Price
+
+- the numeric price remains in the existing price column
+- every product in a category uses the same category min–max scale
+- the relation lane shows one neutral position marker
+- the scale does not label products cheap, expensive, high value, or good CP
+- if all category prices are identical, every marker uses the same centered safe fallback and announces that the category prices are the same
+
+#### Portion
+
+Formal domain values are rendered with the existing glossary language:
+
+```text
+小份
+一人份
+約 2–3 人
+多人分享
+未提供
+```
+
+#### Meal role
+
+Formal domain values are rendered without adding new classes:
+
+```text
+個人主餐
+分享主菜
+小食或配菜
+飯麵主食
+飲品
+甜點
+未提供
+```
+
+#### Preparation
+
+Formal coarse values are rendered as:
+
+```text
+較快
+一般準備
+需要較久
+未提供
+```
+
+No exact waiting time or live prediction is shown.
+
+#### Trust and availability
+
+- `high` and `medium` metadata may be projected
+- `low` or missing metadata becomes `未提供`
+- category defaults remain visible with their existing medium-confidence authority
+- sold-out products retain their axis value and canonical position
+- unavailable metadata never becomes a negative attribute
+
+## State result
+
+The reading state is deliberately small:
+
+```ts
+type MenuReadingState = {
+  activeCategoryId: CategoryId | null;
+  expansion: MenuExpansion;
+  readingAxis: MenuReadingAxis;
+};
+```
+
+It contains no:
+
+- `focusedProductId`
+- `detailLevel`
+- `anchorProductId`
+- `candidateProductIds`
+- Comparison state
+- configuration or order state
+
+Axis changes preserve the current category expansion and cannot change product or category order.
+
+## Automated safeguards
+
+The implementation tests cover:
+
+### State
+
+- initial axis is `default`
+- single-category mode can change axis
+- overview resets axis
+- category changes reset axis
+- all-expanded mode cannot retain a non-default axis
+- axis changes preserve category expansion
+- axis changes do not affect canonical product order
+- no anchor, Candidate, Comparison, detail, or order state appears
+
+### Projection
+
+- price uses one category min–max scale
+- the minimum and maximum products map to the scale endpoints
+- a single-price category uses a centered safe fallback
+- formal portion, role, and preparation labels are correct
+- missing and low-confidence metadata render `未提供`
+- sold-out products retain axis evidence and canonical position
+- projection output contains no recommendation, best-value, suitability, or CP language
+
+### Structural cleanup
+
+The direct diff and compiled source must contain no primary-flow references to:
+
+- `product-focus-rail`
+- `preserveSourceRow`
+- `8.75rem` rail reservation
+- product focus or detail state
+- Candidate, Comparison, or order state
+
+## Pages review gate
+
+Prototype A is deployed from `agent/menu-map-atlas` through the existing Pages workflow into the `github-pages-preview` environment.
+
+Use a phone viewport and run this checklist:
+
+1. Expand one category.
+2. Record one row's visible position.
+3. Switch among 一般、價格、份量、餐點角色、準備節奏.
+4. Confirm row position, column widths, row height, and scroll position do not jump.
+5. Identify several lower-priced dishes from the shared scale.
+6. Identify products suitable for multiple people.
+7. Identify products that may prepare more quickly.
+8. Identify products whose relevant information is `未提供`.
+9. Confirm no product was hidden, moved, copied, dimmed, or reordered.
+10. Ask what the control changes without naming it; confirm it is understood as a reading mode rather than a filter.
+
+Prototype A passes only if all of the following are observed:
+
+- one axis switch makes several rows simultaneously comparable
+- product detail is not needed for the task
+- users answer from visible evidence
+- missing data is understood as unknown, not negative
+- the complete menu remains credible
+- no visible row, column, or scroll jump occurs
+- feedback indicates reduced comprehension work, not only visual polish or ordinary convenience
+
+Prototype A fails if:
+
+- the control is understood as a filter
+- users still inspect one product at a time
+- the shared scale does not lower comprehension work
+- relation-lane changes cause orientation loss
+- the result only resembles a spreadsheet without improving decisions
+- any obvious jump remains
+
+No participant review has been recorded yet, so the status must remain `[implemented, awaiting review]`.
+
+## Prototype B — Anchor-only relation
+
+Status:
+
+```text
+[blocked]
+```
+
+Prototype B must not begin from implementation convenience. It requires an explicit disposition of Prototype A after Pages review. No anchor state, baseline styling, product selection, relative phrases, or anchor tests are present in this implementation.
+
+## Prototype C and later work
+
+Prototype C remains blocked until Axis-only and Anchor-only each produce useful evidence independently. Candidate, Comparison, Decision, Configuration, Current order, quantity, modifiers, recommendation, ranking, filtering, product network, scatterplot, shared-table composition, and checkout remain blocked.
 
 ## Measurement and falsification
 
 Promising signals:
 
 - one action reveals several product relationships
-- fewer repeated product openings
-- less recall language such as "I think the previous one was..."
-- users can explain differences using currently visible evidence
+- less recall language such as “I think the previous one was…”
+- users explain differences using currently visible evidence
 - canonical order and complete-menu credibility remain intact
 - no visible row jump
 
@@ -405,66 +439,12 @@ Failure signals:
 - users still inspect one product at a time
 - the interface creates another list or comparison destination
 - relationship labels are slower to interpret than the original facts
-- row content changes create perceived jumping even without scroll movement
+- row content changes create perceived jumping
 - missing metadata produces false conclusions
 - users believe items were filtered, ranked, recommended, or selected
 
-## Implementation boundary
-
-During the prototype round, permitted implementation concepts are:
-
-- pure relation projection functions
-- one category-level reading-axis state
-- one same-category anchor product
-- stable relation-lane rendering
-- isolated prototype entry points
-- focused tests for relation correctness and DOM invariants
-
-Explicitly excluded:
-
-- Candidate shelf
-- comparison modal
-- ranking or similarity scoring
-- filtering
-- automatic recommendation
-- drag and drop
-- two-dimensional product maps
-- shared-table composition
-- modifier, quantity, total, or order state
-- animation or scroll compensation
-- desktop-only proof of value
-
-## Proposed modules
-
-Potential pure-domain modules:
-
-```text
-src/customer/menu-relations.ts
-src/customer/menu-relations.test.ts
-```
-
-Potential prototype UI modules:
-
-```text
-src/app/category-reading-control.ts
-src/app/relational-ledger-prototype.ts
-```
-
-Names and paths remain provisional until the prototype is selected.
-
-## Open questions
-
-1. Does a common visual price scale outperform a compact numeric price column on a phone?
-2. Which semantic axes remain useful when several products have incomplete metadata?
-3. Should an anchor relation show a deterministic fixed pair of differences or one user-selected dimension?
-4. Is "comparison baseline" understandable without teaching?
-5. Can relation text remain bounded without row-height changes?
-6. Does attached consideration add value after relational reading, or merely rename bookmarking?
-7. Should cross-category relations remain forbidden in the first prototype?
-8. Which parts of the existing evidence detail should survive after C1 removal?
-
 ## Contract impact
 
-None yet.
+None.
 
-The product contract already requires stable full-menu access, separation between browsing and ordering, preserved browsing context, and support for comparison. This record changes the experimental route used to investigate those requirements, not the requirements themselves.
+The product contract already requires stable full-menu access, separation between browsing and ordering, preserved browsing context, comparison support, and explicit uncertainty for incomplete metadata. Prototype A changes the experimental route used to investigate those requirements, not the requirements themselves.
