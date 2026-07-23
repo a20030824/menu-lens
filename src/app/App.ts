@@ -95,6 +95,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   });
 
   const workspace = element("div", "reading-workspace");
+  workspace.id = "complete-menu";
   workspace.append(overview.element);
   headerInner.append(summaryCopy, metrics);
   header.append(headerInner);
