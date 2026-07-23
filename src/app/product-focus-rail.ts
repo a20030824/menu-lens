@@ -25,7 +25,6 @@ export const createProductFocusRail = (
   rail.hidden = true;
   rail.dataset.open = "false";
   rail.setAttribute("aria-label", "目前查看的商品");
-  rail.setAttribute("aria-live", "polite");
 
   const copy = element("div", "product-focus-rail__copy");
   const context = element("p", "product-focus-rail__context");
