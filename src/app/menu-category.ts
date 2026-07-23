@@ -72,45 +72,72 @@ export const createMenuCategorySection = (
   reveal.setAttribute("aria-hidden", "true");
   reveal.setAttribute("inert", "");
   const revealInner = element("div", "category-reveal__inner");
-  const products = element("ul", "product-list");
-
-  category.products.forEach((product) => {
-    const item = element(
-      "li",
-      product.isSoldOut ? "product-row product-row--sold-out" : "product-row",
-    );
-    item.dataset.productId = product.id;
-
-    const heading = element("div", "product-row__heading");
-    heading.append(
-      element("h3", "product-row__name", product.name),
-      element("p", "product-row__price", product.price),
-    );
-
-    const cues = element("p", "product-row__cues");
-    if (product.primaryCue) cues.append(element("span", undefined, product.primaryCue));
-    if (product.secondaryCue) {
-      cues.append(document.createTextNode(" · "), element("span", undefined, product.secondaryCue));
-    }
-    if (!product.primaryCue && !product.secondaryCue) {
-      cues.append(element("span", "product-row__cue-placeholder", "基本商品資訊"));
-    }
-
-    const signals = element("p", "product-row__signals");
-    if (product.isSoldOut) {
-      signals.append(element("span", "status-text status-text--sold-out", product.availabilityLabel));
-    } else {
-      signals.append(visuallyHiddenText(product.availabilityLabel));
-    }
-    if (product.metadataCompleteness === "partial") {
-      signals.append(element("span", "status-text", "部分比較資訊"));
-    }
-
-    item.append(heading, cues, signals);
-    products.append(item);
+  const ledger = element("table", "product-ledger");
+  const caption = element("caption", "visually-hidden", `${category.name}商品列表`);
+  const columns = element("colgroup");
+  ["index", "name", "cue", "price"].forEach((column) => {
+    columns.append(element("col", `product-ledger__col product-ledger__col--${column}`));
   });
 
-  revealInner.append(products);
+  const ledgerHead = element("thead");
+  const ledgerHeadRow = element("tr");
+  const headings = [
+    ["序", "product-ledger__heading product-ledger__heading--index"],
+    ["菜名", "product-ledger__heading product-ledger__heading--name"],
+    ["閱讀線索", "product-ledger__heading product-ledger__heading--cue"],
+    ["價格", "product-ledger__heading product-ledger__heading--price"],
+  ] as const;
+  headings.forEach(([label, className]) => {
+    const heading = element("th", className, label);
+    heading.scope = "col";
+    ledgerHeadRow.append(heading);
+  });
+  ledgerHead.append(ledgerHeadRow);
+
+  const ledgerBody = element("tbody");
+  category.products.forEach((product, productIndex) => {
+    const row = element("tr", product.isSoldOut ? "product-row product-row--sold-out" : "product-row");
+    row.dataset.productId = product.id;
+
+    const indexCell = element(
+      "td",
+      "product-row__index",
+      String(productIndex + 1).padStart(2, "0"),
+    );
+    const nameCell = element("th", "product-row__name", product.name);
+    nameCell.scope = "row";
+
+    const cueCell = element("td", "product-row__cues");
+    const cueParts = [product.primaryCue, product.secondaryCue].filter(
+      (cue): cue is string => cue !== null,
+    );
+    if (cueParts.length > 0) {
+      cueCell.append(element("span", "product-row__cue-text", cueParts.join(" · ")));
+    } else {
+      cueCell.append(
+        visuallyHiddenText("無額外閱讀線索"),
+        element("span", "product-row__cue-empty", "—"),
+      );
+    }
+
+    const status = element("span", "product-row__status");
+    if (product.isSoldOut) {
+      status.append(element("span", "status-text status-text--sold-out", product.availabilityLabel));
+    } else {
+      status.append(visuallyHiddenText(product.availabilityLabel));
+    }
+    if (product.metadataCompleteness === "partial") {
+      status.append(element("span", "status-text", "資訊有限"));
+    }
+    if (status.textContent !== "") cueCell.append(status);
+
+    const priceCell = element("td", "product-row__price", product.price);
+    row.append(indexCell, nameCell, cueCell, priceCell);
+    ledgerBody.append(row);
+  });
+
+  ledger.append(caption, columns, ledgerHead, ledgerBody);
+  revealInner.append(ledger);
   reveal.append(revealInner);
   section.append(band, reveal);
 
