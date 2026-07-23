@@ -2,6 +2,7 @@ import { referenceMenu } from "../domain/reference-menu.js";
 import {
   categoryIsExpanded,
   categoryScrollBehavior,
+  clearProductFocus,
   closeProductDetail,
   collapseProductDetail,
   createCompleteMenuModel,
@@ -9,6 +10,7 @@ import {
   expandProductDetail,
   focusCategory,
   focusProduct,
+  openProductDetail,
   productDetailFor,
   showAllCategories,
   showMenuOverview,
@@ -22,7 +24,7 @@ function assert(condition: unknown, message: string): asserts condition { if (!c
 const firstProductId = referenceMenu.products[0]?.id;
 assert(firstProductId !== undefined, "fixture must include a first product");
 
-test("initial state starts in compressed menu overview with product detail closed", () => {
+test("initial state starts in compressed menu overview without product focus", () => {
   const state = createInitialMenuReadingState(referenceMenu);
   assert(state.expansion.kind === "overview", "initial mode must be overview");
   assert(state.focusedProductId === null, "initial product focus must be empty");
@@ -42,18 +44,26 @@ test("category focus expands exactly one region without removing the others", ()
   assert(referenceMenu.categories.filter((category) => categoryIsExpanded(focused, category.id)).length === 1, "only one category expands");
 });
 
-test("opening product detail preserves the current category expansion", () => {
+test("product focus opens the non-modal rail without opening detail", () => {
   const categoryId = referenceMenu.categories[0]?.id;
   assert(categoryId !== undefined, "first category must exist");
   const categoryState = focusCategory(createInitialMenuReadingState(referenceMenu), categoryId);
   const focused = focusProduct(categoryState, firstProductId);
   assert(focused.expansion.kind === "category" && focused.expansion.categoryId === categoryId, "product focus must not alter category expansion");
   assert(focused.focusedProductId === firstProductId, "product becomes focused");
-  assert(focused.detailLevel === "summary", "opening starts at summary level");
+  assert(focused.detailLevel === "closed", "row selection must not open modal detail");
+});
+
+test("more information explicitly opens summary detail", () => {
+  const focused = focusProduct(showAllCategories(createInitialMenuReadingState(referenceMenu)), firstProductId);
+  const opened = openProductDetail(focused);
+  assert(opened.focusedProductId === firstProductId, "opening detail keeps product focus");
+  assert(opened.detailLevel === "summary", "more information opens summary detail");
 });
 
 test("product detail summary and full levels are reversible", () => {
-  const opened = focusProduct(showAllCategories(createInitialMenuReadingState(referenceMenu)), firstProductId);
+  const focused = focusProduct(showAllCategories(createInitialMenuReadingState(referenceMenu)), firstProductId);
+  const opened = openProductDetail(focused);
   const full = expandProductDetail(opened);
   assert(full.detailLevel === "full", "detail expands to full");
   const summary = collapseProductDetail(full);
@@ -61,19 +71,30 @@ test("product detail summary and full levels are reversible", () => {
   assert(summary.focusedProductId === firstProductId, "focus remains on the same product");
 });
 
-test("closing product detail returns the source product id and preserves expansion", () => {
+test("closing detail returns to the focus rail and preserves expansion", () => {
   const categoryId = referenceMenu.categories[0]?.id;
   assert(categoryId !== undefined, "first category must exist");
-  const opened = focusProduct(focusCategory(createInitialMenuReadingState(referenceMenu), categoryId), firstProductId);
+  const focused = focusProduct(focusCategory(createInitialMenuReadingState(referenceMenu), categoryId), firstProductId);
+  const opened = openProductDetail(focused);
   const result = closeProductDetail(opened);
-  assert(result.focusProductId === firstProductId, "close result identifies the focus return target");
-  assert(result.state.focusedProductId === null && result.state.detailLevel === "closed", "detail state closes completely");
+  assert(result.focusProductId === firstProductId, "close result identifies the rail focus target");
+  assert(result.state.focusedProductId === firstProductId, "closing detail keeps product focus");
+  assert(result.state.detailLevel === "closed", "only the evidence surface closes");
   assert(result.state.expansion.kind === "category" && result.state.expansion.categoryId === categoryId, "closing detail preserves category expansion");
 });
 
-test("changing menu expansion closes a product that would become hidden", () => {
-  const opened = focusProduct(showAllCategories(createInitialMenuReadingState(referenceMenu)), firstProductId);
-  const overview = showMenuOverview(opened);
+test("clearing product focus closes both rail and detail", () => {
+  const opened = openProductDetail(
+    focusProduct(showAllCategories(createInitialMenuReadingState(referenceMenu)), firstProductId),
+  );
+  const cleared = clearProductFocus(opened);
+  assert(cleared.focusedProductId === null, "clear focus removes the product");
+  assert(cleared.detailLevel === "closed", "clear focus closes detail");
+});
+
+test("changing menu expansion clears a product that would become hidden", () => {
+  const focused = focusProduct(showAllCategories(createInitialMenuReadingState(referenceMenu)), firstProductId);
+  const overview = showMenuOverview(focused);
   assert(overview.focusedProductId === null && overview.detailLevel === "closed", "overview change clears hidden product focus");
 });
 
@@ -128,8 +149,8 @@ test("complete model preserves all products, sold-out placement, and partial met
 test("reading state still does not introduce Candidate or ordering state", () => {
   const state = focusProduct(showAllCategories(createInitialMenuReadingState(referenceMenu)), firstProductId);
   const serialized = JSON.stringify(state);
-  assert(!serialized.includes("candidate"), "Candidate state must not exist in M2");
-  assert(!serialized.includes("order"), "ordering state must not exist in M2");
+  assert(!serialized.includes("candidate"), "Candidate state must not exist in C1");
+  assert(!serialized.includes("order"), "ordering state must not exist in C1");
 });
 
 test("category scrolling respects reduced motion", () => {
