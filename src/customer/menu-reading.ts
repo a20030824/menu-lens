@@ -14,9 +14,11 @@ import {
   resolveProductSemantics,
 } from "../domain/menu-validation.js";
 import {
-  anchorRelationFor,
-  type AnchorRelation,
-} from "./menu-anchor-relations.js";
+  anchorAxisRelationFor,
+  availableSemanticAxesFor,
+  type AnchorAxisRelation,
+  type SemanticAxis,
+} from "./menu-anchor-axis.js";
 
 export type MenuExpansion =
   | Readonly<{ kind: "overview" }>
@@ -32,6 +34,7 @@ export type MenuReadingState = Readonly<{
   activeCategoryId: CategoryId | null;
   expansion: MenuExpansion;
   anchorReading: AnchorReading;
+  semanticAxis: SemanticAxis | null;
 }>;
 
 export type ProductNodeModel = Readonly<{
@@ -46,6 +49,10 @@ export type ProductNodeModel = Readonly<{
   metadataCompleteness: "complete" | "partial";
 }>;
 
+export type AnchorAxisRelationMap = Readonly<Record<ProductId, AnchorAxisRelation>>;
+export type AnchorAxisByAxis = Readonly<Partial<Record<SemanticAxis, AnchorAxisRelationMap>>>;
+export type AnchorAxisByAnchor = Readonly<Record<ProductId, AnchorAxisByAxis>>;
+
 export type CategoryReadingModel = Readonly<{
   id: CategoryId;
   name: string;
@@ -58,7 +65,8 @@ export type CategoryReadingModel = Readonly<{
   relativeCount: number;
   previewProductNames: ReadonlyArray<string>;
   products: ReadonlyArray<ProductNodeModel>;
-  anchorRelations: Readonly<Record<ProductId, Readonly<Record<ProductId, AnchorRelation>>>>;
+  semanticAxes: ReadonlyArray<SemanticAxis>;
+  anchorAxisRelations: AnchorAxisByAnchor;
 }>;
 
 export type CompleteMenuModel = Readonly<{
@@ -103,6 +111,14 @@ export const formatPrice = (price: number): string => moneyFormatter.format(pric
 
 const categoryProducts = (menu: Menu, categoryId: CategoryId): ReadonlyArray<Product> =>
   menu.products.filter((product) => product.categoryId === categoryId);
+
+export const defaultSemanticAxisFor = (
+  menu: Menu,
+  categoryId: CategoryId | null,
+): SemanticAxis | null => {
+  if (!categoryId) return null;
+  return availableSemanticAxesFor(menu, categoryProducts(menu, categoryId))[0] ?? null;
+};
 
 const priceRange = (products: ReadonlyArray<Product>): string => {
   if (products.length === 0) return "—";
@@ -204,35 +220,50 @@ const createProductNodeModel = (
   metadataCompleteness: metadataCompleteness(menu, product),
 });
 
-const createAnchorRelations = (
+const createAnchorAxisRelations = (
   menu: Menu,
   products: ReadonlyArray<Product>,
-): Readonly<Record<ProductId, Readonly<Record<ProductId, AnchorRelation>>>> =>
+  axes: ReadonlyArray<SemanticAxis>,
+): AnchorAxisByAnchor =>
   Object.fromEntries(
     products.map((anchor) => [
       anchor.id,
       Object.fromEntries(
-        products.map((target) => [target.id, anchorRelationFor(menu, anchor, target, formatPrice)]),
-      ),
+        axes.map((axis) => [
+          axis,
+          Object.fromEntries(
+            products.map((target) => [
+              target.id,
+              anchorAxisRelationFor(menu, anchor, target, axis, formatPrice),
+            ]),
+          ),
+        ]),
+      ]),
     ]),
   );
 
 const idleAnchor = (): AnchorReading => ({ kind: "idle" });
 
-export const createInitialMenuReadingState = (menu: Menu): MenuReadingState => ({
-  activeCategoryId: menu.categories[0]?.id ?? null,
-  expansion: { kind: "overview" },
-  anchorReading: idleAnchor(),
-});
+export const createInitialMenuReadingState = (menu: Menu): MenuReadingState => {
+  const activeCategoryId = menu.categories[0]?.id ?? null;
+  return {
+    activeCategoryId,
+    expansion: { kind: "overview" },
+    anchorReading: idleAnchor(),
+    semanticAxis: defaultSemanticAxisFor(menu, activeCategoryId),
+  };
+};
 
 export const focusCategory = (
   state: MenuReadingState,
+  menu: Menu,
   categoryId: CategoryId,
 ): MenuReadingState => ({
   ...state,
   activeCategoryId: categoryId,
   expansion: { kind: "category", categoryId },
   anchorReading: idleAnchor(),
+  semanticAxis: defaultSemanticAxisFor(menu, categoryId),
 });
 
 export const showMenuOverview = (state: MenuReadingState): MenuReadingState => ({
@@ -249,15 +280,20 @@ export const showAllCategories = (state: MenuReadingState): MenuReadingState => 
 
 export const setActiveCategory = (
   state: MenuReadingState,
+  menu: Menu,
   categoryId: CategoryId,
-): MenuReadingState => ({
-  ...state,
-  activeCategoryId: categoryId,
-  anchorReading: state.activeCategoryId === categoryId ? state.anchorReading : idleAnchor(),
-});
+): MenuReadingState => {
+  if (state.activeCategoryId === categoryId) return state;
+  return {
+    ...state,
+    activeCategoryId: categoryId,
+    anchorReading: idleAnchor(),
+    semanticAxis: defaultSemanticAxisFor(menu, categoryId),
+  };
+};
 
 export const beginAnchorSelection = (state: MenuReadingState): MenuReadingState =>
-  state.expansion.kind === "category"
+  state.expansion.kind === "category" && state.semanticAxis !== null
     ? { ...state, anchorReading: { kind: "selecting" } }
     : { ...state, anchorReading: idleAnchor() };
 
@@ -271,10 +307,25 @@ export const selectAnchor = (
   menu: Menu,
   productId: ProductId,
 ): MenuReadingState => {
-  if (state.expansion.kind !== "category" || state.anchorReading.kind !== "selecting") return state;
+  if (
+    state.expansion.kind !== "category" ||
+    state.anchorReading.kind !== "selecting" ||
+    state.semanticAxis === null
+  ) return state;
   const product = menu.products.find((entry) => entry.id === productId);
   if (!product || product.categoryId !== state.expansion.categoryId) return state;
   return { ...state, anchorReading: { kind: "active", productId } };
+};
+
+export const setSemanticAxis = (
+  state: MenuReadingState,
+  menu: Menu,
+  semanticAxis: SemanticAxis,
+): MenuReadingState => {
+  if (state.expansion.kind !== "category" || state.anchorReading.kind !== "active") return state;
+  const eligibleAxes = availableSemanticAxesFor(menu, categoryProducts(menu, state.expansion.categoryId));
+  if (!eligibleAxes.includes(semanticAxis) || state.semanticAxis === semanticAxis) return state;
+  return { ...state, semanticAxis };
 };
 
 export const clearAnchor = (state: MenuReadingState): MenuReadingState =>
@@ -302,6 +353,7 @@ export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
     const products = categoryProducts(menu, category.id);
     const productModels = products.map((product) => createProductNodeModel(menu, product));
     const availableCount = products.filter((product) => product.availability === "available").length;
+    const semanticAxes = availableSemanticAxesFor(menu, products);
     return {
       id: category.id,
       name: category.name,
@@ -319,7 +371,8 @@ export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
         .slice(0, 2)
         .map((product) => product.name),
       products: productModels,
-      anchorRelations: createAnchorRelations(menu, products),
+      semanticAxes,
+      anchorAxisRelations: createAnchorAxisRelations(menu, products, semanticAxes),
     } satisfies CategoryReadingModel;
   });
 
