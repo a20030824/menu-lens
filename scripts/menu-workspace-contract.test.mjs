@@ -118,6 +118,21 @@ assertIncludes(
   "overview.focusProductRelation(categoryId, productId);",
   "selecting an anchor must retain visible focus on the chosen row instead of moving focus offscreen",
 );
+assertIncludes(
+  appSource,
+  "const cancelAnchor = (returnFocusProductId: ProductId | null = null): void =>",
+  "anchor cancellation must distinguish a top-control action from an Escape action inside a row",
+);
+assertIncludes(
+  appSource,
+  "if (returnFocusProductId) overview.focusProductRelation(categoryId, returnFocusProductId);",
+  "Escape cancellation inside a row must retain visible focus on that canonical row",
+);
+assertIncludes(
+  appSource,
+  "cancelAnchor(focusedProductId());",
+  "the Escape handler must capture the currently focused product before replacing row buttons",
+);
 
 [
   "category-reading-control",
