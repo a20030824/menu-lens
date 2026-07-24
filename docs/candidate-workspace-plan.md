@@ -395,7 +395,7 @@ At 320px and 390px verify:
 ## Pass signals
 
 - Candidates from several categories are visible in one truthful derived view;
-- the workspace is understood structurally as review, not order state;
+- the workspace remains structurally a review surface rather than order state;
 - category and Product order remain canonical;
 - removal is explicit and leaves the menu and order state untouched;
 - ordinary Back restores the previous menu context exactly;
