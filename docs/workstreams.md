@@ -2,16 +2,19 @@
 
 This file is the current coordination view for Menu Lens.
 
-It exists to prevent parallel conversations from redefining the product, duplicating work, or expanding the demo before the decision spine is coherent.
+It prevents parallel conversations from redefining the product, retaining failed interaction surfaces, or expanding the demo before the decision spine is coherent.
 
 ## Coordination rules
 
 - The core conversation owns product-contract changes and cross-workstream conflict resolution.
-- Each implementation conversation should own one bounded outcome, not a collection of screens or technologies.
-- Workstreams should modify only the files needed for their outcome.
-- Cross-cutting discoveries should be recorded and returned to the core conversation rather than silently expanding scope.
-- Conventional-interface comparison is parked until the Menu Lens interaction is coherent enough to evaluate on its own.
-- Prefer fewer moving parts, fewer dependencies, and fewer abstractions while the product model is still being tested.
+- Each implementation conversation owns one bounded outcome.
+- Cross-cutting discoveries must be recorded instead of silently expanding scope.
+- Desktop-only differences and visual polish do not prove a product difference.
+- Failed or insufficient experiments remain isolated as evidence instead of accumulating in the active path.
+- Conventional-interface comparison remains parked.
+- Prefer fewer moving parts, dependencies, and abstractions while the product model is still being tested.
+- Do not merge Product, Candidate, comparison selection, DraftOrderItem, ConfiguredOrderItem, or SubmittedOrderRound state.
+- Passing one slice does not automatically authorize the next surface.
 
 ## Current sequence
 
@@ -20,176 +23,491 @@ It exists to prevent parallel conversations from redefining the product, duplica
 → [complete] domain schema and reference dataset
 → [complete] formative evaluation protocol
 → [active] customer decision spine
-    [complete] complete menu + inline detail
-    → [next] Candidate + comparison
-    → Decision + Configuration + Current order
-→ continuity and table state
-→ thin alternative lenses
-→ merchant-authoring test
-→ decide whether a conventional baseline is useful
+    [complete] complete-menu technical baseline
+    → [passed] mobile-first relational menu reading
+        [rejected] large category Atlas
+        → [rejected] desktop-first static workspace
+        → [passed] M1 compressed overview + shared ledger
+        → [rejected] M2 modal Product detail
+        → [rejected, removed] C1 fixed Product focus rail
+        → [useful but insufficient] Prototype A — Axis-only score
+        → [useful but insufficient] Prototype B — Anchor-only relation
+        → [passed for current scope] Prototype C — Anchor + explicit shared axis
+    → [passed for current scope] CND1 — Attached Candidate marks
+    → [passed for current scope] CND2 — Candidate review workspace
+    → [planned, implementation not started] CMP1 — Bounded Candidate comparison
+    → [blocked] Decision / Configuration / Current order
+→ [deferred] continuity and table state
+→ [deferred] thin alternative lenses
+→ [deferred] merchant-authoring test
+→ [parked] conventional baseline decision
 ```
 
 ## Workstream status
 
-| Workstream | Status | Scope | Depends on | Primary output |
-|---|---|---|---|---|
-| Foundation memory | Complete | product contract, glossary, workstream boundaries, handoff protocol | existing design core | stable cross-conversation reference |
-| Domain and reference data | Complete | types, validation, 30-product fictional menu, incomplete metadata cases | product contract | local typed dataset and tests |
-| Formative evaluation | Complete | task scripts, observation notes, lightweight local events, falsification signals | product contract | protocol that shapes implementation |
-| Customer decision spine | In progress | full menu → inline detail → candidates → comparison → decision → configuration → current order | domain dataset and formative protocol | one complete interactive flow |
-| Continuity and table state | Deferred | scroll restoration, preserved candidates, submitted rounds, coarse table composition | customer decision spine | continuity behavior over the same state model |
-| Alternative lenses | Deferred | thin quick, shared-table, and featured views | stable decision spine | views over the same canonical menu |
-| Merchant authoring | Deferred | category defaults, exceptions, confidence, incomplete-data preview | proven useful semantic fields | small authoring test, not production CMS |
-| Conventional baseline | Parked | credible conventional ordering flow using the same data | coherent Menu Lens demo and explicit study need | optional comparison condition |
-| Production integration | Out of scope | payment, POS, KDS, inventory, auth, deployment operations | none in current demo | none |
+| Workstream | Status | Scope | Primary output |
+|---|---|---|---|
+| Foundation memory | Complete | product contract, glossary, boundaries, handoff | stable shared memory |
+| Domain and reference data | Complete | types, validation, fictional menu, incomplete metadata | canonical local dataset |
+| Formative evaluation | Complete | tasks, observations, events, falsification signals | observation contract |
+| Relational menu research | Passed for current scope | stable ledger and A/B/C evidence | accepted C reading substrate |
+| CND1 Attached Candidate marks | Passed for current scope | row-attached reversible Candidate membership only | accepted consideration state |
+| CND2 Candidate review workspace | Passed for current scope | derived retrieval, revisit, removal, exact menu return | accepted Candidate collection surface |
+| CMP1 Bounded Candidate comparison | Planned, implementation not started | explicit 2–3 Candidate selection and difference-only evidence | reviewed plan required before code |
+| Decision / Configuration / Current order | Blocked | transaction-boundary states | accepted comparison first |
+| Continuity and table state | Deferred | submitted rounds and coarse composition | stable decision spine first |
+| Alternative lenses | Deferred | quick, shared-table, featured | stable decision spine first |
+| Merchant authoring | Deferred | defaults, exceptions, confidence preview | proven semantic value first |
+| Conventional baseline | Parked | conventional comparison condition | explicit later research need |
+| Production integration | Out of scope | payment, POS, KDS, auth, live inventory | none |
 
-## Completed foundation work
+## Authoritative entry points
 
-A new conversation can determine, without relying on chat history:
+Read before CMP1 work:
 
-- what Menu Lens is investigating
-- which states must remain distinct
-- which terminology to use
-- which workstream is currently allowed to proceed
-- which work is deferred or out of scope
-- how to report changes and unresolved questions
+1. `README.md`
+2. `docs/product-contract.md`
+3. `docs/glossary.md`
+4. `docs/workstreams.md`
+5. `docs/candidate-workspace-plan.md`
+6. `docs/candidate-comparison-plan.md`
+7. `docs/interaction-model.md`
+8. `docs/demo-scope.md`
+9. `docs/evaluation-plan.md`
 
-The authoritative entry points are:
-
-- `docs/product-contract.md`
-- `docs/glossary.md`
-- `docs/workstreams.md`
-- `docs/handoff.md`
-
-The domain and reference-data workstream now provides:
-
-- canonical TypeScript menu and order-state types
-- runtime validation for the local dataset boundary
-- one fictional restaurant with 30 products
-- required and optional modifier examples
-- personal and shared portion examples
-- sold-out products that remain in the canonical collection
-- intentionally incomplete semantic metadata
-- metadata source and confidence representation
-- focused compile-time and runtime invariant tests
-
-The formative-evaluation workstream now provides:
-
-- four moderated task scripts for overview, consideration, comparison, and Configuration
-- neutral moderator and think-aloud guidance
-- observable success, failure, and falsification signals
-- a bounded local event vocabulary
-- observation and session-summary templates
-- explicit criteria for redesigning, simplifying, or removing a feature
-
-The first customer-facing slice now provides:
-
-- one static local client using the validated canonical menu
-- restaurant overview and complete-menu trust cues
-- all six categories and all 30 products in one stable document
-- category navigation that moves without filtering or replacing products
-- inline product detail resolved by stable `ProductId`
-- sold-out and incomplete-metadata behavior
-- keyboard open, Escape close, and focus return
-- reduced-motion-aware category scrolling
-- focused menu-reading tests and a static build path
-
-## Active workstream: customer decision spine
-
-### Goal
-
-Implement one coherent mobile-first interaction using the canonical reference menu:
+Active planning record:
 
 ```text
-complete menu
-→ inline detail
-→ Candidate
-→ comparison
-→ explicit Decision
-→ Configuration
-→ Current order
+docs/candidate-comparison-plan.md
 ```
 
-### Progress
+Accepted substrate records:
 
 ```text
-[complete] complete menu + inline detail
-→ [next] Candidate + comparison
-→ [pending] explicit Decision + Configuration + Current order
+docs/relational-menu-research.md
+docs/prototype-b-anchor-plan.md
+docs/prototype-c-anchor-axis-plan.md
+docs/candidate-marks-plan.md
+docs/candidate-workspace-plan.md
 ```
 
-### Required outputs
+## Passed substrate — M1 shared ledger
 
-- **Complete:** one client application
-- **Complete:** complete-menu overview with stable category navigation
-- **Complete:** inline product detail without losing browsing context
-- **Next:** Candidate add, remove, and workspace behavior
-- **Next:** comparison for genuine Candidate differences
-- **Pending:** explicit transition from consideration to Decision
-- **Pending:** Configuration only after Decision
-- **Pending:** Current order clearly separated from Candidates
-- **Pending:** local-only observation events aligned with `docs/evaluation-plan.md`
-- focused tests for every implemented state transition and preserved invariant
+M1 established one stable table surface per category:
 
-### Constraints
+- sequence, Product name, bounded evidence, and price use shared columns;
+- sold-out and incomplete-data states remain visible;
+- canonical order and one continuous reading order remain stable;
+- Products do not receive separate card identities.
 
-- no backend, database, authentication, payment, POS, or KDS integration
-- no conventional baseline
-- no Quick, Shared-table, or Featured lens implementation
-- no merchant CMS
-- no remote analytics
-- no generic state-machine, repository, plugin, or design-system framework
-- do not add abstractions for deferred work
-- preserve `Product ≠ Candidate ≠ DraftOrderItem ≠ ConfiguredOrderItem ≠ SubmittedOrderRound`
+This remains the coordinate plane for Prototype C and CND1 Candidate marks.
 
-## Next implementation slice: Candidate and comparison
+## Relational prototype dispositions
 
-### Goal
+### Prototype A — Axis-only score
 
-Extend the existing complete-menu client from reading into reversible consideration:
+```text
+[useful but insufficient]
+```
+
+Useful:
+
+- one shared dimension supported simultaneous multi-Product scanning;
+- portion and preparation exposed explicit known and unknown states;
+- canonical order and geometry remained stable.
+
+Insufficient:
+
+- price duplicated the visible numeric column;
+- only one dimension remained visible;
+- axis switching retained memory work.
+
+The obsolete A selector UI was removed. Its pure projection remains tested as historical evidence.
+
+### Prototype B — Anchor-only relation
+
+```text
+[useful but insufficient]
+```
+
+Useful:
+
+- exact price deltas removed repeated arithmetic;
+- one temporary Anchor fit the domain model;
+- canonical rows, statuses, and geometry remained stable.
+
+Decisive failure:
+
+- row-level semantic selection mixed dimensions;
+- trusted differences were silently suppressed;
+- omission was indistinguishable from equality;
+- the surface could imply false exclusivity.
+
+### Prototype C — Anchor + explicit shared axis
+
+```text
+[passed for current scope]
+```
+
+C preserves one Anchor and exact price deltas while the user explicitly selects one category-wide `份量` or `準備` axis.
+
+Accepted evidence:
+
+- complete active-axis projection across every canonical row;
+- formal absolute labels or `未提供`;
+- exact price deltas and visible equality;
+- stable canonical order and four-column ledger;
+- same-category axis preference preservation;
+- row-local keyboard focus after Anchor selection and Escape;
+- stable 320px and 390px geometry proxy;
+- passing Typecheck, tests, and static build.
+
+Evidence boundary:
+
+- acceptance is a current-scope product disposition;
+- unfamiliar-participant evidence is not claimed;
+- learnability and measured task improvement remain unproven limitations.
+
+## CND1 — Attached Candidate marks
+
+```text
+[passed for current scope]
+```
+
+Question:
+
+> Can a diner preserve several serious possibilities directly on the canonical menu without mistaking them for an order, losing menu position, or creating a second Product list?
+
+Implemented state boundary:
 
 ```text
 Product
-→ Candidate
-→ Candidate workspace
-→ comparison
+→ Candidate membership by ProductId
 ```
 
-### Required behavior
+Candidate membership has no quantity, configuration, modifier selections, order total, submission state, recommendation rank, notes, or ownership.
 
-- add an available Product as a Candidate using stable `ProductId`
-- remove a Candidate without affecting the canonical menu
-- keep Candidate separate from Current order and purchase commitment
-- do not request quantity or modifiers when adding a Candidate
-- keep browsing context while opening and closing the Candidate workspace
-- compare a small set of genuine Candidate differences using only supported metadata
-- omit unsupported comparison fields instead of guessing
-- return from comparison without clearing Candidates or changing the complete menu
-- add the bounded local events already defined for Candidate and comparison observation
-- add focused state and interaction tests
+Implemented surface:
+
+```text
+four-column canonical ledger
++ fixed relation lane
++ fixed Candidate/status lane
++ one noninteractive Candidate count
+```
+
+Available rows expose one persistent `考慮` toggle. Membership is expressed through `aria-pressed` and pressed styling. Sold-out rows remain visible and cannot be newly marked.
+
+Candidate membership survives overview, category focus and changes, all-expanded mode, every Anchor transition, semantic-axis switching, and same-category reopening.
+
+### CND1 final corrections
+
+The final review corrected:
+
+1. stale ProductIds affecting count;
+2. Candidate-dependent Product-name weight;
+3. repeated live-region mutations on unrelated renders;
+4. changing labels on an `aria-pressed` toggle;
+5. an unused row-wide `data-candidate` mirror;
+6. a premature detached Candidate-list projection.
+
+A code-derived Chromium proxy at 320px and 390px found zero Candidate on/off geometry differences. Typecheck, tests, structure contracts, and static build pass.
+
+## CND2 — Candidate review workspace
+
+```text
+[passed for current scope]
+```
+
+Question:
+
+> Can a diner retrieve, review, revisit, and dismiss Candidates collected across the canonical menu without losing the previous menu position or mistaking the workspace for an order?
+
+### Implemented boundary
+
+```text
+canonical Category and Product references
++ Candidate ProductId membership
+→ derived Candidate review workspace
+```
+
+CND2 stores no Product copies, Candidate insertion order, ranking, score, comparison selection, quantity, configuration, totals, or order state.
+
+App state adds only:
+
+```text
+surface.kind = menu | candidates
+```
+
+Scroll and DOM focus return context remain in the App controller rather than pure state.
+
+### Entry and active surface
+
+The menu heading contains one fixed-geometry `查看考慮項目` button when canonical Candidate count is nonzero.
+
+The canonical menu and Candidate workspace remain mounted as sibling `main` surfaces. Exactly one is visible and interactive; the hidden surface is inert.
+
+No router, URL state, modal, dialog, sheet, rail, overlay, second sticky Candidate bar, or fixed footer exists.
+
+### Workspace content
+
+The workspace is a compact grouped document.
+
+Allowed row evidence:
+
+- canonical category name;
+- Product name;
+- current formatted price;
+- ordinary cues;
+- sold-out and incomplete-data labels;
+- `在菜單中查看`;
+- `移出考慮`.
+
+Not present:
+
+- Prototype C Anchor-relative projections;
+- workspace semantic-axis controls;
+- comparison fields or matrix;
+- score, rank, match, winner, quantity, modifiers, total, checkout, or order language.
+
+### Return, locator, removal
+
+Ordinary `回到完整菜單` restores:
+
+- prior expansion mode;
+- active category;
+- Anchor and semantic axis;
+- captured scroll position;
+- prior focus origin when still available.
+
+Workspace opening and ordinary Back use explicit instant scrolling rather than inheriting global smooth scrolling.
+
+After the final Candidate is removed, the original entry becomes unavailable; Back therefore focuses the stable Candidate summary.
+
+`在菜單中查看` uses existing `focusCategory()` behavior, reveals the canonical row, and focuses its existing Candidate toggle. Sold-out Products fall back to the canonical relation lane because they have no Candidate toggle.
+
+`移出考慮` changes only Candidate membership. It preserves reading state, active Anchor, surface, Product data, and every order boundary.
+
+Focus recovery follows canonical workspace order:
+
+```text
+next removal action
+→ previous removal action
+→ empty-state heading
+```
+
+Removing the final Candidate leaves an in-place empty workspace. CND2 does not add `clear all`.
+
+### Final re-review corrections
+
+Implementation and review corrected:
+
+1. final-removal Back focus targeting an unavailable entry;
+2. sold-out locator focus targeting a nonexistent Candidate toggle;
+3. hidden workspace DOM rebuilding during unrelated menu renders;
+4. status-lane geometry relying on the `hidden` attribute;
+5. `behavior: "auto"` inheriting global smooth scrolling and weakening exact return;
+6. an unused hidden-status CSS branch.
+
+### Accepted evidence
+
+- canonical derived references and ordering;
+- duplicate and stale ProductId handling;
+- sold-out Candidate visibility;
+- surface open/close continuity;
+- reading and Candidate reference preservation;
+- active-Anchor independence;
+- final-removal empty state;
+- canonical Product locator rules;
+- deterministic focus and instant-scroll code paths;
+- one active `main` contract;
+- Typecheck, tests, and static build.
+
+Evidence not claimed:
+
+- complete branch-runtime Chromium verification at 320px and 390px;
+- real-device fit;
+- unfamiliar-participant comprehension;
+- measured comparison or usability benefit.
+
+These limitations remain recorded but do not block the current-scope disposition.
+
+## CMP1 — Bounded Candidate comparison
+
+```text
+[planned, implementation not started]
+```
+
+### Question
+
+> Can a diner reduce repeated memory work across two or three serious Candidates using a bounded, truthful comparison without mistaking comparison selection for commitment or losing the Candidate workspace?
+
+### Planned boundary
+
+```text
+canonical Products
++ Candidate ProductId membership
++ reversible comparison selection
+→ bounded comparison projection
+```
+
+Comparison selection is identity-only and distinct from Candidate membership.
+
+Proposed state:
+
+```ts
+type CandidateComparisonState = Readonly<{
+  productIds: ReadonlyArray<ProductId>;
+}>;
+```
+
+Proposed surface state:
+
+```text
+surface.kind = menu | candidates | comparison
+```
+
+Selection rules:
+
+- only current Candidates;
+- no duplicates;
+- canonical Product order;
+- maximum three Products;
+- no arbitrary replacement at the limit;
+- Candidate removal sanitizes selection;
+- comparison toggling never changes Candidate membership.
+
+### Entry and selection
+
+CND2 row actions remain unchanged.
+
+The Candidate workspace header gains one fixed-geometry `比較考慮項目` entry when at least two Candidates exist.
+
+Opening:
+
+- preserves menu reading, Anchor, Candidate, comparison, and Candidate-to-menu return state;
+- sanitizes prior comparison selection against current Candidates;
+- preserves an empty, one-, two-, or three-item selection;
+- begins empty on the first open;
+- never silently preselects Products;
+- captures Candidate-workspace scroll and focus for exact return.
+
+The comparison surface lists all current Candidates in canonical order with stable native `aria-pressed` buttons labeled `比較`.
+
+### Mobile comparison grammar
+
+CMP1 does not use a wide Product-column matrix.
+
+At 320px and 390px it uses vertical dimension blocks:
+
+```text
+價格
+Product A                NT$320
+Product B                NT$360
+
+份量
+Product A                一人份
+Product B                約 2–3 人
+```
+
+This keeps two or three values simultaneous within one dimension without horizontal scrolling or unreadably narrow Product columns.
+
+### Bounded dimensions
+
+Allowed fixed-priority dimensions:
+
+1. price;
+2. portion class;
+3. meal role;
+4. preparation class;
+5. shareability;
+6. coarse traits;
+7. required customization presence.
+
+Price is always shown.
+
+Semantic dimensions appear only when values differ or selected evidence includes missing or low-confidence data. Equal complete dimensions and all-missing dimensions are omitted.
+
+Required customization appears only when selected Products differ and shows only:
+
+```text
+有必選項目
+無必選項目
+```
+
+No modifier names, options, prices, or controls appear.
+
+### Evidence truthfulness
+
+Semantic projection reuses canonical category defaults and Product overrides.
+
+Evidence states:
+
+```text
+known
+low confidence
+missing
+```
+
+Required labels include:
+
+```text
+商家確認
+分類預設
+低可信
+未提供
+```
+
+Missing data must not appear as a negative Product property, and low-confidence data must not look identical to confirmed data.
 
 ### Explicit exclusions
 
-- no `DraftOrderItem` creation
-- no Configuration form
-- no quantity controls
-- no modifier selection
-- no order total
-- no Current order
-- no submitted rounds
-- no persistence, URL state, router, backend, or remote analytics
-- no alternative lenses
+CMP1 does not add:
 
-### Completion gate
+- winner selection;
+- `決定點這道`;
+- quantity;
+- modifier selection;
+- Configuration;
+- Current order;
+- total or submission;
+- score, rank, recommendation, best-value badge, or automatic preselection;
+- Product descriptions or exhaustive specifications;
+- modal, sheet, carousel, fixed footer, horizontal matrix, routing, persistence, backend, or analytics.
 
-The next slice is complete when a tester can:
+### Current gate
 
-1. preserve two or more possible products as Candidates
-2. continue browsing the same complete menu
-3. open a clearly separate Candidate workspace
-4. compare supported differences without seeing invented metadata
-5. remove or retain Candidates reversibly
-6. return to the original browsing context
-7. avoid interpreting Candidate as a placed order
+Implementation must not begin until `docs/candidate-comparison-plan.md` receives explicit product-owner approval.
 
-It does not need Decision, Configuration, Current order, continuity persistence, alternative lenses, merchant tooling, production integration, or a baseline comparison before completion.
+Designer review, tests, geometry evidence, and CI may later support a current-scope disposition, but no unfamiliar-participant memory reduction, comprehension, decision-quality, speed, real-device, or conventional-interface claim may be inferred from implementation evidence alone.
+
+## Blocked later work
+
+Until CMP1 receives an explicit disposition, do not begin:
+
+- explicit Decision;
+- Configuration;
+- Current order;
+- quantity or modifiers;
+- totals or submission;
+- recommendation, ranking, or filtering;
+- shared-table composition;
+- checkout.
+
+## Constraints
+
+- no backend, database, authentication, payment, POS, or KDS integration;
+- no conventional baseline;
+- no alternative lens implementation;
+- no merchant CMS;
+- no remote analytics;
+- no generic state machine, repository abstraction, plugin system, dynamic comparison-field registry, or design-system package;
+- preserve canonical Product and category order;
+- preserve `Product ≠ Candidate ≠ comparison selection ≠ DraftOrderItem ≠ ConfiguredOrderItem ≠ SubmittedOrderRound`;
+- do not count visual polish or desktop-only behavior as proof.
+
+## Contract impact
+
+None.
+
+Prototype C, CND1, CND2, and the CMP1 plan refine existing product invariants without changing `docs/product-contract.md`.

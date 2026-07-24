@@ -1,62 +1,72 @@
 import type {
+  Category,
   CategoryId,
   CoarseTrait,
   MealRole,
   Menu,
   MetadataConfidence,
-  MetadataSource,
   PortionClass,
-  PreparationClass,
   Product,
   ProductId,
 } from "../domain/menu-types.js";
 import {
   hasCompleteComparisonSemantics,
-  productRequiresConfiguration,
   resolveProductSemantics,
 } from "../domain/menu-validation.js";
+import {
+  anchorAxisRelationFor,
+  availableSemanticAxesFor,
+  type AnchorAxisRelation,
+  type SemanticAxis,
+} from "./menu-anchor-axis.js";
+
+export type MenuExpansion =
+  | Readonly<{ kind: "overview" }>
+  | Readonly<{ kind: "category"; categoryId: CategoryId }>
+  | Readonly<{ kind: "all" }>;
+
+export type AnchorReading =
+  | Readonly<{ kind: "idle" }>
+  | Readonly<{ kind: "selecting" }>
+  | Readonly<{ kind: "active"; productId: ProductId }>;
 
 export type MenuReadingState = Readonly<{
-  expandedProductId: ProductId | null;
   activeCategoryId: CategoryId | null;
+  expansion: MenuExpansion;
+  anchorReading: AnchorReading;
+  semanticAxis: SemanticAxis | null;
 }>;
+
+export type ProductNodeModel = Readonly<{
+  id: ProductId;
+  categoryId: CategoryId;
+  name: string;
+  price: string;
+  availabilityLabel: "供應中" | "已售完";
+  isSoldOut: boolean;
+  primaryCue: string | null;
+  secondaryCue: string | null;
+  metadataCompleteness: "complete" | "partial";
+}>;
+
+export type AnchorAxisRelationMap = Readonly<Record<ProductId, AnchorAxisRelation>>;
+export type AnchorAxisByAxis = Readonly<Partial<Record<SemanticAxis, AnchorAxisRelationMap>>>;
+export type AnchorAxisByAnchor = Readonly<Record<ProductId, AnchorAxisByAxis>>;
 
 export type CategoryReadingModel = Readonly<{
   id: CategoryId;
   name: string;
-  description: string | null;
   productCount: number;
+  availableCount: number;
+  soldOutCount: number;
+  partialMetadataCount: number;
   priceRange: string;
-  products: ReadonlyArray<ProductReadingModel>;
-}>;
-
-export type ProductReadingModel = Readonly<{
-  id: ProductId;
-  categoryId: CategoryId;
-  name: string;
-  description: string;
-  price: string;
-  availabilityLabel: "供應中" | "已售完";
-  isSoldOut: boolean;
-  traits: ReadonlyArray<string>;
-  metadataCompleteness: "complete" | "partial";
-}>;
-
-export type DetailFact = Readonly<{
-  label: string;
-  value: string;
-  evidence: string;
-}>;
-
-export type ProductDetailModel = Readonly<{
-  productId: ProductId;
-  title: string;
-  description: string;
-  price: string;
-  availabilityLabel: "供應中" | "已售完";
-  facts: ReadonlyArray<DetailFact>;
-  metadataNotice: string | null;
-  configurationNotice: string | null;
+  structuralSummary: string;
+  relativeCount: number;
+  previewProductNames: ReadonlyArray<string>;
+  products: ReadonlyArray<ProductNodeModel>;
+  semanticAxes: ReadonlyArray<SemanticAxis>;
+  anchorAxisRelations: AnchorAxisByAnchor;
 }>;
 
 export type CompleteMenuModel = Readonly<{
@@ -86,14 +96,8 @@ const roleLabels: Record<MealRole, string> = {
 const portionLabels: Record<PortionClass, string> = {
   small: "小份",
   one_person: "一人份",
-  two_to_three: "約 2–3 人分享",
-  large_shared: "多人分享份量",
-};
-
-const preparationLabels: Record<PreparationClass, string> = {
-  fast: "出餐較快",
-  normal: "一般準備節奏",
-  slow: "需要較多準備時間",
+  two_to_three: "約 2–3 人",
+  large_shared: "多人分享",
 };
 
 const traitLabels: Record<CoarseTrait, string> = {
@@ -103,27 +107,18 @@ const traitLabels: Record<CoarseTrait, string> = {
   vegetarian: "素食",
 };
 
-const sourceLabels: Record<MetadataSource, string> = {
-  merchant_confirmed: "餐廳確認",
-  category_default: "依類別提供",
-};
-
-const confidenceLabels: Record<MetadataConfidence, string> = {
-  high: "高可信度",
-  medium: "一般可信度",
-  low: "低可信度",
-};
-
 export const formatPrice = (price: number): string => moneyFormatter.format(price);
-
-const formatEvidence = (source: MetadataSource, confidence: MetadataConfidence): string =>
-  `${sourceLabels[source]} · ${confidenceLabels[confidence]}`;
-
-const productTraits = (menu: Menu, product: Product): ReadonlyArray<string> =>
-  (resolveProductSemantics(menu, product).traits?.value ?? []).map((trait) => traitLabels[trait]);
 
 const categoryProducts = (menu: Menu, categoryId: CategoryId): ReadonlyArray<Product> =>
   menu.products.filter((product) => product.categoryId === categoryId);
+
+export const defaultSemanticAxisFor = (
+  menu: Menu,
+  categoryId: CategoryId | null,
+): SemanticAxis | null => {
+  if (!categoryId) return null;
+  return availableSemanticAxesFor(menu, categoryProducts(menu, categoryId))[0] ?? null;
+};
 
 const priceRange = (products: ReadonlyArray<Product>): string => {
   if (products.length === 0) return "—";
@@ -135,135 +130,267 @@ const priceRange = (products: ReadonlyArray<Product>): string => {
     : `${formatPrice(minimum)}–${formatPrice(maximum)}`;
 };
 
-export const createInitialMenuReadingState = (menu: Menu): MenuReadingState => ({
-  expandedProductId: null,
-  activeCategoryId: menu.categories[0]?.id ?? null,
+const isTrusted = (confidence: MetadataConfidence): boolean => confidence !== "low";
+
+const metadataCompleteness = (
+  menu: Menu,
+  product: Product,
+): ProductNodeModel["metadataCompleteness"] =>
+  hasCompleteComparisonSemantics(resolveProductSemantics(menu, product)) ? "complete" : "partial";
+
+const roleIsRedundantWithPortion = (
+  role: MealRole | undefined,
+  portion: PortionClass | undefined,
+): boolean =>
+  (role === "personal_main" && portion === "one_person") ||
+  (role === "shared_main" && (portion === "two_to_three" || portion === "large_shared"));
+
+const productCues = (
+  menu: Menu,
+  product: Product,
+): Readonly<{ primaryCue: string | null; secondaryCue: string | null }> => {
+  const semantics = resolveProductSemantics(menu, product);
+  const trustedPortion =
+    semantics.portionClass && isTrusted(semantics.portionClass.confidence)
+      ? semantics.portionClass.value
+      : undefined;
+  const trustedRole =
+    semantics.mealRole && isTrusted(semantics.mealRole.confidence)
+      ? semantics.mealRole.value
+      : undefined;
+  const trustedTrait =
+    semantics.traits && isTrusted(semantics.traits.confidence)
+      ? semantics.traits.value[0]
+      : undefined;
+
+  const portionCue = trustedPortion ? portionLabels[trustedPortion] : null;
+  const roleCue = trustedRole ? roleLabels[trustedRole] : null;
+  const traitCue = trustedTrait ? traitLabels[trustedTrait] : null;
+  const primaryCue = portionCue ?? roleCue ?? traitCue;
+
+  if (traitCue && traitCue !== primaryCue) return { primaryCue, secondaryCue: traitCue };
+  if (roleCue && roleCue !== primaryCue && !roleIsRedundantWithPortion(trustedRole, trustedPortion)) {
+    return { primaryCue, secondaryCue: roleCue };
+  }
+  return { primaryCue, secondaryCue: null };
+};
+
+const dominantMealRole = (menu: Menu, products: ReadonlyArray<Product>): MealRole | null => {
+  const availableProducts = products.filter((product) => product.availability === "available");
+  const counts = new Map<MealRole, number>();
+  availableProducts.forEach((product) => {
+    const mealRole = resolveProductSemantics(menu, product).mealRole;
+    if (!mealRole || !isTrusted(mealRole.confidence)) return;
+    counts.set(mealRole.value, (counts.get(mealRole.value) ?? 0) + 1);
+  });
+  let strongestRole: MealRole | null = null;
+  let strongestCount = 0;
+  for (const [role, count] of counts) {
+    if (count > strongestCount) {
+      strongestRole = role;
+      strongestCount = count;
+    }
+  }
+  if (!strongestRole || availableProducts.length === 0) return null;
+  return strongestCount >= Math.ceil(availableProducts.length / 2) ? strongestRole : null;
+};
+
+const categoryStructuralSummary = (
+  menu: Menu,
+  category: Category,
+  products: ReadonlyArray<Product>,
+): string => {
+  const role = dominantMealRole(menu, products);
+  if (role) return `以${roleLabels[role]}為主`;
+  if (category.description) return category.description;
+  return `${products.filter((product) => product.availability === "available").length} 道目前供應`;
+};
+
+const createProductNodeModel = (
+  menu: Menu,
+  product: Product,
+): ProductNodeModel => ({
+  id: product.id,
+  categoryId: product.categoryId,
+  name: product.name,
+  price: formatPrice(product.price),
+  availabilityLabel: product.availability === "sold_out" ? "已售完" : "供應中",
+  isSoldOut: product.availability === "sold_out",
+  ...productCues(menu, product),
+  metadataCompleteness: metadataCompleteness(menu, product),
 });
 
-export const openProduct = (
+const createAnchorAxisRelations = (
+  menu: Menu,
+  products: ReadonlyArray<Product>,
+  axes: ReadonlyArray<SemanticAxis>,
+): AnchorAxisByAnchor =>
+  Object.fromEntries(
+    products.map((anchor) => [
+      anchor.id,
+      Object.fromEntries(
+        axes.map((axis) => [
+          axis,
+          Object.fromEntries(
+            products.map((target) => [
+              target.id,
+              anchorAxisRelationFor(menu, anchor, target, axis, formatPrice),
+            ]),
+          ),
+        ]),
+      ),
+    ]),
+  );
+
+const idleAnchor = (): AnchorReading => ({ kind: "idle" });
+
+export const createInitialMenuReadingState = (menu: Menu): MenuReadingState => {
+  const activeCategoryId = menu.categories[0]?.id ?? null;
+  return {
+    activeCategoryId,
+    expansion: { kind: "overview" },
+    anchorReading: idleAnchor(),
+    semanticAxis: defaultSemanticAxisFor(menu, activeCategoryId),
+  };
+};
+
+export const focusCategory = (
   state: MenuReadingState,
-  productId: ProductId,
-): MenuReadingState => ({
+  menu: Menu,
+  categoryId: CategoryId,
+): MenuReadingState => {
+  const eligibleAxes = availableSemanticAxesFor(menu, categoryProducts(menu, categoryId));
+  const semanticAxis =
+    state.activeCategoryId === categoryId &&
+    state.semanticAxis !== null &&
+    eligibleAxes.includes(state.semanticAxis)
+      ? state.semanticAxis
+      : eligibleAxes[0] ?? null;
+  return {
+    ...state,
+    activeCategoryId: categoryId,
+    expansion: { kind: "category", categoryId },
+    anchorReading: idleAnchor(),
+    semanticAxis,
+  };
+};
+
+export const showMenuOverview = (state: MenuReadingState): MenuReadingState => ({
   ...state,
-  expandedProductId: productId,
+  expansion: { kind: "overview" },
+  anchorReading: idleAnchor(),
 });
 
-export const closeProduct = (
-  state: MenuReadingState,
-): Readonly<{ state: MenuReadingState; focusProductId: ProductId | null }> => ({
-  state: { ...state, expandedProductId: null },
-  focusProductId: state.expandedProductId,
+export const showAllCategories = (state: MenuReadingState): MenuReadingState => ({
+  ...state,
+  expansion: { kind: "all" },
+  anchorReading: idleAnchor(),
 });
 
 export const setActiveCategory = (
   state: MenuReadingState,
+  menu: Menu,
   categoryId: CategoryId,
-): MenuReadingState => ({ ...state, activeCategoryId: categoryId });
+): MenuReadingState => {
+  if (state.activeCategoryId === categoryId) return state;
+  return {
+    ...state,
+    activeCategoryId: categoryId,
+    anchorReading: idleAnchor(),
+    semanticAxis: defaultSemanticAxisFor(menu, categoryId),
+  };
+};
+
+export const beginAnchorSelection = (state: MenuReadingState): MenuReadingState =>
+  state.expansion.kind === "category" && state.semanticAxis !== null
+    ? { ...state, anchorReading: { kind: "selecting" } }
+    : { ...state, anchorReading: idleAnchor() };
+
+export const cancelAnchorSelection = (state: MenuReadingState): MenuReadingState =>
+  state.anchorReading.kind === "selecting"
+    ? { ...state, anchorReading: idleAnchor() }
+    : state;
+
+export const selectAnchor = (
+  state: MenuReadingState,
+  menu: Menu,
+  productId: ProductId,
+): MenuReadingState => {
+  if (
+    state.expansion.kind !== "category" ||
+    state.anchorReading.kind !== "selecting" ||
+    state.semanticAxis === null
+  ) return state;
+  const product = menu.products.find((entry) => entry.id === productId);
+  if (!product || product.categoryId !== state.expansion.categoryId) return state;
+  return { ...state, anchorReading: { kind: "active", productId } };
+};
+
+export const setSemanticAxis = (
+  state: MenuReadingState,
+  menu: Menu,
+  semanticAxis: SemanticAxis,
+): MenuReadingState => {
+  if (state.expansion.kind !== "category" || state.anchorReading.kind !== "active") return state;
+  const eligibleAxes = availableSemanticAxesFor(menu, categoryProducts(menu, state.expansion.categoryId));
+  if (!eligibleAxes.includes(semanticAxis) || state.semanticAxis === semanticAxis) return state;
+  return { ...state, semanticAxis };
+};
+
+export const clearAnchor = (state: MenuReadingState): MenuReadingState =>
+  state.anchorReading.kind === "idle"
+    ? state
+    : { ...state, anchorReading: idleAnchor() };
+
+export const isAnchorSelectionCancelKey = (key: string): boolean => key === "Escape";
+
+export const categoryIsExpanded = (
+  state: MenuReadingState,
+  categoryId: CategoryId,
+): boolean =>
+  state.expansion.kind === "all" ||
+  (state.expansion.kind === "category" && state.expansion.categoryId === categoryId);
 
 export const categoryScrollBehavior = (prefersReducedMotion: boolean): ScrollBehavior =>
   prefersReducedMotion ? "auto" : "smooth";
 
-export const isDetailCloseKey = (key: string): boolean => key === "Escape";
+export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
+  const productCounts = menu.categories.map((category) => categoryProducts(menu, category.id).length);
+  const maximumProductCount = Math.max(0, ...productCounts);
 
-export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => ({
-  restaurantName: menu.restaurant.name,
-  restaurantDescription: menu.restaurant.description,
-  productCount: menu.products.length,
-  categoryCount: menu.categories.length,
-  priceRange: priceRange(menu.products),
-  categories: menu.categories.map((category) => {
+  const categories = menu.categories.map((category) => {
     const products = categoryProducts(menu, category.id);
+    const productModels = products.map((product) => createProductNodeModel(menu, product));
+    const availableCount = products.filter((product) => product.availability === "available").length;
+    const semanticAxes = availableSemanticAxesFor(menu, products);
     return {
       id: category.id,
       name: category.name,
-      description: category.description ?? null,
       productCount: products.length,
+      availableCount,
+      soldOutCount: products.length - availableCount,
+      partialMetadataCount: products.filter(
+        (product) => metadataCompleteness(menu, product) === "partial",
+      ).length,
       priceRange: priceRange(products),
-      products: products.map((product) => {
-        const semantics = resolveProductSemantics(menu, product);
-        return {
-          id: product.id,
-          categoryId: product.categoryId,
-          name: product.name,
-          description: product.description,
-          price: formatPrice(product.price),
-          availabilityLabel: product.availability === "sold_out" ? "已售完" : "供應中",
-          isSoldOut: product.availability === "sold_out",
-          traits: productTraits(menu, product),
-          metadataCompleteness: hasCompleteComparisonSemantics(semantics)
-            ? "complete"
-            : "partial",
-        };
-      }),
-    };
-  }),
-});
-
-export const createProductDetailModel = (
-  menu: Menu,
-  productId: ProductId,
-): ProductDetailModel => {
-  const product = menu.products.find((entry) => entry.id === productId);
-  if (!product) throw new Error(`Unknown ProductId: ${productId}`);
-
-  const semantics = resolveProductSemantics(menu, product);
-  const facts: DetailFact[] = [];
-
-  if (semantics.mealRole) {
-    facts.push({
-      label: "餐點角色",
-      value: roleLabels[semantics.mealRole.value],
-      evidence: formatEvidence(semantics.mealRole.source, semantics.mealRole.confidence),
-    });
-  }
-  if (semantics.portionClass) {
-    facts.push({
-      label: "份量",
-      value: portionLabels[semantics.portionClass.value],
-      evidence: formatEvidence(semantics.portionClass.source, semantics.portionClass.confidence),
-    });
-  }
-  if (semantics.preparationClass) {
-    facts.push({
-      label: "準備方式",
-      value: preparationLabels[semantics.preparationClass.value],
-      evidence: formatEvidence(
-        semantics.preparationClass.source,
-        semantics.preparationClass.confidence,
-      ),
-    });
-  }
-  if (semantics.shareable) {
-    facts.push({
-      label: "分享方式",
-      value: semantics.shareable.value ? "適合分享" : "較適合一人享用",
-      evidence: formatEvidence(semantics.shareable.source, semantics.shareable.confidence),
-    });
-  }
-  if (semantics.traits) {
-    facts.push({
-      label: "風味特徵",
-      value: semantics.traits.value.map((trait) => traitLabels[trait]).join("、"),
-      evidence: formatEvidence(semantics.traits.source, semantics.traits.confidence),
-    });
-  }
-
-  const requiredGroups = menu.modifierGroups.filter(
-    (group) => group.required && product.modifierGroupIds?.includes(group.id),
-  );
+      structuralSummary: categoryStructuralSummary(menu, category, products),
+      relativeCount: maximumProductCount > 0 ? products.length / maximumProductCount : 0,
+      previewProductNames: productModels
+        .filter((product) => !product.isSoldOut)
+        .slice(0, 2)
+        .map((product) => product.name),
+      products: productModels,
+      semanticAxes,
+      anchorAxisRelations: createAnchorAxisRelations(menu, products, semanticAxes),
+    } satisfies CategoryReadingModel;
+  });
 
   return {
-    productId: product.id,
-    title: product.name,
-    description: product.description,
-    price: formatPrice(product.price),
-    availabilityLabel: product.availability === "sold_out" ? "已售完" : "供應中",
-    facts,
-    metadataNotice: hasCompleteComparisonSemantics(semantics)
-      ? null
-      : "部分份量或料理資訊未提供；未提供的內容不作推測。",
-    configurationNotice: productRequiresConfiguration(menu, product)
-      ? `正式決定點餐後，需要選擇：${requiredGroups.map((group) => group.name).join("、")}。`
-      : null,
+    restaurantName: menu.restaurant.name,
+    restaurantDescription: menu.restaurant.description,
+    productCount: menu.products.length,
+    categoryCount: menu.categories.length,
+    priceRange: priceRange(menu.products),
+    categories,
   };
 };
