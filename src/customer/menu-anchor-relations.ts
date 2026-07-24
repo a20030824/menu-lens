@@ -123,6 +123,39 @@ export const preparationRelationToken = (
   };
 };
 
+const portionDistance = (menu: Menu, anchor: Product, target: Product): number | null => {
+  const anchorValue = trustedPortion(menu, anchor);
+  const targetValue = trustedPortion(menu, target);
+  return anchorValue && targetValue
+    ? Math.abs(portionRank[targetValue] - portionRank[anchorValue])
+    : null;
+};
+
+const preparationDistance = (menu: Menu, anchor: Product, target: Product): number | null => {
+  const anchorValue = trustedPreparation(menu, anchor);
+  const targetValue = trustedPreparation(menu, target);
+  return anchorValue && targetValue
+    ? Math.abs(preparationRank[targetValue] - preparationRank[anchorValue])
+    : null;
+};
+
+const semanticTokenFor = (
+  menu: Menu,
+  anchor: Product,
+  target: Product,
+): AnchorRelationToken | null => {
+  const portion = portionRelationToken(menu, anchor, target);
+  const preparation = preparationRelationToken(menu, anchor, target);
+  const portionDelta = portionDistance(menu, anchor, target);
+  const preparationDelta = preparationDistance(menu, anchor, target);
+
+  if (portionDelta === null) return portion;
+  if (portionDelta === 0 && preparationDelta === null) return preparation;
+  if (portionDelta === 0 && (preparationDelta ?? 0) === 0) return null;
+  if (preparationDelta !== null && preparationDelta > portionDelta) return preparation;
+  return portion;
+};
+
 export const anchorRelationFor = (
   menu: Menu,
   anchor: Product,
@@ -138,13 +171,7 @@ export const anchorRelationFor = (
   }
 
   const price = priceRelationToken(anchor, target, formatPrice);
-  const portion = portionRelationToken(menu, anchor, target);
-  const preparation = preparationRelationToken(menu, anchor, target);
-  const semantic = portion.status === "unknown" || portion.label !== "同份量"
-    ? portion
-    : preparation.status === "unknown" || preparation.label !== "同節奏"
-      ? preparation
-      : null;
+  const semantic = semanticTokenFor(menu, anchor, target);
   const tokens = semantic ? [price, semantic] : [price];
   return {
     kind: "relative",
