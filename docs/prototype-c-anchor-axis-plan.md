@@ -360,9 +360,23 @@ Fitting text does not prove comfortable mobile reading. Actual readability remai
 - active rows expose accessible price and semantic phrases;
 - unknown explains lack of trusted metadata;
 - sticky context exposes axis and anchor;
-- selecting, cancelling, changing, and clearing preserve usable focus targets;
 - axis switching does not replace the axis-button DOM;
 - Escape cancels selecting state only.
+
+Focus restoration is now source-local:
+
+```text
+select a row as anchor
+→ focus remains on that row's relation lane
+
+press Escape while focused in a row
+→ cancellation returns focus to that same canonical row
+
+use the top Cancel or Clear action
+→ focus remains in the top anchor control
+```
+
+The relation lane is programmatically focusable but remains outside the ordinary Tab sequence. It receives the complete accessible relation phrase and uses `preventScroll`, so the keyboard user keeps both visible focus and spatial position.
 
 ## Test-first implementation record
 
@@ -389,7 +403,13 @@ scripts/menu-workspace-contract.test.mjs
 package.json
 ```
 
-Prototype A and B pure projection modules remain as historical evidence. The active C rendering path does not use their controls or B's automatic semantic-token output.
+Removed after active-path review:
+
+```text
+src/app/category-reading-control.ts
+```
+
+That file was Prototype A's unused `<select>` UI. No active code referenced it. Prototype A and B pure projection modules remain as historical evidence; obsolete UI is not retained in the application tree.
 
 ## Automated validation
 
@@ -420,7 +440,7 @@ Tests cover:
 - overview, all-expanded, clear, cancel, and Escape boundaries;
 - no Candidate, Comparison, detail, score, configuration, quantity, or order state.
 
-### Structure
+### Structure and focus
 
 - four columns only;
 - fixed anchor-control row;
@@ -429,7 +449,11 @@ Tests cover:
 - one existing sticky context only;
 - no row-wide product click;
 - no B automatic semantic relation in active rendering;
-- no row measurement or compensatory scroll restoration in category rendering.
+- no row measurement or compensatory scroll restoration in category rendering;
+- selected anchors restore focus to their canonical row;
+- Escape cancellation inside a row restores focus to that row;
+- top-level cancel and clear keep focus in the anchor control;
+- obsolete Prototype A selector UI must remain absent.
 
 The branch requires:
 
@@ -504,13 +528,14 @@ FORMAL PASS
 
 Actual unfamiliar-user interpretation still requires review.
 
-### Orientation
+### Orientation and focus
 
 - active axis is visible in the shared control;
 - active axis and anchor remain in the existing sticky context;
 - changing anchor preserves the axis;
 - clearing and reopening the same category preserve the axis preference;
-- rows do not move.
+- rows do not move;
+- keyboard focus no longer jumps to an offscreen top control after row selection or row-local Escape cancellation.
 
 Result:
 
