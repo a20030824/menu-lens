@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const normalized = (path) => readFileSync(new URL(path, import.meta.url), "utf8")
   .replace(/\s+/g, " ")
@@ -15,6 +15,9 @@ const assertIncludes = (source, fragment, message) => {
   }
 };
 
+if (existsSync(new URL("../src/app/category-reading-control.ts", import.meta.url))) {
+  throw new Error("Prototype A's unused axis-selector UI must not remain in the active application tree");
+}
 if (css.includes("vertical-align: baseline")) {
   throw new Error("product ledger cells must not use baseline alignment across renderers");
 }
