@@ -258,13 +258,22 @@ export const focusCategory = (
   state: MenuReadingState,
   menu: Menu,
   categoryId: CategoryId,
-): MenuReadingState => ({
-  ...state,
-  activeCategoryId: categoryId,
-  expansion: { kind: "category", categoryId },
-  anchorReading: idleAnchor(),
-  semanticAxis: defaultSemanticAxisFor(menu, categoryId),
-});
+): MenuReadingState => {
+  const eligibleAxes = availableSemanticAxesFor(menu, categoryProducts(menu, categoryId));
+  const semanticAxis =
+    state.activeCategoryId === categoryId &&
+    state.semanticAxis !== null &&
+    eligibleAxes.includes(state.semanticAxis)
+      ? state.semanticAxis
+      : eligibleAxes[0] ?? null;
+  return {
+    ...state,
+    activeCategoryId: categoryId,
+    expansion: { kind: "category", categoryId },
+    anchorReading: idleAnchor(),
+    semanticAxis,
+  };
+};
 
 export const showMenuOverview = (state: MenuReadingState): MenuReadingState => ({
   ...state,
