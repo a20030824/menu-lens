@@ -33,9 +33,17 @@
 .category-anchor-control__actions { display: flex; flex-wrap: nowrap; align-items: center; gap: 0.2rem; }
 .category-anchor-control__action { block-size: 2rem; min-width: 2.75rem; padding: 0.2rem 0.38rem; border: 1px solid var(--line-strong); border-radius: 0; background: var(--surface); color: var(--accent-deep); font-size: 0.62rem; font-weight: 850; white-space: nowrap; cursor: pointer; }
 .category-anchor-control__action[hidden] { display: none; }
+.category-anchor-axis-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.45rem; min-height: 2.4rem; block-size: 2.4rem; padding: 0.2rem 0; border-top: 1px solid var(--line); }
+.category-anchor-axis-control[hidden] { display: none; }
+.category-anchor-axis-control__label { min-width: 0; color: var(--ink-soft); font-size: 0.62rem; font-weight: 750; white-space: nowrap; }
+.category-anchor-axis-control__group { display: flex; flex-wrap: nowrap; align-items: center; gap: 0.2rem; }
+.category-anchor-axis-control__button { block-size: 2rem; min-width: 2.75rem; padding: 0.2rem 0.42rem; border: 1px solid var(--line-strong); border-radius: 0; background: transparent; color: var(--ink-soft); font-size: 0.62rem; font-weight: 850; white-space: nowrap; cursor: pointer; }
+.category-anchor-axis-control__button[aria-pressed="true"] { border-color: var(--accent-deep); background: var(--accent-soft); color: var(--accent-deep); }
+.category-anchor-axis-control__button:disabled { cursor: default; opacity: 0.55; }
+.category-anchor-axis-control__button[hidden] { display: none; }
 .product-ledger { --relation-lane-height: 1.55rem; --status-lane-height: 0.64rem; width: 100%; border-collapse: collapse; table-layout: fixed; border-block: 1px solid var(--ink); background: rgba(251, 248, 241, 0.42); }
 .product-ledger__col--index { width: 2rem; }
-.product-ledger__col--cue { width: 6.7rem; }
+.product-ledger__col--cue { width: 7.2rem; }
 .product-ledger__col--price { width: 4.2rem; }
 .product-ledger__heading { padding: 0.38rem 0.25rem 0.34rem; border-bottom: 1px solid var(--line-strong); color: var(--ink-soft); font-size: 0.55rem; font-weight: 850; letter-spacing: 0.06em; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .product-ledger__heading--index { padding-left: 0; }
@@ -48,7 +56,7 @@
 .product-row__name { font-family: ui-serif, "Noto Serif TC", serif; font-size: 0.82rem; font-weight: 750; line-height: 1.35; text-align: left; }
 .product-row__cues { color: var(--ink-soft); font-size: 0.6rem; line-height: 1.35; }
 .product-row__relation { display: block; block-size: var(--relation-lane-height); line-height: var(--relation-lane-height); overflow: hidden; }
-.product-row__relation-text { display: block; block-size: 100%; line-height: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.product-row__relation-text { display: block; block-size: 100%; overflow: hidden; font-size: 0.62rem; line-height: inherit; text-overflow: ellipsis; white-space: nowrap; }
 .product-row__relation-text--anchor { color: var(--accent-deep); font-weight: 850; }
 .product-row__relation-text--unknown { color: var(--line-strong); }
 .anchor-select-button { display: block; width: 100%; block-size: 100%; padding: 0 0.2rem; border: 1px solid var(--line-strong); border-radius: 0; background: transparent; color: var(--accent-deep); font: inherit; font-weight: 850; line-height: 1; white-space: nowrap; cursor: pointer; }
@@ -71,6 +79,7 @@
   .product-row__index, .product-row__name, .product-row__cues, .product-row__price { padding-block: 0.65rem; }
   .product-row__name { font-size: 0.9rem; }
   .product-row__cues { font-size: 0.66rem; }
+  .product-row__relation-text { font-size: 0.66rem; }
   .product-row__price { font-size: 0.78rem; }
 }
 @media (min-width: 64rem) {
