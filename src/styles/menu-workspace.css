@@ -52,7 +52,6 @@
 .product-row { border-top: 1px solid var(--line); }
 .product-ledger tbody .product-row:first-child { border-top: 0; }
 .product-row[data-anchor="true"] { box-shadow: inset 2px 0 0 var(--accent-deep); }
-.product-row[data-candidate="true"] .product-row__name { font-weight: 850; }
 .product-row__index, .product-row__name, .product-row__cues, .product-row__price { padding: 0.52rem 0.25rem; vertical-align: top; }
 .product-row__index { padding-left: 0; color: var(--line-strong); font-size: 0.58rem; font-variant-numeric: tabular-nums; }
 .product-row__name { font-family: ui-serif, "Noto Serif TC", serif; font-size: 0.82rem; font-weight: 750; line-height: 1.35; text-align: left; }
