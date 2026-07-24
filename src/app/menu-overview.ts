@@ -103,8 +103,11 @@ export const createMenuOverview = (
       const categoryContext = activeCategory
         ? `${activeIndex + 1} / ${model.categoryCount}　${activeCategory.name}　${activeCategory.productCount} 道`
         : "分類聚焦";
-      const anchorName = state.anchorReading.kind === "active"
-        ? activeCategory?.products.find((product) => product.id === state.anchorReading.productId)?.name
+      const anchorProductId = state.anchorReading.kind === "active"
+        ? state.anchorReading.productId
+        : null;
+      const anchorName = anchorProductId
+        ? activeCategory?.products.find((product) => product.id === anchorProductId)?.name
         : null;
       contextLabel.textContent = anchorName
         ? `基準：${anchorName}　${activeCategory?.name ?? "分類聚焦"}`
