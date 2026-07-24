@@ -22,7 +22,7 @@ const visuallyHiddenText = (text: string): HTMLSpanElement =>
 
 const axisHeading: Record<MenuReadingAxis, string> = {
   default: "閱讀線索",
-  price: "同類價格",
+  price: "同類價位 低→高",
   portion: "份量",
   role: "餐點角色",
   preparation: "準備節奏",
@@ -149,7 +149,11 @@ export const createMenuCategorySection = (
   reveal.setAttribute("aria-hidden", "true");
   reveal.setAttribute("inert", "");
   const revealInner = element("div", "category-reveal__inner");
-  const readingControl = createCategoryReadingControl(category.id, onSelectAxis);
+  const readingControl = createCategoryReadingControl(
+    category.id,
+    category.readingAxes,
+    onSelectAxis,
+  );
   const ledger = element("table", "product-ledger");
   const caption = element("caption", "visually-hidden", `${category.name}商品列表`);
   const columns = element("colgroup");
@@ -165,6 +169,7 @@ export const createMenuCategorySection = (
     axisHeading.default,
   );
   cueHeading.scope = "col";
+  cueHeading.title = axisHeading.default;
   const headings = [
     ["序", "product-ledger__heading product-ledger__heading--index"],
     ["菜名", "product-ledger__heading product-ledger__heading--name"],
@@ -251,6 +256,7 @@ export const createMenuCategorySection = (
         if (target) renderRelation(target, product, readingAxis);
       });
       cueHeading.textContent = axisHeading[readingAxis];
+      cueHeading.title = axisHeading[readingAxis];
       renderedAxis = readingAxis;
     }
   };
