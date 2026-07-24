@@ -1,12 +1,15 @@
-import type { CategoryId, Menu } from "../domain/menu-types.js";
-import type { MenuReadingAxis } from "../customer/menu-relations.js";
+import type { CategoryId, Menu, ProductId } from "../domain/menu-types.js";
 import {
+  beginAnchorSelection,
+  cancelAnchorSelection,
   categoryScrollBehavior,
+  clearAnchor,
   createCompleteMenuModel,
   createInitialMenuReadingState,
   focusCategory,
+  isAnchorSelectionCancelKey,
+  selectAnchor,
   setActiveCategory,
-  setReadingAxis,
   showAllCategories,
   showMenuOverview,
   type MenuReadingState,
@@ -42,8 +45,29 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     render();
   };
 
-  const selectAxis = (axis: MenuReadingAxis): void => {
-    state = setReadingAxis(state, axis);
+  const beginAnchor = (): void => {
+    state = beginAnchorSelection(state);
+    render();
+  };
+
+  const cancelAnchor = (): void => {
+    const categoryId = state.expansion.kind === "category" ? state.expansion.categoryId : null;
+    state = cancelAnchorSelection(state);
+    render();
+    if (categoryId) overview.focusAnchorControl(categoryId);
+  };
+
+  const chooseAnchor = (productId: ProductId): void => {
+    const categoryId = state.expansion.kind === "category" ? state.expansion.categoryId : null;
+    state = selectAnchor(state, menu, productId);
+    render();
+    if (categoryId && state.anchorReading.kind === "active") {
+      overview.focusAnchorControl(categoryId);
+    }
+  };
+
+  const clearCurrentAnchor = (): void => {
+    state = clearAnchor(state);
     render();
   };
 
@@ -64,7 +88,10 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   overview = createMenuOverview(
     model,
     selectCategory,
-    selectAxis,
+    beginAnchor,
+    cancelAnchor,
+    chooseAnchor,
+    clearCurrentAnchor,
     showOverviewFromContext,
     showAll,
   );
@@ -102,6 +129,12 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   shell.append(header, workspace);
   root.replaceChildren(shell);
   render();
+
+  document.addEventListener("keydown", (event) => {
+    if (state.anchorReading.kind !== "selecting" || !isAnchorSelectionCancelKey(event.key)) return;
+    event.preventDefault();
+    cancelAnchor();
+  });
 
   let scrollFrame: number | null = null;
   const syncAllModePosition = (): void => {
