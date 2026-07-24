@@ -2,7 +2,7 @@
 
 ## Document status
 
-This document defines a new, separately reviewable hypothesis after Prototype A and Prototype B were both found useful but insufficient.
+This document records the planned and implemented boundary for Prototype C.
 
 Current branch and Draft PR:
 
@@ -16,27 +16,25 @@ Current status:
 ```text
 [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
-→ [planned, implementation not started] Prototype C — Anchor + explicit shared axis
+→ [implemented, awaiting review] Prototype C — Anchor + explicit shared axis
 → [blocked] Candidate / Comparison / Decision / Configuration / Current order
 ```
 
-This document authorizes planning only. It does not authorize implementation until the layout, state, projection, geometry, and evaluation contracts below are reviewed.
+Prototype C is an isolated relational-reading experiment. It does not authorize Candidate, Comparison, Decision, Configuration, Current order, quantity, modifiers, recommendation, ranking, filtering, shared-table composition, or checkout.
 
-## Why a new hypothesis is necessary
+## Why Prototype C exists
 
-Prototype A produced one truthful shared dimension across all rows, but only one dimension was visible at a time and its price scale duplicated the numeric price column.
+Prototype A made one shared semantic dimension truthful across all rows, but required switching dimensions and its price scale duplicated the visible numeric price column.
 
-Prototype B produced useful exact price deltas, but automatically selected one semantic token per row. The selected dimension varied across rows and silently suppressed other trusted differences.
+Prototype B added a temporary reference product and useful exact price deltas, but automatically selected one semantic token per row. That rule silently hid other trusted differences and made omission indistinguishable from equality.
 
-With `山椒烤雞半隻` as a slow anchor, every trusted shared-dish alternative is faster. Prototype B displayed `較快` only for the soft-shell crab because portion or uncertainty occupied the other rows. Omission became indistinguishable from equality.
+With `山椒烤雞半隻` as a slow anchor, every trusted shared-dish alternative is faster. Prototype B displayed `較快` only for the soft-shell crab because portion or uncertainty occupied the other rows. The crab was the strongest faster class, not the only faster dish.
 
-Prototype C therefore asks:
+Prototype C asks:
 
 > Can one temporary anchor preserve exact price deltas while one explicit category-wide semantic axis keeps every row answering the same question, so no trusted difference is silently suppressed?
 
 ## Core corrective principle
-
-Prototype C must not automatically decide which semantic dimension matters for each product.
 
 ```text
 Prototype B
@@ -48,17 +46,11 @@ Prototype C
 all rows → the same explicitly selected axis
 ```
 
-The user, not a row-level heuristic, determines whether the visible semantic axis is `份量` or `準備`.
+The user explicitly selects `份量` or `準備`. A row-level heuristic no longer decides which dimension is shown.
 
-## Selected low-fidelity direction
+## Implemented layout
 
-Selected direction:
-
-```text
-C2 — one anchor + exact price delta + one explicit shared semantic axis
-```
-
-Two control rows are reserved above the same canonical ledger:
+Prototype C reuses the same canonical ledger and adds one fixed shared-axis control row below the fixed anchor control.
 
 ```text
 比較基準：山椒烤雞半隻               更換  清除
@@ -76,8 +68,6 @@ Two control rows are reserved above the same canonical ledger:
 Switching the shared axis changes every semantic value together:
 
 ```text
-比較內容： [ 份量 ] [ 準備 ]
-──────────────────────────────────────────
 菜名                   價差 · 準備            價格
 山椒烤雞半隻           基準 · 慢              NT$520
 紹興奶油蝦             少 NT$40 · 一般        NT$480
@@ -87,46 +77,63 @@ Switching the shared axis changes every semantic value together:
 季節時蔬豆腐煲         少 NT$140 · 一般       NT$380
 ```
 
-The row no longer chooses between portion and preparation. Every row contains the active axis value or explicit unknown.
+The implementation keeps:
+
+- one canonical table;
+- one canonical row per product;
+- the same four columns;
+- canonical product order;
+- visible price, sold-out state, and incomplete-data state;
+- no copied product list;
+- no fifth column;
+- no modal, sheet, rail, fixed footer, detail row, horizontal matrix, or second comparison destination;
+- no sorting, filtering, hiding, dimming, ranking, recommendation, Candidate, or order state.
 
 ## Why absolute semantic labels are used
 
-Prototype C displays the resolved absolute semantic class rather than another automatically compressed relative phrase.
+Prototype C displays the resolved formal class instead of inventing another compressed relative phrase.
 
-Examples:
+Visible portion labels:
 
 ```text
-portion
-多人 / 2–3 人 / 一人 / 小份 / 未提供
-
-preparation
-快 / 一般 / 慢 / 未提供
+小份
+一人
+2–3 人
+多人
+未提供
 ```
 
-The anchor row exposes its own value:
+Visible preparation labels:
+
+```text
+快
+一般
+慢
+未提供
+```
+
+The anchor row includes its own formal value:
 
 ```text
 基準 · 多人
 基準 · 慢
 ```
 
-This makes difference magnitude visible without inventing language such as `快很多` or a numerical suitability score.
-
-For example:
+This allows a diner to see:
 
 ```text
 anchor = 慢
-normal = visibly faster category
-fast = visibly strongest faster category
+normal alternatives = faster class
+fast alternative = strongest faster class
 ```
 
-The interface does not need to hide three `normal` relationships merely to emphasize one `fast` relationship.
+The interface does not invent `快很多`, suitability scores, similarity scores, or recommendation ranks.
 
-## How omission differs from equality
+## Equality, unknown, and the non-active axis
 
-Prototype C has no blank semantic cell in active mode.
+An active semantic cell is never blank.
 
-For the active axis, every row must display exactly one of:
+Every row displays exactly one of:
 
 ```text
 trusted absolute value
@@ -134,154 +141,96 @@ or
 未提供
 ```
 
-Equality is represented by the same visible absolute value as the anchor.
+Equality appears as matching visible labels:
 
 ```text
 anchor: 一般
 target: 一般
-→ visibly equal
 ```
 
-Unknown is explicit:
+Unknown remains explicit:
 
 ```text
-anchor or target lacks trusted value
+missing or low-confidence value
 → 未提供
 ```
 
-The non-active axis is not silently omitted by a row-level heuristic. It remains visibly discoverable in the category-wide axis control.
-
-## Explicit alternatives considered
-
-### C1 — show all semantic dimensions simultaneously in every row
-
-Example:
-
-```text
-少 NT$40 · 2–3 人 · 一般
-```
-
-Rejected for the first C prototype because:
-
-- narrow-screen density becomes the dominant variable;
-- long price deltas and three labels risk truncation;
-- rows may need a second line and taller baseline;
-- it becomes harder to distinguish whether success came from completeness or simply more text;
-- it approaches a compact comparison matrix rather than testing one focused correction.
-
-### C2 — anchor + explicit shared axis
-
-Selected because:
-
-- all rows answer the same semantic question;
-- exact price delta remains persistent;
-- every trusted value in the active axis remains visible;
-- other axes remain explicitly discoverable;
-- one-line mobile relation geometry remains plausible;
-- the correction is directly attributable to removal of row-level automatic dimension selection.
-
-### C3 — horizontally scrollable semantic matrix
-
-Rejected because:
-
-- horizontal scrolling destroys simultaneous visibility;
-- frozen and moving columns complicate spatial memory;
-- it behaves like a second comparison destination embedded inside the menu;
-- mobile navigation cost becomes a new confound.
-
-### C4 — keep B and add a `更多差異` affordance
-
-Rejected because:
-
-- the visible row remains incomplete;
-- omission still looks like equality until another interaction occurs;
-- it returns to one-product-at-a-time inspection;
-- it risks reintroducing detail, modal, or expansion behavior.
+The non-active axis remains visible in the shared control. It is not silently omitted by an automatic per-row rule.
 
 ## Interaction state
-
-Planned state:
 
 ```ts
 type SemanticAxis = "portion" | "preparation";
 
-type PrototypeCReading = Readonly<{
+type MenuReadingState = Readonly<{
+  activeCategoryId: CategoryId | null;
+  expansion:
+    | { kind: "overview" }
+    | { kind: "category"; categoryId: CategoryId }
+    | { kind: "all" };
   anchorReading:
     | { kind: "idle" }
     | { kind: "selecting" }
     | { kind: "active"; productId: ProductId };
-  semanticAxis: SemanticAxis;
+  semanticAxis: SemanticAxis | null;
 }>;
 ```
-
-No Candidate, comparison set, score, recommendation, quantity, configuration, or order state is added.
-
-## State behavior
 
 ### Idle
 
 ```text
 比較基準：尚未選擇                         選擇
-比較內容： 份量 / 準備                     disabled
+比較內容： [份量] [準備]                   disabled
 ```
 
-The semantic-axis row remains reserved so selecting an anchor does not move the table.
-
-Ordinary menu cues remain visible until an anchor is active.
+The axis row remains reserved. Ordinary menu cues remain visible until an anchor is active.
 
 ### Selecting
 
 ```text
 選擇一項作為比較基準                       取消
-比較內容： 份量 / 準備                     disabled
+比較內容： [份量] [準備]                   disabled
 ```
 
-The existing relation lane contains explicit `作為基準` buttons. Product names and rows remain non-clickable.
+Every existing relation lane contains an explicit native `作為基準` button. Product names and rows do not become click targets.
 
 ### Active
 
-```text
-比較基準：山椒烤雞半隻               更換  清除
-比較內容： [份量] [準備]
-```
-
 - exact price delta is visible for every non-anchor row;
-- the anchor row shows `基準`;
-- every row shows the same semantic axis;
-- changing axis changes every semantic label together;
-- changing anchor recalculates price deltas but preserves the selected semantic axis;
-- clearing the anchor preserves the selected axis preference but disables it until another anchor is chosen.
+- the anchor row displays `基準` and its semantic value;
+- every row displays the same semantic axis;
+- switching axis changes every row together;
+- changing anchor recalculates price deltas and preserves the selected axis;
+- clearing removes the anchor but preserves the disabled axis preference.
 
-### Category boundary
+### Category and overview boundaries
 
-Changing category:
-
-- clears the anchor;
-- resets the semantic axis to the first eligible category axis;
-- preserves canonical category and product order;
-- performs no URL or persistent-state update.
+- changing to a different category clears the anchor and resets to that category's first eligible axis;
+- entering overview or all-expanded mode clears the anchor;
+- reopening the same category preserves its explicitly selected axis;
+- an ineligible category cannot enter anchor selection;
+- there is no URL state or cross-session persistence;
+- Escape cancels temporary anchor selection only.
 
 ## Axis eligibility
 
-The active semantic axes are bounded to:
+Prototype C axes are bounded to:
 
 ```text
 portion
 preparation
 ```
 
-Price is not an axis option because exact price delta is always visible while an anchor is active.
+Price is persistent evidence, not an axis option. Meal role remains excluded because it is category-redundant in the formal reference data.
 
-Meal role remains excluded because Prototype A showed it was category-redundant in the formal reference data.
-
-A category axis is eligible only when:
+A semantic axis is eligible only when:
 
 1. the category contains at least three products; and
-2. the resolved category data contains at least two visible states across trusted values and explicit unknown.
+2. resolved category data contains at least two visible states across trusted values and explicit unknown.
 
-Eligibility is category-level, not anchor-level. Changing anchor must not make axis controls appear, disappear, reorder, or shift.
+Eligibility is category-level and stable across anchor changes.
 
-Expected current reference behavior:
+Current reference behavior:
 
 ```text
 個人主餐       準備
@@ -292,13 +241,11 @@ Expected current reference behavior:
 甜點           no C control
 ```
 
-A category with no eligible semantic axis does not offer Prototype C merely to expose price deltas. This keeps the prototype focused on the semantic correction rather than turning anchor selection into a general pricing tool.
+A category with no eligible semantic axis does not expose anchor-only price comparison under Prototype C.
 
 ## Projection grammar
 
-### Price token
-
-Every non-anchor row uses the same exact formatter as Prototype B:
+### Price
 
 ```text
 少 NT$40
@@ -306,45 +253,14 @@ Every non-anchor row uses the same exact formatter as Prototype B:
 同價
 ```
 
-### Portion axis labels
-
-Visible short labels:
-
-```text
-小份
-一人
-2–3 人
-多人
-未提供
-```
-
-Accessible full labels:
-
-```text
-小份
-一人份
-約二至三人
-多人分享
-份量資訊未提供
-```
-
-### Preparation axis labels
-
-```text
-快
-一般
-慢
-未提供
-```
-
-### Anchor row
+### Anchor
 
 ```text
 基準 · 多人
 基準 · 慢
 ```
 
-### Alternative row
+### Alternative
 
 ```text
 少 NT$40 · 2–3 人
@@ -352,34 +268,42 @@ Accessible full labels:
 多 NT$40 · 未提供
 ```
 
-No visible output may use:
+No output may use or imply:
 
-- best, better, recommended, suitable, similar, substitute, value, score, rank, or CP language;
-- `最接近` or any automatic closeness claim;
-- color alone to communicate axis values or unknown.
+- best or better;
+- recommended;
+- suitable;
+- closest or similar;
+- substitute;
+- value or CP;
+- score or rank;
+- automatic recommendation.
 
 ## Sticky orientation context
 
 The existing sticky menu context remains the only sticky orientation surface.
 
-In active state it must include both the selected axis and anchor identity:
+Active state leads with the current question and then the reference identity:
 
 ```text
 份量｜山椒烤雞半隻
 準備｜山椒烤雞半隻
 ```
 
-The axis comes first because losing the active question would make rows ambiguous. The anchor name follows immediately and receives the remaining width.
+The full text remains available in `title`. No second sticky axis bar or comparison rail is introduced.
 
-The full text remains available through accessible labeling and `title`.
+## Geometry contract
 
-No second sticky axis bar, comparison rail, or frozen matrix header is added.
+Prototype C establishes one new baseline:
 
-## Layout and geometry contract
+```text
+fixed anchor-control row: 2.6rem
+fixed semantic-axis row: 2.4rem
+fixed relation lane: 1.55rem
+fixed mobile relation column: 7.2rem
+```
 
-Prototype C may establish one new baseline by reserving a fixed semantic-axis control row above the table.
-
-After that baseline, the following state changes must produce zero geometry and scroll differences:
+After that baseline, these transitions must preserve geometry and scroll position:
 
 ```text
 idle → selecting
@@ -389,167 +313,74 @@ anchor A → anchor B
 active → cleared
 ```
 
-Measure at 320 px and 390 px:
+A code-derived Chromium proxy using the current DOM structure, CSS dimensions, fixture strings, and Chromium font metrics was run at 320 px and 390 px.
+
+Measured results:
 
 ```text
-row height
-row top
-column width
-header height
-table height
-anchor-control height
-axis-control height
-sticky-context height
-scroll position
+row-height difference       0px
+row-top difference          0px
+table-height difference     0px
+anchor-control difference   0px
+axis-control difference     0px
 ```
 
-Additional constraints:
+The following current fixture phrases fit without ellipsis at both widths:
 
-- the table remains four columns;
-- the relation lane remains one line;
-- relative text truncation is not accepted when the hidden part contains the active semantic value;
-- fixture phrases must fit without relying on hover or `title` on touch devices;
-- no row measurement or compensatory scroll restoration is allowed;
-- axis buttons must not wrap;
-- anchor and axis controls keep fixed block sizes in all states.
+```text
+少 NT$180 · 2–3 人
+少 NT$140 · 2–3 人
+多 NT$40 · 未提供
+少 NT$180 · 一般
+```
 
-## Mobile readability gate
+This is a code-derived implementation proxy, not deployed participant evidence.
 
-A phrase fitting its container is not sufficient.
+## Mobile readability boundary
 
-At 320 px, the planned implementation must verify:
+At 320 px:
 
-- semantic text is at least the current ordinary cue reading size or larger;
-- price delta and semantic value remain visually separable;
-- `2–3 人`, `未提供`, and three-digit deltas remain fully visible;
-- the active axis and anchor remain identifiable after the source control rows scroll away;
-- touch targets remain at least the existing control height;
-- no horizontal scrolling is introduced.
+- the relation text is `0.62rem`, slightly larger than Prototype B's `0.6rem` relation text;
+- exact price delta and semantic value remain on one line;
+- `2–3 人` and `未提供` remain fully visible;
+- product names may wrap while relation and price columns stay aligned;
+- no horizontal scrolling is introduced;
+- touch controls retain the existing 2rem control height.
 
-The implementation may adjust column allocation once as a new baseline, but it may not create state-dependent widths.
+Fitting text does not prove comfortable mobile reading. Actual readability remains part of the review gate.
 
-## Accessibility contract
+## Accessibility behavior
 
-- axis selection uses native buttons in a named group;
-- selected axis uses `aria-pressed` or equivalent native state;
-- the group has an accessible name such as `比較內容`;
-- unavailable axes are absent at category level, not silently disabled per row;
-- idle and selecting states disable the axis group while preserving its geometry;
-- every active row has an accessible phrase naming price difference, active axis, and value;
+- anchor and axis actions use native buttons;
+- the axis buttons are a named group;
+- selected axis uses `aria-pressed`;
+- unavailable category axes are absent;
+- idle and selecting states disable the axis group while preserving geometry;
+- row anchor actions name the product;
+- active rows expose accessible price and semantic phrases;
 - unknown explains lack of trusted metadata;
-- the sticky context exposes active axis and anchor;
-- keyboard focus remains stable after selecting, changing, clearing, and switching axis;
-- Escape cancels temporary anchor selection only;
-- reduced-motion behavior remains unchanged.
+- sticky context exposes axis and anchor;
+- selecting, cancelling, changing, and clearing preserve usable focus targets;
+- axis switching does not replace the axis-button DOM;
+- Escape cancels selecting state only.
 
-## Formal truthfulness invariants
+## Test-first implementation record
 
-For one active axis:
+Implementation began with failing tests for the planned C APIs.
 
-1. every canonical category product remains present;
-2. every non-anchor row has exactly one price delta;
-3. every row has exactly one active-axis state;
-4. trusted values render their formal absolute class;
-5. low-confidence or missing values render `未提供`;
-6. no row-level heuristic chooses a different dimension;
-7. no blank active-axis state exists;
-8. equal formal values render the same visible label;
-9. switching axis updates every row in the same render;
-10. sold-out status remains independent from relational evidence.
-
-## Test-first implementation gate
-
-Implementation must begin with failing tests for:
-
-### State
-
-- default eligible axis per category;
-- axis preserved when changing anchor;
-- axis reset on category change;
-- axis disabled but geometrically reserved without an active anchor;
-- no A selector, B automatic semantic selection, Candidate, Comparison, detail, quantity, configuration, or order state.
-
-### Projection
-
-- exact price deltas;
-- complete portion projection for every row;
-- complete preparation projection for every row;
-- trusted absolute labels;
-- explicit low-confidence unknown;
-- no blank active-axis state;
-- no row-level mixed dimensions;
-- anchor row includes its absolute semantic value;
-- sold-out products remain present.
-
-### Structure
-
-- four columns only;
-- one fixed anchor-control row;
-- one fixed axis-control row;
-- one fixed relation line box;
-- one existing sticky context only;
-- no row-wide click;
-- no modal, rail, sheet, expansion row, horizontal matrix, or second product list;
-- no row measurement or scroll correction.
-
-### Geometry
-
-Code-derived Chromium measurement at 320 px and 390 px must compare all planned state transitions before participant review.
-
-## Evaluation task
-
-Use `分享料理` and choose `山椒烤雞半隻` as anchor.
-
-Without teaching the interaction, ask the participant to:
-
-1. identify every item cheaper or more expensive than the anchor and the exact difference;
-2. in `份量`, identify all smaller items and the unknown item;
-3. explain whether any portion value is silently hidden;
-4. switch to `準備` and identify every faster item;
-5. identify the strongest faster absolute class;
-6. explain why some rows show `一般` while one shows `快`;
-7. distinguish equality from unknown;
-8. switch anchor while keeping the preparation axis;
-9. explain whether the action saved, ordered, recommended, filtered, or ranked anything;
-10. report whether switching one explicit axis still requires too much remembering or backtracking.
-
-## Pass signals
-
-- every trusted value in the active axis is visible;
-- the participant identifies all faster shared dishes, not only the crab;
-- the crab is recognized as the strongest faster class without implying exclusivity;
-- `未提供` is understood as unavailable trusted data;
-- equality is inferred from matching absolute labels rather than blank output;
-- the participant notices and understands the other available axis;
-- changing axis updates all rows as one coherent column;
-- changing anchor preserves orientation and the selected axis;
-- exact price deltas continue to remove arithmetic;
-- mobile text remains readable without opening another surface;
-- the interaction is not confused with Candidate, recommendation, ranking, or ordering.
-
-## Failure signals
-
-- users do not notice the non-active axis;
-- users think the absolute labels are recommendations or scores;
-- switching axes still causes substantial reconstruction and memory work;
-- price delta plus absolute value is too dense at 320 px;
-- the sticky context loses either the active axis or anchor identity;
-- equal values remain ambiguous;
-- unknown looks like a negative property;
-- axis switching moves rows, columns, table, or scroll position;
-- the interface behaves like a hidden comparison destination;
-- the prototype succeeds only after increasing row density enough to harm ordinary menu reading.
-
-## Planned implementation boundary
-
-Expected implementation files, only after plan approval:
+Added:
 
 ```text
 src/customer/menu-anchor-axis.ts
 src/customer/menu-anchor-axis.test.ts
+src/app/category-anchor-axis-control.ts
+```
+
+Updated:
+
+```text
 src/customer/menu-reading.ts
 src/customer/menu-reading.test.ts
-src/app/category-anchor-axis-control.ts
 src/app/menu-category.ts
 src/app/menu-overview.ts
 src/app/App.ts
@@ -558,16 +389,197 @@ scripts/menu-workspace-contract.test.mjs
 package.json
 ```
 
-Prototype A and B pure projections may remain as historical evidence, but the active C path must not render their controls or B's automatic semantic-token output.
+Prototype A and B pure projection modules remain as historical evidence. The active C rendering path does not use their controls or B's automatic semantic-token output.
 
-No product-contract change is planned.
+## Automated validation
+
+Tests cover:
+
+### Projection
+
+- stable category-level axis eligibility;
+- complete portion projection for every canonical row;
+- complete preparation projection for every canonical row;
+- formal absolute labels;
+- explicit low-confidence unknown;
+- exact lower, higher, and equal price deltas;
+- anchor row semantic value;
+- no blank active-axis state;
+- no mixed row dimensions;
+- no recommendation, score, or closeness language.
+
+### State
+
+- category defaults;
+- ineligible categories;
+- disabled axis without anchor;
+- axis switching only with an active anchor;
+- axis preservation across anchor changes;
+- axis preservation when reopening the same category;
+- axis reset when changing categories;
+- overview, all-expanded, clear, cancel, and Escape boundaries;
+- no Candidate, Comparison, detail, score, configuration, quantity, or order state.
+
+### Structure
+
+- four columns only;
+- fixed anchor-control row;
+- fixed axis-control row;
+- fixed relation line box;
+- one existing sticky context only;
+- no row-wide product click;
+- no B automatic semantic relation in active rendering;
+- no row measurement or compensatory scroll restoration in category rendering.
+
+The branch requires:
+
+```text
+Typecheck         ✓
+Test              ✓
+Build static site ✓
+```
+
+## Designer reverse review
+
+The reverse review uses `分享料理` with `山椒烤雞半隻` as anchor.
+
+### Exact price differences
+
+```text
+紹興奶油蝦             少 NT$40
+蒜酥椒鹽軟殼蟹         少 NT$60
+豆豉蒸鱸魚             多 NT$40
+宮保杏鮑菇             少 NT$180
+季節時蔬豆腐煲         少 NT$140
+```
+
+Result:
+
+```text
+PASS — exact deltas still remove arithmetic
+```
+
+### Portion completeness
+
+```text
+anchor                  多人
+four trusted alternatives 2–3 人
+seabass                 未提供
+```
+
+Result:
+
+```text
+PASS — every row has the selected axis or explicit unknown
+```
+
+### Preparation completeness
+
+```text
+anchor                  慢
+prawns                  一般
+soft-shell crab         快
+seabass                 一般
+mushroom                一般
+tofu pot                一般
+```
+
+Result:
+
+```text
+PASS — all trusted faster classes remain visible
+```
+
+The crab is visibly the strongest faster class without appearing to be the only faster alternative.
+
+### Equality and unknown
+
+Matching absolute labels expose equality. `未提供` is distinct from a matching value.
+
+Result:
+
+```text
+FORMAL PASS
+```
+
+Actual unfamiliar-user interpretation still requires review.
+
+### Orientation
+
+- active axis is visible in the shared control;
+- active axis and anchor remain in the existing sticky context;
+- changing anchor preserves the axis;
+- clearing and reopening the same category preserve the axis preference;
+- rows do not move.
+
+Result:
+
+```text
+PASS — designer proxy
+```
+
+## Remaining risks
+
+Prototype C has removed B's formal semantic omission, but it remains unpassed because:
+
+- users may not notice the non-active axis;
+- users may not understand that `一般` is faster than a `慢` anchor without guidance;
+- explicit axis switching may still require too much memory and backtracking;
+- absolute labels may be read as category descriptions rather than comparison evidence;
+- 0.62rem relation text may be technically complete but uncomfortable on a real phone;
+- a single-axis category may make the axis control feel redundant;
+- the anchor action may still be confused with saving or ordering.
+
+## Review task
+
+Without teaching the interaction, ask a participant to:
+
+1. choose `山椒烤雞半隻` as the reference;
+2. identify every cheaper or more expensive item and exact difference;
+3. in `份量`, identify every smaller item and the unknown item;
+4. explain whether any portion value is hidden;
+5. switch to `準備` and identify every faster item;
+6. identify the strongest faster absolute class;
+7. explain why several rows show `一般` while one shows `快`;
+8. distinguish equality from unknown;
+9. switch anchor while keeping preparation active;
+10. return to the menu overview and reopen the same category;
+11. explain whether anything was saved, ordered, recommended, filtered, or ranked;
+12. report whether switching one explicit axis still requires too much remembering.
+
+## Pass signals
+
+- every trusted value in the active axis is understood as visible;
+- all faster shared dishes are identified, not only the crab;
+- the crab is recognized as the strongest faster class without false exclusivity;
+- matching labels communicate equality;
+- `未提供` communicates unavailable trusted data;
+- the other axis is noticed and understood;
+- changing axis updates the column as one coherent question;
+- changing anchor and reopening the category preserve orientation and axis preference;
+- exact price deltas remove arithmetic;
+- mobile text is readable without another surface;
+- the interaction is not confused with Candidate, recommendation, ranking, or ordering.
+
+## Failure signals
+
+- users do not notice the other axis;
+- users cannot infer all faster alternatives from `慢 / 一般 / 快`;
+- users interpret absolute labels as recommendations or scores;
+- switching axes still causes substantial reconstruction;
+- mobile density or text size harms ordinary menu reading;
+- sticky context loses axis or anchor identity;
+- equal values remain ambiguous;
+- unknown looks like a negative property;
+- axis or anchor switching moves rows, table, or scroll position;
+- the interface behaves like a hidden comparison destination.
 
 ## Current disposition
 
 ```text
-[planned, implementation not started] Prototype C — Anchor + explicit shared axis
+[implemented, awaiting review] Prototype C — Anchor + explicit shared axis
 ```
 
-Prototype C is ready for plan review only.
+Automated checks and designer reverse review show that the implementation satisfies its formal contracts and corrects Prototype B's silent semantic omission. They do not prove unfamiliar-user comprehension or reduced task effort.
 
-Candidate, Comparison, Decision, Configuration, Current order, quantity, modifiers, recommendation, ranking, filtering, shared-table composition, and checkout remain blocked.
+Candidate and every later decision or transaction state remain blocked until Prototype C receives an explicit review disposition.
