@@ -11,13 +11,13 @@ const element = <K extends keyof HTMLElementTagNameMap>(
   return node;
 };
 
-const options: ReadonlyArray<Readonly<{ value: MenuReadingAxis; label: string }>> = [
-  { value: "default", label: "一般" },
-  { value: "price", label: "價格" },
-  { value: "portion", label: "份量" },
-  { value: "role", label: "餐點角色" },
-  { value: "preparation", label: "準備節奏" },
-];
+const optionLabels: Readonly<Record<MenuReadingAxis, string>> = {
+  default: "一般",
+  price: "價格",
+  portion: "份量",
+  role: "餐點角色",
+  preparation: "準備節奏",
+};
 
 export type CategoryReadingControl = Readonly<{
   element: HTMLElement;
@@ -26,6 +26,7 @@ export type CategoryReadingControl = Readonly<{
 
 export const createCategoryReadingControl = (
   categoryId: string,
+  availableAxes: ReadonlyArray<MenuReadingAxis>,
   onChange: (axis: MenuReadingAxis) => void,
 ): CategoryReadingControl => {
   const root = element("div", "category-reading-control");
@@ -36,19 +37,22 @@ export const createCategoryReadingControl = (
   label.htmlFor = selectId;
   const select = element("select", "category-reading-control__select") as HTMLSelectElement;
   select.id = selectId;
-  options.forEach((entry) => {
-    const option = element("option", undefined, entry.label) as HTMLOptionElement;
-    option.value = entry.value;
+  availableAxes.forEach((axis) => {
+    const option = element("option", undefined, optionLabels[axis]) as HTMLOptionElement;
+    option.value = axis;
     select.append(option);
   });
   select.addEventListener("change", () => onChange(select.value as MenuReadingAxis));
   root.append(label, select);
 
+  const hasRelationalAxis = availableAxes.some((axis) => axis !== "default");
+
   return {
     element: root,
     setState: (axis, visible) => {
-      root.hidden = !visible;
-      if (select.value !== axis) select.value = axis;
+      root.hidden = !visible || !hasRelationalAxis;
+      const resolvedAxis = availableAxes.includes(axis) ? axis : "default";
+      if (select.value !== resolvedAxis) select.value = resolvedAxis;
     },
   };
 };
