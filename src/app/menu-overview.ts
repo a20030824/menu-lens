@@ -100,9 +100,18 @@ export const createMenuOverview = (
     const activeCategory = activeIndex >= 0 ? model.categories[activeIndex] : undefined;
 
     if (state.expansion.kind === "category") {
-      contextLabel.textContent = activeCategory
+      const categoryContext = activeCategory
         ? `${activeIndex + 1} / ${model.categoryCount}　${activeCategory.name}　${activeCategory.productCount} 道`
         : "分類聚焦";
+      const anchorName = state.anchorReading.kind === "active"
+        ? activeCategory?.products.find((product) => product.id === state.anchorReading.productId)?.name
+        : null;
+      const anchorContext = anchorName
+        ? `　基準：${anchorName}`
+        : state.anchorReading.kind === "selecting"
+          ? "　選擇比較基準"
+          : "";
+      contextLabel.textContent = `${categoryContext}${anchorContext}`;
     } else if (state.expansion.kind === "all") {
       contextLabel.textContent = activeCategory
         ? `全部 ${model.productCount} 道　${activeIndex + 1} / ${model.categoryCount}　${activeCategory.name}`
@@ -110,6 +119,7 @@ export const createMenuOverview = (
     } else {
       contextLabel.textContent = "";
     }
+    contextLabel.title = contextLabel.textContent;
 
     sections.forEach((section) => {
       const isCurrent = state.expansion.kind !== "overview" && state.activeCategoryId === section.categoryId;
