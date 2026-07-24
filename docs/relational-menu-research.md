@@ -4,7 +4,7 @@
 
 This is the exploratory design record for the active Menu Lens menu-reading work.
 
-It records failed single-product interactions, the stable-ledger hypothesis, Prototype A and B evidence, and the separately planned Prototype C correction. It is not a product-contract change and does not authorize Candidate, Comparison, Decision, Configuration, Current order, or checkout work.
+It records failed single-product interactions, the stable-ledger hypothesis, Prototype A and B dispositions, and the implemented Prototype C correction. It is not a product-contract change and does not authorize Candidate, Comparison, Decision, Configuration, Current order, or checkout work.
 
 Current branch and Draft PR:
 
@@ -21,7 +21,7 @@ Current status:
 → [rejected, removed] C1 fixed product focus rail
 → [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
-→ [planned, implementation not started] Prototype C — Anchor + explicit shared axis
+→ [implemented, awaiting review] Prototype C — Anchor + explicit shared axis
 → [blocked] Candidate / Comparison / Decision / Configuration / Current order
 ```
 
@@ -84,7 +84,7 @@ Insufficient evidence:
 - only one dimension was visible at a time;
 - switching axes removed prior evidence and reintroduced cross-axis remembering.
 
-Prototype A remains isolated research evidence. Its selector is not active in Prototype B.
+Prototype A remains isolated research evidence. Its selector is not active in Prototype C.
 
 ## Prototype B — Anchor-only relation
 
@@ -139,23 +139,13 @@ Visible Prototype B output selected:
 季節時蔬豆腐煲         份量較小
 ```
 
-The crab correctly exposes the strongest preparation difference, but the surface silently hides four other true faster-preparation relationships. An unfamiliar diner can reasonably conclude that the crab is the only faster dish.
+The crab correctly exposed the strongest preparation difference, but the surface silently hid four other true faster-preparation relationships. An unfamiliar diner could reasonably conclude that the crab was the only faster dish.
 
-This triggers the predefined failure signal:
+This triggered the predefined failure signal:
 
 > deterministic token selection hides useful evidence.
 
-The problem is not merely the priority order. Any single automatically selected semantic token can suppress another known difference.
-
-Omission is indistinguishable from equality, and the relation column mixes dimensions across rows:
-
-```text
-row A → portion
-row B → preparation
-row C → uncertainty
-```
-
-The result is neither one shared semantic axis nor a complete relative profile.
+The problem was not merely the priority order. Any single automatically selected semantic token could suppress another known difference. Omission was indistinguishable from equality, and the relation column mixed dimensions across rows.
 
 ### Designer reverse-review result
 
@@ -166,43 +156,35 @@ The result is neither one shared semantic axis nor a complete relative profile.
 - complete and truthful semantic comparison: **fail**;
 - reliable reduction of semantic remembering and backtracking: **insufficient**.
 
-This is an adversarial designer proxy. It can reject the formal contradiction between canonical data and visible output, but it cannot prove unfamiliar-user learnability or perceived effort.
-
 The full task matrix is in `docs/prototype-b-anchor-plan.md`.
 
 ## Shared conclusion from A and B
 
-Prototype A exposes one complete dimension but requires switching dimensions.
-
-Prototype B keeps one reference visible and removes price arithmetic, but compresses semantic evidence by hiding dimensions.
-
 ```text
-A result
+Prototype A
 complete one-axis evidence
 but cross-axis memory remains
 
-B result
+Prototype B
 persistent anchor and exact price delta
 but semantic omission becomes misleading
 ```
 
-Neither experiment should be treated as the finished relational-reading answer.
+Neither experiment is the finished relational-reading answer.
 
 ## Prototype C — Anchor + explicit shared axis
 
 Status:
 
 ```text
-[planned, implementation not started]
+[implemented, awaiting review]
 ```
-
-Prototype C is a new, separately testable hypothesis rather than an automatic accumulation of previous UI.
 
 Question:
 
 > Can one temporary anchor preserve exact price deltas while one explicit category-wide semantic axis keeps every row answering the same question, so no trusted difference is silently suppressed?
 
-### Planned correction
+### Implemented correction
 
 ```text
 Prototype B
@@ -221,6 +203,8 @@ Portion mode:
 紹興奶油蝦             少 NT$40 · 2–3 人      NT$480
 蒜酥椒鹽軟殼蟹         少 NT$60 · 2–3 人      NT$460
 豆豉蒸鱸魚             多 NT$40 · 未提供      NT$560
+宮保杏鮑菇             少 NT$180 · 2–3 人     NT$340
+季節時蔬豆腐煲         少 NT$140 · 2–3 人     NT$380
 ```
 
 Preparation mode:
@@ -230,6 +214,8 @@ Preparation mode:
 紹興奶油蝦             少 NT$40 · 一般        NT$480
 蒜酥椒鹽軟殼蟹         少 NT$60 · 快          NT$460
 豆豉蒸鱸魚             多 NT$40 · 一般        NT$560
+宮保杏鮑菇             少 NT$180 · 一般       NT$340
+季節時蔬豆腐煲         少 NT$140 · 一般       NT$380
 ```
 
 ### Why absolute labels
@@ -253,37 +239,143 @@ For one active axis:
 9. switching axis updates every row together;
 10. sold-out state remains independent.
 
-### Mobile constraint
+### State and orientation
 
-The selected direction keeps one semantic value per row rather than displaying all dimensions simultaneously.
+- one anchor remains category-local;
+- changing anchor preserves the active axis;
+- clearing removes the anchor but preserves the disabled axis preference;
+- entering overview or all-expanded mode clears the anchor;
+- reopening the same category preserves the selected axis;
+- changing categories resets to the destination's first eligible axis;
+- ineligible categories cannot enter C selection;
+- the existing sticky context remains the only sticky surface and displays `axis｜anchor`.
 
-The plan requires:
+A reverse-review correction was required here: the first implementation reset `準備` to default `份量` when the user returned to overview and reopened the same category. The state transition now distinguishes same-category reopening from an actual category change.
 
-- a fixed anchor-control row;
-- a fixed shared-axis row;
-- one-line relation cells;
-- complete fixture phrases at 320 px without relying on hover or `title`;
-- the existing sticky context as the only sticky orientation surface;
-- sticky visibility of both active axis and anchor;
-- no state-dependent column widths or scroll correction.
+### Axis eligibility
 
-### Independent evaluation target
+Axes are bounded to:
 
-The shared-dish task must verify that a participant can:
+```text
+portion
+preparation
+```
 
-- identify every faster dish in preparation mode;
-- identify the crab as the strongest absolute faster class without thinking it is the only faster dish;
-- identify all smaller dishes and the unknown item in portion mode;
-- distinguish matching values from unknown;
-- notice and switch the non-active axis;
-- retain price deltas and orientation while switching axis or anchor;
-- avoid interpreting the interaction as Candidate, recommendation, ranking, or order state.
+Current reference behavior:
 
-### Plan boundary
+```text
+個人主餐       準備
+飯麵類         準備
+分享料理       份量 / 準備
+小食           準備
+飲料           no C control
+甜點           no C control
+```
 
-No Prototype C application code has been added.
+Eligibility is category-level and stable across anchor changes.
 
-The complete layout, state, projection, geometry, accessibility, test-first, and evaluation contracts are in:
+### Automated evidence
+
+Tests cover:
+
+- category-level eligibility;
+- complete portion and preparation projection;
+- exact price deltas;
+- formal absolute labels and explicit unknown;
+- no blank or mixed active-axis states;
+- anchor row value;
+- axis preservation across anchor changes and same-category reopening;
+- category reset boundaries;
+- canonical order and sold-out retention;
+- four columns, fixed controls, one sticky context, and no row-wide click;
+- absence of B automatic semantics and all deferred states.
+
+The branch passes:
+
+```text
+Typecheck
+Tests
+Static build
+```
+
+### Narrow-screen proxy
+
+A code-derived Chromium proxy using current DOM structure, CSS dimensions, fixture text, and Chromium font metrics was run at 320 px and 390 px.
+
+Results across idle, selecting, portion, preparation, switched axis, and cleared states:
+
+```text
+row-height difference       0px
+row-top difference          0px
+table-height difference     0px
+fixture relation overflow   none
+horizontal scrolling        none
+```
+
+This is implementation evidence, not participant evidence.
+
+### Designer reverse-review result
+
+Price:
+
+```text
+PASS — exact deltas remove arithmetic
+```
+
+Portion:
+
+```text
+PASS — all trusted values and explicit unknown remain visible
+```
+
+Preparation:
+
+```text
+PASS — all normal and fast alternatives remain visible
+```
+
+The crab is visibly the strongest faster class without appearing to be the only faster alternative.
+
+Equality and unknown:
+
+```text
+FORMAL PASS
+```
+
+Orientation:
+
+```text
+DESIGNER-PROXY PASS
+```
+
+No formal contradiction equivalent to Prototype B remains.
+
+## Prototype C review gate
+
+Prototype C remains unpassed because designer review cannot prove:
+
+- that users notice the non-active axis;
+- that users infer every faster item from `慢 / 一般 / 快`;
+- that switching one explicit axis sufficiently reduces memory work;
+- that absolute labels are understood as comparison evidence;
+- that 0.62rem relation text is comfortable on a real phone;
+- that anchor selection is not mistaken for saving or ordering.
+
+Use `分享料理` and `山椒烤雞半隻` as the initial anchor. Without teaching the interaction, verify that a participant can:
+
+1. identify every exact price difference;
+2. identify all smaller products and the unknown product in portion mode;
+3. explain whether any portion value is hidden;
+4. switch to preparation and identify every faster product;
+5. identify the strongest faster class without false exclusivity;
+6. explain `一般` versus `快` relative to a `慢` anchor;
+7. distinguish equality from unknown;
+8. change anchor while preserving preparation;
+9. return to overview and reopen the same category without losing the axis;
+10. explain whether anything was saved, ordered, recommended, filtered, or ranked;
+11. report whether switching axes still requires too much remembering.
+
+The complete contract and task signals are in:
 
 ```text
 docs/prototype-c-anchor-axis-plan.md
@@ -291,11 +383,8 @@ docs/prototype-c-anchor-axis-plan.md
 
 ## Blocked later work
 
-Prototype C planning does not authorize implementation automatically.
+Until Prototype C receives an explicit disposition, the following remain blocked:
 
-Until the C plan is explicitly reviewed and implementation is separately started, the following remain blocked:
-
-- Prototype C application code;
 - Candidate;
 - Comparison;
 - Decision;
@@ -311,4 +400,4 @@ Until the C plan is explicitly reviewed and implementation is separately started
 
 None.
 
-The product contract already requires complete-menu access, browsing distinct from ordering, preserved browsing context, comparison support, and explicit uncertainty. These prototype dispositions and plans change the experimental route, not the requirements.
+The product contract already requires complete-menu access, browsing distinct from ordering, preserved browsing context, comparison support, and explicit uncertainty. These prototype dispositions change the experimental route, not the requirements.
