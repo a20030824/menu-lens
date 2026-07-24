@@ -66,7 +66,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     state = selectAnchor(state, menu, productId);
     render();
     if (categoryId && state.anchorReading.kind === "active") {
-      overview.focusAnchorControl(categoryId);
+      overview.focusProductRelation(categoryId, productId);
     }
   };
 
