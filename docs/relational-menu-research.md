@@ -4,13 +4,11 @@
 
 This document records the completed current-scope relational menu research that produced the accepted Prototype C reading substrate.
 
-It is historical evidence for the active Candidate workstream, not authorization to build Comparison, Decision, Configuration, Current order, or checkout.
-
-Current branch and Draft PR:
+It is historical evidence for the accepted CND1 Candidate slice, not authorization to build Comparison, Decision, Configuration, Current order, or checkout.
 
 ```text
-agent/menu-map-atlas
-PR #4 — Build menu reading workspace
+branch  agent/menu-map-atlas
+PR      #4 — Build menu reading workspace
 ```
 
 Final sequence:
@@ -18,11 +16,11 @@ Final sequence:
 ```text
 [passed] M1 compressed overview + shared ledger
 → [rejected] M2 modal product detail
-→ [rejected, removed] C1 fixed product focus rail
+→ [rejected, removed] C1 fixed Product focus rail
 → [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
 → [passed for current scope] Prototype C — Anchor + explicit shared axis
-→ [implemented, awaiting review] CND1 — Attached Candidate marks
+→ [passed for current scope] CND1 — Attached Candidate marks
 ```
 
 ## Core problem
@@ -50,7 +48,7 @@ M1 established:
 - canonical order retained;
 - no independent Product cards.
 
-This passed coordinate plane remains the substrate for CND1 Candidate marks.
+This passed coordinate plane remains the substrate for Prototype C and CND1 Candidate marks.
 
 ## Rejected single-Product approaches
 
@@ -72,8 +70,8 @@ Disposition:
 
 Useful evidence:
 
-- one shared preparation axis made several Products simultaneously comparable;
-- portion exposed known classes and explicit unknown;
+- one shared dimension made several Products simultaneously comparable;
+- portion and preparation exposed explicit known and unknown states;
 - complete-menu credibility, canonical order, and stable geometry remained.
 
 Insufficient evidence:
@@ -82,7 +80,7 @@ Insufficient evidence:
 - only one dimension was visible at a time;
 - switching axes retained cross-axis remembering.
 
-The obsolete A selector UI was removed from the active application tree. Its pure projection remains compiled and tested as historical evidence.
+The obsolete selector UI was removed. The pure projection remains compiled and tested as historical evidence.
 
 ## Prototype B — Anchor-only relation
 
@@ -92,44 +90,25 @@ Disposition:
 [useful but insufficient]
 ```
 
-B introduced one temporary category-local Anchor and displayed:
-
-```text
-exact price delta
-+ at most one automatically selected semantic token
-```
+B introduced one temporary category-local Anchor and displayed exact price delta plus at most one automatically selected semantic token.
 
 Useful evidence:
 
 - exact deltas removed repeated arithmetic;
 - one temporary Anchor fit the state model;
 - canonical rows, statuses, order, and geometry remained stable;
-- unknown remained explicit;
-- no Candidate, recommendation, ranking, or transaction state appeared.
+- uncertainty remained explicit.
 
-### Decisive semantic failure
-
-With `山椒烤雞半隻` as a slow Anchor, every trusted shared-dish alternative is faster:
-
-```text
-anchor                  慢
-紹興奶油蝦             一般
-蒜酥椒鹽軟殼蟹         快
-豆豉蒸鱸魚             一般
-宮保杏鮑菇             一般
-季節時蔬豆腐煲         一般
-```
-
-B displayed `較快` only for the soft-shell crab because portion or uncertainty occupied the other rows.
-
-The crab was the strongest faster class, not the only faster Product.
-
-This proved that the problem was structural rather than a priority-order bug:
+Decisive failure:
 
 - semantic dimensions varied by row;
 - trusted differences were silently suppressed;
 - omission was indistinguishable from equality;
 - the surface could imply false exclusivity.
+
+With `山椒烤雞半隻` as a slow Anchor, every trusted shared-dish alternative was faster, but B displayed `較快` only for the soft-shell crab because other semantic tokens occupied the remaining rows.
+
+The problem was structural rather than a priority-order bug.
 
 ## Prototype C — Anchor + explicit shared axis
 
@@ -139,43 +118,15 @@ Final disposition:
 [passed for current scope]
 ```
 
-C tested:
-
-> Can one temporary Anchor preserve exact price deltas while one explicit category-wide semantic axis keeps every row answering the same question, so no trusted difference is silently suppressed?
-
-### Implemented correction
+C replaced automatic row-level semantic selection with one explicit category-wide axis:
 
 ```text
-Prototype B
-price delta + row-selected semantic dimension
-
-Prototype C
-price delta + user-selected category-wide semantic axis
+one Anchor
++ exact price delta on every alternative
++ one user-selected 份量 or 準備 axis
 ```
 
-The user explicitly selects `份量` or `準備`. Every row displays the same active axis using a trusted absolute value or `未提供`.
-
-### Portion mode
-
-```text
-山椒烤雞半隻           基準 · 多人            NT$520
-紹興奶油蝦             少 NT$40 · 2–3 人      NT$480
-蒜酥椒鹽軟殼蟹         少 NT$60 · 2–3 人      NT$460
-豆豉蒸鱸魚             多 NT$40 · 未提供      NT$560
-宮保杏鮑菇             少 NT$180 · 2–3 人     NT$340
-季節時蔬豆腐煲         少 NT$140 · 2–3 人     NT$380
-```
-
-### Preparation mode
-
-```text
-山椒烤雞半隻           基準 · 慢              NT$520
-紹興奶油蝦             少 NT$40 · 一般        NT$480
-蒜酥椒鹽軟殼蟹         少 NT$60 · 快          NT$460
-豆豉蒸鱸魚             多 NT$40 · 一般        NT$560
-宮保杏鮑菇             少 NT$180 · 一般       NT$340
-季節時蔬豆腐煲         少 NT$140 · 一般       NT$380
-```
+Every active row answers the same semantic question using a trusted absolute value or `未提供`.
 
 ### Truthfulness invariants
 
@@ -200,15 +151,16 @@ For one active axis:
 - same-category reopening preserves an explicit eligible axis;
 - changing category resets to the destination default axis;
 - the existing sticky context exposes `axis｜anchor`;
-- no Candidate or order state is stored in reading state.
+- Candidate and order state remain outside reading state.
 
 ### Re-review corrections
 
-The C re-review found and corrected:
+Prototype C corrected:
 
-1. same-category reopening incorrectly reset an explicit axis;
-2. choosing an Anchor in a row moved focus to an offscreen top control;
-3. pressing Escape from a row had the same offscreen-focus problem.
+1. same-category reopening resetting an explicit axis;
+2. Anchor selection moving focus to an offscreen control;
+3. Escape cancellation moving focus offscreen;
+4. an obsolete Prototype A selector UI remaining in the application tree.
 
 Current focus behavior:
 
@@ -223,50 +175,28 @@ Top Cancel or Clear
 → focus top Anchor control
 ```
 
-The relation lane uses `tabIndex=-1`, receives the complete accessible phrase, and does not add a normal Tab stop.
+A code-derived Chromium proxy at 320px and 390px reported zero state-change differences for row height, row top, table height, and scroll position, with no relation overflow or horizontal scrolling.
 
-### Geometry and build evidence
+Typecheck, tests, and static build pass.
 
-A code-derived Chromium proxy at 320 px and 390 px found:
+### Evidence boundary
 
-```text
-row-height difference       0px
-row-top difference          0px
-table-height difference     0px
-fixture relation overflow   none
-horizontal scrolling        none
-```
+Prototype C is accepted for the current implementation scope by product-owner decision.
 
-The branch passes:
+No unfamiliar-participant comprehension, measured task improvement, comfortable real-device readability, or conventional-interface superiority is claimed.
 
-```text
-Typecheck
-Tests
-Static build
-```
+## Handoff to CND1
 
-### Final evidence boundary
-
-C is accepted for the current implementation scope by product-owner decision after formal, automated, designer-proxy, focus, and narrow-screen checks.
-
-No unfamiliar-participant evidence, proven learnability, measured task improvement, or conventional-interface superiority is claimed.
-
-The cancelled unfamiliar-user gate is no longer a blocker. Previously listed comprehension and mobile-comfort risks remain recorded as known limitations.
-
-## Handoff to Candidate work
-
-Prototype C is the stable reading substrate for the implemented CND1 Attached Candidate marks slice.
-
-Candidate and C are independent:
+CND1 attached Candidate membership to canonical rows without changing Prototype C meaning.
 
 ```text
 Anchor / semantic axis = how Products are read
 Candidate              = which Products remain under consideration
 ```
 
-CND1 attaches identity-only membership to canonical rows, preserves C state, and introduces no Candidate workspace or transaction state.
+CND1 is now also accepted for the current scope after its own test-first implementation and final reverse review.
 
-Current CND1 evidence and review status:
+Current CND1 record:
 
 ```text
 docs/candidate-marks-plan.md
@@ -274,20 +204,23 @@ docs/candidate-marks-plan.md
 
 ## Blocked later work
 
-Until CND1 receives an explicit product-owner disposition, do not begin:
+Passing Prototype C and CND1 does not automatically authorize:
 
-- detached Candidate workspace or copied Candidate list;
+- Candidate workspace or copied Candidate list;
 - Candidate comparison;
 - Decision;
 - Configuration;
 - Current order;
 - quantity or modifiers;
+- totals or submission;
 - recommendation, ranking, or filtering;
 - shared-table composition;
 - checkout.
+
+A separate bounded plan is required before any of those states begin.
 
 ## Contract impact
 
 None.
 
-The product contract already requires complete-menu access, browsing distinct from ordering, Candidate distinct from order state, preserved browsing context, and explicit uncertainty. The relational prototype dispositions changed the implementation route, not those invariants.
+The relational prototype dispositions changed the implementation route, not the invariants in `docs/product-contract.md`.
