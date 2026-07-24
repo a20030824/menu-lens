@@ -60,8 +60,11 @@ export const createCandidateWorkspace = (
   root.append(header, groups);
 
   const removeButtons = new Map<ProductId, HTMLButtonElement>();
+  let renderedCandidateState: CandidateState | null = null;
 
   const render = (state: CandidateState): void => {
+    if (renderedCandidateState === state) return;
+    renderedCandidateState = state;
     const workspace = createCandidateWorkspaceModel(menu, state);
     heading.textContent = workspace.count === 0 ? "尚無考慮項目" : `考慮中的 ${workspace.count} 道`;
     root.dataset.empty = String(workspace.count === 0);
@@ -110,7 +113,6 @@ export const createCandidateWorkspace = (
         if (productView?.metadataCompleteness === "partial") {
           statuses.append(element("span", "candidate-status", "資訊有限"));
         }
-        statuses.hidden = statuses.childElementCount === 0;
 
         const actions = element("div", "candidate-workspace__actions");
         const locateButton = element("button", "candidate-workspace__action", "在菜單中查看") as HTMLButtonElement;
