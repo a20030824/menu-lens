@@ -61,7 +61,7 @@ full menu
 → current order
 ```
 
-The exact interaction route remains under investigation. The current branch is testing whether product relationships can appear on the stable menu surface before Candidate or transaction work begins.
+Prototype C established the accepted relational-reading substrate. The current work is planning how reversible Candidate membership attaches to canonical Product rows without creating an order or a second product list.
 
 ### Later, only after the decision spine works
 
@@ -123,7 +123,8 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/interaction-model.md`](docs/interaction-model.md) — menu map, candidate workspace, lens behavior, table state, and reversibility
 - [`docs/relational-menu-research.md`](docs/relational-menu-research.md) — failed menu-reading hypotheses and relational prototype evidence
 - [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) — Prototype B implementation, task matrix, reverse review, and disposition
-- [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) — Prototype C implementation, formal evidence, mobile proxy, focus re-review, and review gate
+- [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) — Prototype C implementation, evidence, accepted limitations, and final current-scope disposition
+- [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) — planned first Candidate slice, state boundaries, row-attached layout, tests, and gates
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
@@ -132,7 +133,7 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 
 The foundation, domain schema, reference dataset, and formative evaluation protocol are complete.
 
-The customer decision spine is active on Draft PR #4. Current evidence is:
+The customer decision spine is active on Draft PR #4:
 
 ```text
 [passed] M1 compressed overview + shared ledger
@@ -140,20 +141,17 @@ The customer decision spine is active on Draft PR #4. Current evidence is:
 → [rejected, removed] C1 fixed product focus rail
 → [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
-→ [implemented, awaiting review] Prototype C — Anchor + explicit shared axis
-→ [blocked] Candidate / Comparison / Decision / Configuration / Current order
+→ [passed for current scope] Prototype C — Anchor + explicit shared axis
+→ [planned, implementation not started] CND1 — Attached Candidate marks
+→ [blocked] Candidate workspace / Comparison / Decision / Configuration / Current order
 ```
 
-Prototype A proved that one shared dimension can make several products simultaneously comparable, but it retained cross-axis memory work and its price scale had weak independent value.
+Prototype A showed that one shared dimension can support simultaneous multi-product reading, but retained cross-axis memory work and a weak price axis.
 
-Prototype B proved that exact anchor-relative price deltas remove mental subtraction while preserving canonical order, stable geometry, explicit uncertainty, and complete-menu credibility. However, the automatically selected semantic token varied by row and silently suppressed other trusted differences. In the formal shared-dish fixture, several dishes were faster than the slow anchor, but only the soft-shell crab displayed `較快`; the surface could therefore imply false exclusivity.
+Prototype B showed that exact anchor-relative price deltas remove arithmetic while preserving the canonical menu, but its automatically selected semantic token mixed dimensions and could imply false exclusivity.
 
-Prototype C is implemented as a separately testable correction. It preserves one anchor and exact price deltas, removes row-level automatic dimension selection, and gives the category one explicit shared semantic axis. Every row displays the same `份量` or `準備` question using a trusted absolute value or `未提供`. Switching the axis updates all rows together, changing the anchor preserves the axis, and reopening the same category preserves the explicit axis preference.
+Prototype C corrects that failure with one Anchor, persistent exact price deltas, and one explicit category-wide `份量` or `準備` axis. Formal projection tests, state tests, designer reverse review, focus re-review, narrow-screen proxies, and CI pass. It is accepted for the current scope by product-owner decision. No unfamiliar-participant evidence or measured usability claim is made.
 
-The latest re-review also corrected keyboard focus continuity: selecting an anchor or cancelling with Escape inside a row now keeps focus on that canonical row without moving the viewport; top-level cancel and clear remain in the anchor control. The unused Prototype A selector UI was removed while A/B pure projection modules remain as historical evidence.
+CND1 now plans the first Candidate state without implementing a Candidate workspace. Candidate membership will remain independent from Anchor and semantic-axis state, attach to the canonical row, survive reading transitions, and introduce no quantity, configuration, total, copied Product list, or order state.
 
-Automated tests and a code-derived Chromium proxy show that C satisfies its formal truthfulness, state, structure, focus, and narrow-screen geometry contracts. This does not prove unfamiliar-user comprehension, discoverability, or reduced memory work, so C remains awaiting review.
-
-Candidate and every later decision or transaction state remain blocked until Prototype C receives an explicit disposition.
-
-See [`docs/workstreams.md`](docs/workstreams.md), [`docs/relational-menu-research.md`](docs/relational-menu-research.md), [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md), and [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) for the sequence and evidence record.
+See [`docs/workstreams.md`](docs/workstreams.md), [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md), and [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) for the active sequence and gates.
