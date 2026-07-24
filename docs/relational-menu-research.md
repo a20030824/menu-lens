@@ -22,7 +22,7 @@ Final sequence:
 → [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
 → [passed for current scope] Prototype C — Anchor + explicit shared axis
-→ [planned] CND1 — Attached Candidate marks
+→ [implemented, awaiting review] CND1 — Attached Candidate marks
 ```
 
 ## Core problem
@@ -255,7 +255,7 @@ The cancelled unfamiliar-user gate is no longer a blocker. Previously listed com
 
 ## Handoff to Candidate work
 
-Prototype C is now the stable reading substrate for CND1 Attached Candidate marks.
+Prototype C is the stable reading substrate for the implemented CND1 Attached Candidate marks slice.
 
 Candidate and C are independent:
 
@@ -264,9 +264,9 @@ Anchor / semantic axis = how Products are read
 Candidate              = which Products remain under consideration
 ```
 
-The next slice must not modify C's meaning or automatically turn an Anchor into a Candidate.
+CND1 attaches identity-only membership to canonical rows, preserves C state, and introduces no Candidate workspace or transaction state.
 
-CND1 plan:
+Current CND1 evidence and review status:
 
 ```text
 docs/candidate-marks-plan.md
@@ -274,7 +274,7 @@ docs/candidate-marks-plan.md
 
 ## Blocked later work
 
-Until CND1 receives an explicit implementation disposition, do not begin:
+Until CND1 receives an explicit product-owner disposition, do not begin:
 
 - detached Candidate workspace or copied Candidate list;
 - Candidate comparison;
