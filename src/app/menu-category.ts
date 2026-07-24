@@ -98,6 +98,7 @@ export type MenuCategorySection = Readonly<{
     anchorReading: AnchorReading,
     semanticAxis: SemanticAxis | null,
     controlsVisible: boolean,
+    candidateProductIds: ReadonlySet<ProductId>,
   ) => void;
   focusAnchorControl: () => void;
   focusProductRelation: (productId: ProductId) => void;
@@ -112,6 +113,7 @@ export const createMenuCategorySection = (
   onSelectAnchor: (productId: ProductId) => void,
   onClearAnchor: () => void,
   onSelectAxis: (axis: SemanticAxis) => void,
+  onToggleCandidate: (productId: ProductId) => void,
 ): MenuCategorySection => {
   const section = element("section", "menu-category-zone");
   section.id = `category-${category.id}`;
@@ -199,6 +201,7 @@ export const createMenuCategorySection = (
   ledgerHead.append(ledgerHeadRow);
 
   const relationTargets = new Map<ProductId, HTMLElement>();
+  const candidateButtons = new Map<ProductId, HTMLButtonElement>();
   const rows = new Map<ProductId, HTMLTableRowElement>();
   const ledgerBody = element("tbody");
   category.products.forEach((product, productIndex) => {
@@ -208,6 +211,7 @@ export const createMenuCategorySection = (
     ) as HTMLTableRowElement;
     row.dataset.productId = product.id;
     row.dataset.anchor = "false";
+    row.dataset.candidate = "false";
 
     const indexCell = element(
       "td",
@@ -220,19 +224,28 @@ export const createMenuCategorySection = (
     const relation = element("span", "product-row__relation");
     relation.tabIndex = -1;
     renderDefaultRelation(relation, product);
-    cueCell.append(relation);
 
-    const status = element("span", "product-row__status");
+    const candidate = element("span", "product-row__candidate");
     if (product.isSoldOut) {
-      status.append(element("span", "status-text status-text--sold-out", product.availabilityLabel));
+      candidate.append(
+        element("span", "status-text status-text--sold-out", product.availabilityLabel),
+      );
     } else {
-      status.append(visuallyHiddenText(product.availabilityLabel));
+      const button = element("button", "candidate-toggle", "考慮") as HTMLButtonElement;
+      button.type = "button";
+      button.setAttribute("aria-pressed", "false");
+      button.setAttribute("aria-label", `將「${product.name}」列入考慮`);
+      button.addEventListener("click", () => onToggleCandidate(product.id));
+      candidate.append(button);
+      candidateButtons.set(product.id, button);
     }
     if (product.metadataCompleteness === "partial") {
-      status.append(element("span", "status-text", "資訊有限"));
+      candidate.append(element("span", "candidate-status", "資訊有限"));
+    } else if (!product.isSoldOut) {
+      candidate.append(visuallyHiddenText(product.availabilityLabel));
     }
-    cueCell.append(status);
 
+    cueCell.append(relation, candidate);
     const priceCell = element("td", "product-row__price", product.price);
     row.append(indexCell, nameCell, cueCell, priceCell);
     ledgerBody.append(row);
@@ -245,13 +258,14 @@ export const createMenuCategorySection = (
   reveal.append(revealInner);
   section.append(band, reveal);
 
-  let renderedState = "";
+  let renderedReadingState = "";
   const setState = (
     expanded: boolean,
     current: boolean,
     anchorReading: AnchorReading,
     semanticAxis: SemanticAxis | null,
     controlsVisible: boolean,
+    candidateProductIds: ReadonlySet<ProductId>,
   ): void => {
     section.dataset.expanded = String(expanded);
     section.dataset.current = String(current);
@@ -261,6 +275,20 @@ export const createMenuCategorySection = (
     reveal.setAttribute("aria-hidden", String(!expanded));
     if (expanded) reveal.removeAttribute("inert");
     else reveal.setAttribute("inert", "");
+
+    candidateButtons.forEach((button, productId) => {
+      const product = category.products.find((entry) => entry.id === productId);
+      const isMarked = candidateProductIds.has(productId);
+      button.setAttribute("aria-pressed", String(isMarked));
+      button.textContent = isMarked ? "考慮中" : "考慮";
+      button.setAttribute(
+        "aria-label",
+        isMarked
+          ? `將「${product?.name ?? productId}」移出考慮`
+          : `將「${product?.name ?? productId}」列入考慮`,
+      );
+      rows.get(productId)?.setAttribute("data-candidate", String(isMarked));
+    });
 
     const prototypeVisible = controlsVisible && category.semanticAxes.length > 0;
     const activeAnchorId = anchorReading.kind === "active"
@@ -284,7 +312,7 @@ export const createMenuCategorySection = (
     const nextRenderedState = activeAnchorId
       ? `active:${activeAnchorId}:${semanticAxis ?? "none"}`
       : `${anchorReading.kind}:${semanticAxis ?? "none"}`;
-    if (renderedState === nextRenderedState) return;
+    if (renderedReadingState === nextRenderedState) return;
 
     category.products.forEach((product) => {
       const target = relationTargets.get(product.id);
@@ -310,7 +338,7 @@ export const createMenuCategorySection = (
         : "閱讀線索";
     cueHeading.textContent = heading;
     cueHeading.title = heading;
-    renderedState = nextRenderedState;
+    renderedReadingState = nextRenderedState;
   };
 
   return {
