@@ -61,7 +61,7 @@ full menu
 → current order
 ```
 
-Prototype C established the accepted relational-reading substrate. CND1 now implements reversible Candidate membership directly on canonical Product rows without creating an order, Candidate workspace, or copied Product list.
+Prototype C establishes the accepted relational-reading substrate. CND1 establishes reversible Candidate membership directly on canonical Product rows without creating an order, Candidate workspace, or copied Product list.
 
 ### Later, only after the decision spine works
 
@@ -124,7 +124,7 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/relational-menu-research.md`](docs/relational-menu-research.md) — failed menu-reading hypotheses and relational prototype evidence
 - [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) — Prototype B implementation, task matrix, reverse review, and disposition
 - [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) — Prototype C implementation, evidence, accepted limitations, and final current-scope disposition
-- [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) — CND1 implementation, state boundaries, attached-row layout, tests, corrections, and product-owner review status
+- [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) — CND1 implementation, final re-review corrections, narrow-screen evidence, and accepted disposition
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
@@ -142,7 +142,7 @@ The customer decision spine is active on Draft PR #4:
 → [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
 → [passed for current scope] Prototype C — Anchor + explicit shared axis
-→ [implemented, awaiting product-owner review] CND1 — Attached Candidate marks
+→ [passed for current scope] CND1 — Attached Candidate marks
 → [blocked] Candidate workspace / Comparison / Decision / Configuration / Current order
 ```
 
@@ -152,10 +152,10 @@ Prototype B showed that exact Anchor-relative price deltas remove arithmetic whi
 
 Prototype C corrects that failure with one Anchor, persistent exact price deltas, and one explicit category-wide `份量` or `準備` axis. Formal projection tests, state tests, designer reverse review, focus re-review, narrow-screen proxies, and CI pass. It is accepted for the current scope by product-owner decision. No unfamiliar-participant evidence or measured usability claim is made.
 
-CND1 adds identity-only Candidate membership beside reading state. Available Product rows expose persistent `考慮 ↔ 考慮中` buttons; sold-out rows remain visible but cannot be newly marked. Candidate membership survives every category, overview, all-expanded, Anchor, and semantic-axis transition while preserving canonical order, four columns, focus, and fixed row geometry.
+CND1 adds identity-only Candidate membership beside reading state. Available Product rows expose persistent `考慮` toggle buttons whose membership is communicated through `aria-pressed`; sold-out rows remain visible but cannot be newly marked. Candidate membership survives every category, overview, all-expanded, Anchor, and semantic-axis transition while preserving canonical order, four columns, focus, and fixed row geometry.
 
-CND1 includes one noninteractive count that explicitly says Candidates are not an order. It does not add a Candidate workspace, Comparison, quantity, Configuration, total, Current order, copied Product list, recommendation, or ranking state. Typecheck, Candidate domain tests, app-state continuity tests, structure contracts, and the static build pass.
+The final CND1 re-review corrected stale-ID counting, Candidate-dependent Product typography, repeated live-region announcements, changing toggle labels, an unused row-wide state mirror, and a premature detached-list projection. A 320px/390px Chromium proxy reports zero Candidate on/off geometry differences and no overflow. Typecheck, Candidate domain tests, app-state continuity tests, structure contracts, and the static build pass.
 
-CND1 is implemented and awaiting an explicit product-owner disposition. The current gate does not require an unfamiliar-participant study. Later Candidate and transaction slices remain blocked.
+CND1 is accepted for the current scope. Candidate workspace, Comparison, Decision, Configuration, Current order, and every transaction state remain blocked until a separate bounded plan is approved.
 
 See [`docs/workstreams.md`](docs/workstreams.md), [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md), and [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) for the active sequence and evidence.
