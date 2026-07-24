@@ -28,6 +28,7 @@ export type MenuOverviewView = Readonly<{
   render: (state: MenuReadingState) => void;
   sectionFor: (categoryId: CategoryId) => HTMLElement | null;
   focusAnchorControl: (categoryId: CategoryId) => void;
+  focusProductRelation: (categoryId: CategoryId, productId: ProductId) => void;
 }>;
 
 export const createMenuOverview = (
@@ -154,5 +155,7 @@ export const createMenuOverview = (
       sections.find((section) => section.categoryId === categoryId)?.element ?? null,
     focusAnchorControl: (categoryId) =>
       sections.find((section) => section.categoryId === categoryId)?.focusAnchorControl(),
+    focusProductRelation: (categoryId, productId) =>
+      sections.find((section) => section.categoryId === categoryId)?.focusProductRelation(productId),
   };
 };
