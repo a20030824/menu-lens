@@ -258,8 +258,11 @@ export const createMenuCategorySection = (
     else reveal.setAttribute("inert", "");
 
     const prototypeVisible = controlsVisible && category.semanticAxes.length > 0;
-    const anchorProduct = anchorReading.kind === "active"
-      ? category.products.find((product) => product.id === anchorReading.productId)
+    const activeAnchorId = anchorReading.kind === "active"
+      ? anchorReading.productId
+      : null;
+    const anchorProduct = activeAnchorId
+      ? category.products.find((product) => product.id === activeAnchorId)
       : undefined;
     anchorControl.setState(
       anchorReading,
@@ -269,12 +272,12 @@ export const createMenuCategorySection = (
     axisControl.setState(
       category.semanticAxes,
       semanticAxis,
-      anchorReading.kind === "active",
+      activeAnchorId !== null,
       prototypeVisible,
     );
 
-    const nextRenderedState = anchorReading.kind === "active"
-      ? `active:${anchorReading.productId}:${semanticAxis ?? "none"}`
+    const nextRenderedState = activeAnchorId
+      ? `active:${activeAnchorId}:${semanticAxis ?? "none"}`
       : `${anchorReading.kind}:${semanticAxis ?? "none"}`;
     if (renderedState === nextRenderedState) return;
 
@@ -282,15 +285,13 @@ export const createMenuCategorySection = (
       const target = relationTargets.get(product.id);
       const row = rows.get(product.id);
       if (!target || !row) return;
-      row.dataset.anchor = String(
-        anchorReading.kind === "active" && product.id === anchorReading.productId,
-      );
+      row.dataset.anchor = String(activeAnchorId !== null && product.id === activeAnchorId);
       if (anchorReading.kind === "selecting") {
         renderSelectingRelation(target, product, onSelectAnchor);
-      } else if (anchorReading.kind === "active" && semanticAxis) {
+      } else if (activeAnchorId && semanticAxis) {
         renderActiveRelation(
           target,
-          category.anchorAxisRelations[anchorReading.productId]?.[semanticAxis]?.[product.id],
+          category.anchorAxisRelations[activeAnchorId]?.[semanticAxis]?.[product.id],
         );
       } else {
         renderDefaultRelation(target, product);
@@ -299,7 +300,7 @@ export const createMenuCategorySection = (
 
     const heading = anchorReading.kind === "selecting"
       ? "選擇基準"
-      : anchorReading.kind === "active" && semanticAxis
+      : activeAnchorId && semanticAxis
         ? `價差 · ${axisLabels[semanticAxis]}`
         : "閱讀線索";
     cueHeading.textContent = heading;
