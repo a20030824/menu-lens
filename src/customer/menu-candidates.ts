@@ -1,4 +1,4 @@
-import type { Menu, Product, ProductId } from "../domain/menu-types.js";
+import type { Menu, ProductId } from "../domain/menu-types.js";
 
 export type CandidateState = Readonly<{
   productIds: ReadonlyArray<ProductId>;
@@ -44,11 +44,3 @@ export const toggleCandidate = (
   isCandidate(state, productId)
     ? removeCandidate(state, productId)
     : addCandidate(state, menu, productId);
-
-export const candidateProducts = (
-  menu: Menu,
-  state: CandidateState,
-): ReadonlyArray<Product> => {
-  const membership = new Set(state.productIds);
-  return menu.products.filter((product) => membership.has(product.id));
-};
