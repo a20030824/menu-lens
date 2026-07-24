@@ -119,7 +119,7 @@ export const createMenuOverview = (
     } else {
       contextLabel.textContent = "";
     }
-    contextLabel.title = contextLabel.textContent;
+    contextLabel.title = contextLabel.textContent ?? "";
 
     sections.forEach((section) => {
       const isCurrent = state.expansion.kind !== "overview" && state.activeCategoryId === section.categoryId;
