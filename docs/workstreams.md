@@ -28,13 +28,13 @@ It prevents parallel conversations from redefining the product, retaining failed
         [rejected] large category Atlas
         → [rejected] desktop-first static workspace
         → [passed] M1 compressed overview + shared ledger
-        → [rejected] M2 modal product detail
+        → [rejected] M2 modal Product detail
         → [rejected, removed] C1 fixed Product focus rail
         → [useful but insufficient] Prototype A — Axis-only score
         → [useful but insufficient] Prototype B — Anchor-only relation
         → [passed for current scope] Prototype C — Anchor + explicit shared axis
     → [passed for current scope] CND1 — Attached Candidate marks
-    → [active, plan-review-gated] CND2 — Candidate review workspace
+    → [implemented, awaiting review] CND2 — Candidate review workspace
     → [blocked] Candidate comparison
     → [blocked] Decision / Configuration / Current order
 → [deferred] continuity and table state
@@ -52,7 +52,7 @@ It prevents parallel conversations from redefining the product, retaining failed
 | Formative evaluation | Complete | tasks, observations, events, falsification signals | observation contract |
 | Relational menu research | Passed for current scope | stable ledger and A/B/C evidence | accepted C reading substrate |
 | CND1 Attached Candidate marks | Passed for current scope | row-attached reversible Candidate membership only | accepted consideration state |
-| CND2 Candidate review workspace | Active, plan-review-gated | derived Candidate retrieval, revisit, removal, and exact menu return | approved workspace contract |
+| CND2 Candidate review workspace | Implemented, awaiting review | derived retrieval, revisit, removal, exact menu return | reviewable Candidate collection surface |
 | Candidate comparison | Blocked | bounded decision-relevant comparison generated from Candidates | explicit CND2 disposition first |
 | Decision / Configuration / Current order | Blocked | transaction-boundary states | Candidate and comparison coherence first |
 | Continuity and table state | Deferred | submitted rounds and coarse composition | stable decision spine first |
@@ -71,7 +71,7 @@ Read before new work:
 4. `docs/workstreams.md`
 5. the active slice document
 
-Active slice:
+Active implementation record:
 
 ```text
 docs/candidate-workspace-plan.md
@@ -182,13 +182,6 @@ Product
 
 Candidate membership has no quantity, configuration, modifier selections, order total, submission state, recommendation rank, notes, or ownership.
 
-Reading and Candidate state remain independent:
-
-```text
-Anchor / semantic axis = reading state
-Candidate              = reversible consideration state
-```
-
 Implemented surface:
 
 ```text
@@ -202,7 +195,7 @@ Available rows expose one persistent `考慮` toggle. Membership is expressed th
 
 Candidate membership survives overview, category focus and changes, all-expanded mode, every Anchor transition, semantic-axis switching, and same-category reopening.
 
-### Final re-review corrections
+### CND1 final corrections
 
 The final review corrected:
 
@@ -213,103 +206,148 @@ The final review corrected:
 5. an unused row-wide `data-candidate` mirror;
 6. a premature detached Candidate-list projection.
 
-A code-derived Chromium proxy at 320px and 390px found zero Candidate on/off differences for row, table, button, lane, and horizontal-scroll geometry. Typecheck, tests, structure contracts, and static build pass.
+A code-derived Chromium proxy at 320px and 390px found zero Candidate on/off geometry differences. Typecheck, tests, structure contracts, and static build pass.
 
-Known limitations:
+## Active review — CND2 Candidate review workspace
 
-- no Candidate workspace exists;
-- the count does not identify which collapsed categories contain Candidates;
-- `考慮` terminology has no unfamiliar-participant validation;
-- state lasts only for the active session.
-
-The first two limitations motivate CND2. The latter two remain accepted current-scope limitations.
-
-## Active workstream — CND2 Candidate review workspace
+```text
+[implemented, awaiting review]
+```
 
 ### Question
 
 > Can a diner retrieve, review, revisit, and dismiss Candidates collected across the canonical menu without losing the previous menu position or mistaking the workspace for an order?
 
-### Why this precedes comparison
+### Why it precedes comparison
 
-Comparison is generated from Candidates, but CND1 exposes only attached row marks and a global count. A bounded Candidate collection view must first establish:
+Comparison is generated from Candidates, but CND1 exposes only attached row marks and a global count. CND2 first establishes a coherent collection surface for:
 
-- which Products are currently Candidates;
-- which canonical categories they belong to;
-- how to remove one without affecting reading or order state;
-- how to return to the exact previous menu context;
-- how to navigate back to one Candidate's canonical row.
+- retrieving cross-category Candidates;
+- seeing canonical category and Product order;
+- removing one without affecting reading or order state;
+- returning to the exact prior menu context;
+- navigating back to one Candidate's canonical row.
 
-Comparison would otherwise combine an unproven Candidate collection surface with a second new interaction problem.
-
-### Authorized derived view
+### Implemented boundary
 
 ```text
-canonical Products
+canonical Category and Product references
 + Candidate ProductId membership
 → derived Candidate review workspace
 ```
 
-CND2 may derive canonical Product references and group them by canonical category order. It may not store copied Product objects, insertion order, ranking, selection, comparison state, quantity, configuration, totals, or order state.
+CND2 stores no Product copies, Candidate insertion order, ranking, score, comparison selection, quantity, configuration, totals, or order state.
 
-### Entry and return
+App state adds only:
 
-The menu heading may add one explicit `查看考慮項目` action when count is greater than zero.
+```text
+surface.kind = menu | candidates
+```
 
-Opening the workspace must preserve:
+Scroll and DOM focus return context remain in the App controller rather than pure state.
 
-- complete `MenuReadingState`;
-- Candidate membership;
-- previous scroll position;
-- previous focus origin.
+### Entry and active surface
 
-Ordinary `回到完整菜單` restores those values exactly.
+The menu heading contains one fixed-geometry `查看考慮項目` button when canonical Candidate count is nonzero.
 
-A separate row action, `在菜單中查看`, may intentionally focus the Candidate's canonical category and row using existing menu-reading transitions.
+The canonical menu and Candidate workspace remain mounted as sibling `main` surfaces. Exactly one is visible and interactive; the hidden surface is inert.
+
+No router, URL state, modal, dialog, sheet, rail, overlay, second sticky Candidate bar, or fixed footer exists.
 
 ### Workspace content
 
-The workspace is a compact derived document, not a modal, rail, sheet, overlay, fixed footer, cart, or comparison matrix.
+The workspace is a compact grouped document.
 
 Allowed row evidence:
 
 - canonical category name;
 - Product name;
-- current price;
+- current formatted price;
 - ordinary cues;
 - sold-out and incomplete-data labels;
 - `在菜單中查看`;
 - `移出考慮`.
 
-Not allowed:
+Not present:
 
 - Prototype C Anchor-relative projections;
 - workspace semantic-axis controls;
-- side-by-side comparison fields;
+- comparison fields or matrix;
 - score, rank, match, winner, quantity, modifiers, total, checkout, or order language.
+
+### Return and locator
+
+Ordinary `回到完整菜單` restores:
+
+- prior expansion mode;
+- active category;
+- Anchor and semantic axis;
+- captured scroll position;
+- prior focus origin when still available.
+
+After the final Candidate is removed, the original entry becomes unavailable; Back therefore focuses the stable Candidate summary.
+
+`在菜單中查看` uses existing `focusCategory()` behavior, reveals the canonical row, and focuses its existing Candidate toggle. Sold-out Products fall back to the canonical relation lane because they have no Candidate toggle.
 
 ### Removal and empty state
 
-`移出考慮` removes only Candidate membership. It leaves reading state, Anchor, semantic axis, Product data, and all order states unchanged.
+`移出考慮` changes only Candidate membership. It preserves reading state, active Anchor, surface, Product data, and every order boundary.
 
-Removing the final Candidate leaves an in-place empty workspace with an explicit return action. The workspace does not auto-close and CND2 does not add `clear all`.
-
-### Plan and gate
-
-Full plan:
+Focus recovery follows canonical workspace order:
 
 ```text
-docs/candidate-workspace-plan.md
+next removal action
+→ previous removal action
+→ empty-state heading
 ```
 
-Before implementation, the plan must be accepted. Implementation must then begin with failing tests for canonical derivation, stale and duplicate handling, surface continuity, exact scroll/focus return, Product locator behavior, removal focus recovery, narrow-screen fit, and absence of comparison or transaction state.
+Removing the final Candidate leaves an in-place empty workspace. CND2 does not add `clear all`.
+
+### Reverse-review corrections
+
+The initial implementation passed CI, then review corrected:
+
+1. final-removal Back focus targeting an unavailable entry;
+2. sold-out locator focus targeting a nonexistent Candidate toggle;
+3. hidden workspace DOM rebuilding during unrelated menu renders;
+4. status-lane geometry relying on the `hidden` attribute.
+
+### Evidence
+
+Passing automated evidence:
+
+- canonical derived references and ordering;
+- duplicate and stale ProductId handling;
+- sold-out Candidate visibility;
+- surface open/close continuity;
+- reading and Candidate reference preservation;
+- active-Anchor independence;
+- final-removal empty state;
+- canonical Product locator rules;
+- deterministic focus code paths;
+- one active `main` contract;
+- Typecheck, tests, and static build.
+
+Evidence not claimed:
+
+- runtime Chromium verification at 320px and 390px;
+- real-device fit;
+- unfamiliar-participant comprehension;
+- comparison benefit.
+
+The current execution container could not resolve GitHub, and the pull-request workflow did not publish a downloadable Pages artifact. Runtime browser geometry therefore remains a review question rather than claimed evidence.
+
+### Current gate
+
+CND2 awaits explicit product-owner disposition.
+
+Do not begin Candidate comparison until CND2 is accepted, revised, or rejected.
 
 ## Blocked later work
 
-Until CND2 receives an explicit implementation disposition, do not begin:
+Until CND2 receives an explicit disposition, do not begin:
 
-- Candidate comparison;
-- comparison selection or matrix;
+- Candidate comparison or comparison selection;
 - explicit Decision;
 - Configuration;
 - Current order;
@@ -335,4 +373,4 @@ Until CND2 receives an explicit implementation disposition, do not begin:
 
 None.
 
-Prototype C, CND1, and the CND2 plan refine existing product invariants without changing `docs/product-contract.md`.
+Prototype C, CND1, and CND2 implement existing product invariants without changing `docs/product-contract.md`.
