@@ -137,14 +137,16 @@ The customer decision spine is active on Draft PR #4. Current evidence is:
 → [rejected] M2 modal product detail
 → [rejected, removed] C1 fixed product focus rail
 → [current research] relational menu reading
-    [implemented, awaiting review] Prototype A — Axis-only score
+    [implemented, awaiting re-review] Prototype A — Axis-only score
     → [blocked] Prototype B — Anchor-only relation
     → [blocked] Prototype C — Combined relational score
 → [blocked] Candidate / Comparison / Decision / Configuration / Current order
 ```
 
-Prototype A keeps every product row in canonical order and changes only one bounded relation lane in a single expanded category. It provides `一般`, `價格`, `份量`, `餐點角色`, and `準備節奏` reading modes. It does not filter, rank, recommend, anchor, persist across categories, or introduce transaction state.
+Prototype A keeps every product row in canonical order and changes only one bounded relation lane in a single expanded category. The native reading control now offers only axes that expose actual differences among at least three products in the current category. Price remains a shared category scale; portion and preparation appear only where the reference data makes them relationally useful. Meal role is not offered in the current menu because it only restates category structure row by row.
 
-Prototype A is not passed until the branch Pages mobile review confirms that switching axes creates no visible row jump and is understood as a reading mode rather than a filter.
+The first reverse review found two concrete failures: the price renderer changed row geometry on narrow screens, and the deployed dataset could not produce an axis-level `未提供`. The corrective iteration fixed the shared line-box geometry and added one explicit low-confidence portion example. A 390 px and 320 px headless measurement now reports zero difference in row height, row position, column width, header height, and table height across all renderer modes.
+
+Prototype A is still not passed. Automated tests and self-review can reject broken implementation, but they cannot prove that an unfamiliar diner understands the control or experiences lower comprehension work. Prototype B and all later decision states remain blocked until that re-review is explicitly dispositioned.
 
 See [`docs/workstreams.md`](docs/workstreams.md) for the authoritative sequence and [`docs/relational-menu-research.md`](docs/relational-menu-research.md) for the implementation and review record.
