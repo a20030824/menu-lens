@@ -8,6 +8,7 @@ const css = normalized("../src/styles/menu-workspace.css");
 const appSource = normalized("../src/app/App.ts");
 const categorySource = normalized("../src/app/menu-category.ts");
 const overviewSource = normalized("../src/app/menu-overview.ts");
+const candidateSource = normalized("../src/customer/menu-candidates.ts");
 
 const assertIncludes = (source, fragment, message) => {
   if (!source.includes(fragment.replace(/\s+/g, " ").trim())) {
@@ -35,6 +36,12 @@ if (css.includes('.product-row[data-candidate="true"] .product-row__name')) {
 }
 if (categorySource.includes("button.textContent =") || categorySource.includes("移出考慮") || categorySource.includes("列入考慮")) {
   throw new Error("an aria-pressed Candidate toggle must keep one stable visible and accessible label");
+}
+if (categorySource.includes("data-candidate")) {
+  throw new Error("Candidate membership must not be mirrored into an unused row-wide DOM state");
+}
+if (candidateSource.includes("candidateProducts")) {
+  throw new Error("CND1 must not prebuild a detached Candidate-list projection before that surface exists");
 }
 
 assertIncludes(
