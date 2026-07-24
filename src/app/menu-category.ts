@@ -102,6 +102,8 @@ export type MenuCategorySection = Readonly<{
   ) => void;
   focusAnchorControl: () => void;
   focusProductRelation: (productId: ProductId) => void;
+  focusProductCandidate: (productId: ProductId) => void;
+  productRowFor: (productId: ProductId) => HTMLTableRowElement | null;
 }>;
 
 export const createMenuCategorySection = (
@@ -337,5 +339,7 @@ export const createMenuCategorySection = (
     setState,
     focusAnchorControl: anchorControl.focusAction,
     focusProductRelation: (productId) => relationTargets.get(productId)?.focus({ preventScroll: true }),
+    focusProductCandidate: (productId) => candidateButtons.get(productId)?.focus({ preventScroll: true }),
+    productRowFor: (productId) => rows.get(productId) ?? null,
   };
 };
