@@ -36,10 +36,10 @@ test("adding an available Product creates one unique membership", () => {
   const empty = createEmptyCandidateState();
   const added = addCandidate(empty, referenceMenu, first.id);
   assert(isCandidate(added, first.id), "available product must become a Candidate");
-  assert(candidateCount(added) === 1, "one Candidate must be counted");
+  assert(candidateCount(referenceMenu, added) === 1, "one Candidate must be counted");
   const duplicate = addCandidate(added, referenceMenu, first.id);
   assert(duplicate === added, "duplicate add must be a referential no-op");
-  assert(candidateCount(duplicate) === 1, "duplicate add must not duplicate membership");
+  assert(candidateCount(referenceMenu, duplicate) === 1, "duplicate add must not duplicate membership");
 });
 
 test("sold-out and invalid Products cannot be newly marked", () => {
@@ -52,7 +52,7 @@ test("removal is reversible and non-member removal is a no-op", () => {
   const added = addCandidate(createEmptyCandidateState(), referenceMenu, first.id);
   const removed = removeCandidate(added, first.id);
   assert(!isCandidate(removed, first.id), "removal must clear Candidate membership");
-  assert(candidateCount(removed) === 0, "removal must update count");
+  assert(candidateCount(referenceMenu, removed) === 0, "removal must update count");
   assert(removeCandidate(removed, first.id) === removed, "removing a non-member must be a referential no-op");
 });
 
@@ -76,10 +76,11 @@ test("derived Candidate Products follow canonical menu order rather than inserti
   assert(derived[0] === first && derived[1] === later, "derived view must reuse canonical Product objects");
 });
 
-test("derived display ignores stale invalid ProductIds without mutating source state", () => {
-  const source = { productIds: ["missing-product", first.id] } as const;
+test("derived display and count ignore stale or duplicate ids without mutating source state", () => {
+  const source = { productIds: ["missing-product", first.id, first.id] } as const;
   const derived = candidateProducts(referenceMenu, source);
-  assert(JSON.stringify(derived.map((product) => product.id)) === JSON.stringify([first.id]), "invalid ids must not appear in derived display");
+  assert(JSON.stringify(derived.map((product) => product.id)) === JSON.stringify([first.id]), "invalid and duplicate ids must not appear in derived display");
+  assert(candidateCount(referenceMenu, source) === 1, "count must include only unique canonical ProductIds");
   assert(source.productIds[0] === "missing-product", "derivation must not mutate source state");
 });
 
