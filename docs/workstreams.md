@@ -14,6 +14,7 @@ It prevents parallel conversations from redefining the product, retaining failed
 - Conventional-interface comparison remains parked.
 - Prefer fewer moving parts, dependencies, and abstractions while the product model is still being tested.
 - Do not merge Product, Candidate, DraftOrderItem, ConfiguredOrderItem, or SubmittedOrderRound state.
+- Passing one slice does not automatically authorize the next surface.
 
 ## Current sequence
 
@@ -28,17 +29,17 @@ It prevents parallel conversations from redefining the product, retaining failed
         → [rejected] desktop-first static workspace
         → [passed] M1 compressed overview + shared ledger
         → [rejected] M2 modal product detail
-        → [rejected, removed] C1 fixed product focus rail
+        → [rejected, removed] C1 fixed Product focus rail
         → [useful but insufficient] Prototype A — Axis-only score
         → [useful but insufficient] Prototype B — Anchor-only relation
         → [passed for current scope] Prototype C — Anchor + explicit shared axis
-    → [implemented, awaiting product-owner review] CND1 — Attached Candidate marks
+    → [passed for current scope] CND1 — Attached Candidate marks
     → [blocked] Candidate workspace / bounded comparison
     → [blocked] Decision / Configuration / Current order
-→ continuity and table state
-→ thin alternative lenses
-→ merchant-authoring test
-→ decide whether a conventional baseline is useful
+→ [deferred] continuity and table state
+→ [deferred] thin alternative lenses
+→ [deferred] merchant-authoring test
+→ [parked] conventional baseline decision
 ```
 
 ## Workstream status
@@ -48,9 +49,9 @@ It prevents parallel conversations from redefining the product, retaining failed
 | Foundation memory | Complete | product contract, glossary, boundaries, handoff | stable shared memory |
 | Domain and reference data | Complete | types, validation, fictional menu, incomplete metadata | canonical local dataset |
 | Formative evaluation | Complete | tasks, observations, events, falsification signals | observation contract |
-| Relational menu research | Complete for current scope | stable ledger and A/B/C evidence | accepted C reading substrate |
-| CND1 Attached Candidate marks | Implemented, awaiting product-owner review | row-attached reversible Candidate membership only | explicit CND1 disposition |
-| Candidate workspace and comparison | Blocked | second-stage Candidate decision support | CND1 disposition first |
+| Relational menu research | Passed for current scope | stable ledger and A/B/C evidence | accepted C reading substrate |
+| CND1 Attached Candidate marks | Passed for current scope | row-attached reversible Candidate membership only | accepted consideration state |
+| Candidate workspace / bounded comparison | Blocked | second-stage decision support | separate bounded plan required |
 | Decision / Configuration / Current order | Blocked | transaction-boundary states | Candidate and comparison coherence first |
 | Continuity and table state | Deferred | submitted rounds and coarse composition | stable decision spine first |
 | Alternative lenses | Deferred | quick, shared-table, featured | stable decision spine first |
@@ -68,19 +69,16 @@ Read before new work:
 4. `docs/workstreams.md`
 5. the active slice document
 
-Current slice:
-
-```text
-docs/candidate-marks-plan.md
-```
-
-Historical relational evidence:
+Accepted substrate records:
 
 ```text
 docs/relational-menu-research.md
 docs/prototype-b-anchor-plan.md
 docs/prototype-c-anchor-axis-plan.md
+docs/candidate-marks-plan.md
 ```
+
+No next slice is active yet.
 
 ## Passed substrate — M1 shared ledger
 
@@ -91,7 +89,7 @@ M1 established one stable table surface per category:
 - canonical order and one continuous reading order remain stable;
 - Products do not receive separate card identities.
 
-This remains the coordinate plane for Candidate marks.
+This remains the coordinate plane for C and Candidate marks.
 
 ## Relational prototype dispositions
 
@@ -124,7 +122,7 @@ The obsolete A selector UI was removed. Its pure projection remains tested as hi
 Useful:
 
 - exact price deltas removed repeated arithmetic;
-- one temporary Anchor fit the state model;
+- one temporary Anchor fit the domain model;
 - canonical rows, statuses, and geometry remained stable.
 
 Decisive failure:
@@ -146,183 +144,83 @@ Accepted evidence:
 
 - complete active-axis projection across every canonical row;
 - formal absolute labels or `未提供`;
-- exact price deltas;
-- matching labels expose equality;
+- exact price deltas and visible equality;
 - stable canonical order and four-column ledger;
-- stable geometry at 320 px and 390 px in a Chromium proxy;
 - same-category axis preference preservation;
 - row-local keyboard focus after Anchor selection and Escape;
+- stable 320px and 390px geometry proxy;
 - passing Typecheck, tests, and static build.
 
 Evidence boundary:
 
-- acceptance is a product-owner current-scope disposition;
+- acceptance is a current-scope product disposition;
 - unfamiliar-participant evidence is not claimed;
-- learnability and measured task improvement remain unproven known limitations;
-- those limitations no longer block the next bounded slice.
+- learnability and measured task improvement remain unproven limitations.
 
-## Active review gate — CND1 Attached Candidate marks
+## CND1 — Attached Candidate marks
 
-### Question
+```text
+[passed for current scope]
+```
+
+Question:
 
 > Can a diner preserve several serious possibilities directly on the canonical menu without mistaking them for an order, losing menu position, or creating a second Product list?
 
-### Implemented state boundary
+Implemented state boundary:
 
 ```text
 Product
 → Candidate membership by ProductId
 ```
 
-Candidate membership has no:
+Candidate membership has no quantity, configuration, modifier selections, order total, submission state, recommendation rank, notes, or ownership.
 
-```text
-quantity
-configuration
-modifier selections
-order total
-submission state
-recommendation rank
-```
-
-Reading and Candidate state remain separate:
-
-```ts
-type MenuAppState = Readonly<{
-  reading: MenuReadingState;
-  candidates: CandidateState;
-}>;
-```
-
-Anchor and Candidate are independent:
+Reading and Candidate state remain independent:
 
 ```text
 Anchor / semantic axis = reading state
 Candidate              = reversible consideration state
 ```
 
-A Product may be both, either, or neither.
-
-### Implemented layout
-
-The four-column ledger remains. The existing third column now has two fixed lanes:
+Implemented surface:
 
 ```text
-relation lane
-candidate / status lane
+four-column canonical ledger
++ fixed relation lane
++ fixed Candidate/status lane
++ one noninteractive Candidate count
 ```
 
-Example:
+Available rows expose one persistent `考慮` toggle. Membership is expressed through `aria-pressed` and pressed styling. Sold-out rows remain visible and cannot be newly marked.
 
-```text
-山椒烤雞半隻    基準 · 多人       NT$520
-                  [考慮中]
+Candidate membership survives overview, category focus and changes, all-expanded mode, every Anchor transition, semantic-axis switching, and same-category reopening.
 
-紹興奶油蝦      少 NT$40 · 2–3 人 NT$480
-                  [考慮]
-```
+### Final re-review corrections
 
-This avoids:
+The final review corrected:
 
-- squeezing the mobile Product-name column;
-- compressing the price column;
-- replacing C evidence;
-- adding a fifth column;
-- creating a detached Candidate list before it is justified.
+1. stale ProductIds affecting count;
+2. Candidate-dependent Product-name weight;
+3. repeated live-region mutations on unrelated renders;
+4. changing labels on an `aria-pressed` toggle;
+5. an unused row-wide `data-candidate` mirror;
+6. a premature detached Candidate-list projection.
 
-### Candidate control and summary
+A code-derived Chromium proxy at 320px and 390px found zero Candidate on/off differences for row, table, button, lane, and horizontal-scroll geometry. Typecheck, tests, structure contracts, and static build pass.
 
-Available Products use one persistent native button:
+Known limitations:
 
-```text
-考慮      aria-pressed=false
-考慮中    aria-pressed=true
-```
+- no Candidate workspace exists;
+- the count does not identify which collapsed categories contain Candidates;
+- `考慮` terminology has no unfamiliar-participant validation;
+- state lasts only for the active session.
 
-Sold-out Products remain visible but have no enabled Candidate action.
-
-One noninteractive summary states the boundary:
-
-```text
-尚無考慮項目 · 不影響點餐
-```
-
-or:
-
-```text
-考慮中 3 道 · 尚未點餐
-```
-
-The existing sticky orientation context may append the count. No second sticky Candidate surface exists.
-
-### Implemented continuity
-
-Candidate membership survives:
-
-- overview;
-- category focus and changes;
-- all-expanded mode;
-- Anchor selection, cancellation, change, and clear;
-- semantic-axis changes;
-- same-category reopening.
-
-Candidate operations do not alter Anchor, axis, Product data, scroll behavior, canonical order, or any order state.
-
-Removing Candidate membership from the active Anchor leaves the Anchor active. Clearing the Anchor leaves Candidate membership intact.
-
-### Automated evidence
-
-Candidate domain tests cover:
-
-- unique ProductId membership;
-- add, remove, duplicate add, and no-op removal;
-- sold-out and invalid rejection;
-- canonical derived Product order;
-- canonical Product-object reuse;
-- stale and duplicate ID handling;
-- unique canonical count;
-- absence of quantity, configuration, total, order, or ranking fields.
-
-App-state tests cover every navigation and Prototype C transition while proving Candidate and Anchor independence.
-
-Structure contracts lock:
-
-- four columns and one canonical row per Product;
-- fixed relation and Candidate lanes;
-- persistent Candidate button DOM;
-- fixed on/off button dimensions;
-- no Candidate-dependent Product-name metrics;
-- one noninteractive polite summary;
-- no Candidate list, rail, modal, sheet, or fixed Candidate footer;
-- no row-wide Candidate click;
-- preservation of C's focus behavior.
-
-Required CI passes:
-
-```text
-Typecheck         ✓
-Tests             ✓
-Static build      ✓
-```
-
-### Reverse-review corrections
-
-The first implementation contained two issues found before disposition:
-
-1. Candidate count accepted stale invalid ProductIds. It now counts unique canonical ProductIds only.
-2. Candidate membership increased Product-name font weight, which could alter 320 px wrapping. The style was removed and the contract now forbids Candidate-dependent name metrics.
-
-### Current disposition
-
-```text
-[implemented, awaiting product-owner review] CND1 — Attached Candidate marks
-```
-
-The review must decide whether to accept CND1 for the current scope and what bounded slice, if any, comes next. An unfamiliar-participant study is not required by the current gate.
+These limitations do not block the current-scope disposition.
 
 ## Blocked later work
 
-Until CND1 receives an explicit product-owner disposition, do not begin:
+Until a separate bounded plan is approved, do not begin:
 
 - Candidate workspace or copied Candidate list;
 - Candidate comparison;
@@ -330,6 +228,7 @@ Until CND1 receives an explicit product-owner disposition, do not begin:
 - Configuration;
 - Current order;
 - quantity or modifiers;
+- totals or submission;
 - recommendation, ranking, or filtering;
 - shared-table composition;
 - checkout.
@@ -350,4 +249,4 @@ Until CND1 receives an explicit product-owner disposition, do not begin:
 
 None.
 
-The existing product contract already defines Candidate as reversible consideration without quantity, configuration, total, or order commitment. CND1 implements that existing boundary without changing it.
+Prototype C and CND1 implement existing product invariants without changing `docs/product-contract.md`.
