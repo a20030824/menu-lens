@@ -385,9 +385,11 @@ The Candidate workspace header gains one fixed-geometry `比較考慮項目` ent
 
 Opening:
 
-- preserves menu reading, Anchor, Candidate, and Candidate-to-menu return state;
-- selects all when exactly two or three Candidates exist and no prior selection exists;
-- selects none from a larger Candidate set rather than choosing an arbitrary first three;
+- preserves menu reading, Anchor, Candidate, comparison, and Candidate-to-menu return state;
+- sanitizes prior comparison selection against current Candidates;
+- preserves an empty, one-, two-, or three-item selection;
+- begins empty on the first open;
+- never silently preselects Products;
 - captures Candidate-workspace scroll and focus for exact return.
 
 The comparison surface lists all current Candidates in canonical order with stable native `aria-pressed` buttons labeled `比較`.
@@ -469,7 +471,7 @@ CMP1 does not add:
 - Configuration;
 - Current order;
 - total or submission;
-- score, rank, recommendation, best-value badge, or automatic first-three selection;
+- score, rank, recommendation, best-value badge, or automatic preselection;
 - Product descriptions or exhaustive specifications;
 - modal, sheet, carousel, fixed footer, horizontal matrix, routing, persistence, backend, or analytics.
 
