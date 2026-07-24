@@ -6,6 +6,7 @@ const normalized = (path) => readFileSync(new URL(path, import.meta.url), "utf8"
 
 const css = normalized("../src/styles/menu-workspace.css");
 const categorySource = normalized("../src/app/menu-category.ts");
+const overviewSource = normalized("../src/app/menu-overview.ts");
 
 const assertIncludes = (source, fragment, message) => {
   if (!source.includes(fragment.replace(/\s+/g, " ").trim())) {
@@ -16,7 +17,15 @@ const assertIncludes = (source, fragment, message) => {
 if (css.includes("vertical-align: baseline")) {
   throw new Error("product ledger cells must not use baseline alignment across relation renderers");
 }
+if (css.includes(".category-anchor-control { position: sticky")) {
+  throw new Error("Prototype B must not create a second sticky comparison rail");
+}
 
+assertIncludes(
+  css,
+  ".menu-context { position: sticky;",
+  "the existing menu context must remain the only sticky orientation surface",
+);
 assertIncludes(
   css,
   ".category-anchor-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.45rem; min-height: 2.6rem; block-size: 2.6rem;",
@@ -56,6 +65,16 @@ assertIncludes(
   categorySource,
   '["index", "name", "cue", "price"].forEach((column) => {',
   "Prototype B must keep the existing four-column ledger",
+);
+assertIncludes(
+  overviewSource,
+  "? `　基準：${anchorName}`",
+  "the existing sticky menu context must keep the active anchor name visible after its row scrolls away",
+);
+assertIncludes(
+  overviewSource,
+  "contextLabel.title = contextLabel.textContent;",
+  "truncated sticky anchor context must retain its full text",
 );
 
 [
