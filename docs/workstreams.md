@@ -32,7 +32,7 @@ It prevents parallel conversations from redefining the product, retaining failed
         → [useful but insufficient] Prototype A — Axis-only score
         → [useful but insufficient] Prototype B — Anchor-only relation
         → [passed for current scope] Prototype C — Anchor + explicit shared axis
-    → [implemented, awaiting review] CND1 — Attached Candidate marks
+    → [implemented, awaiting product-owner review] CND1 — Attached Candidate marks
     → [blocked] Candidate workspace / bounded comparison
     → [blocked] Decision / Configuration / Current order
 → continuity and table state
@@ -49,7 +49,7 @@ It prevents parallel conversations from redefining the product, retaining failed
 | Domain and reference data | Complete | types, validation, fictional menu, incomplete metadata | canonical local dataset |
 | Formative evaluation | Complete | tasks, observations, events, falsification signals | observation contract |
 | Relational menu research | Complete for current scope | stable ledger and A/B/C evidence | accepted C reading substrate |
-| CND1 Attached Candidate marks | Implemented, awaiting review | row-attached reversible Candidate membership only | explicit CND1 disposition |
+| CND1 Attached Candidate marks | Implemented, awaiting product-owner review | row-attached reversible Candidate membership only | explicit CND1 disposition |
 | Candidate workspace and comparison | Blocked | second-stage Candidate decision support | CND1 disposition first |
 | Decision / Configuration / Current order | Blocked | transaction-boundary states | Candidate and comparison coherence first |
 | Continuity and table state | Deferred | submitted rounds and coarse composition | stable decision spine first |
@@ -124,7 +124,7 @@ The obsolete A selector UI was removed. Its pure projection remains tested as hi
 Useful:
 
 - exact price deltas removed repeated arithmetic;
-- one temporary Anchor fit the domain model;
+- one temporary Anchor fit the state model;
 - canonical rows, statuses, and geometry remained stable.
 
 Decisive failure:
@@ -315,10 +315,10 @@ The first implementation contained two issues found before disposition:
 ### Current disposition
 
 ```text
-[implemented, awaiting review] CND1 — Attached Candidate marks
+[implemented, awaiting product-owner review] CND1 — Attached Candidate marks
 ```
 
-This is implementation, formal, and designer-proxy evidence. It is not a claim of unfamiliar-user comprehension.
+The review must decide whether to accept CND1 for the current scope and what bounded slice, if any, comes next. An unfamiliar-participant study is not required by the current gate.
 
 ## Blocked later work
 
