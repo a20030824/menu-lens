@@ -1,8 +1,8 @@
-# Attached Candidate marks plan
+# Attached Candidate marks
 
 ## Document status
 
-This document defines the first Candidate implementation slice after Prototype C.
+This document defines and records the first Candidate implementation slice after Prototype C.
 
 Current branch and Draft PR:
 
@@ -15,18 +15,18 @@ Current sequence:
 
 ```text
 [passed for current scope] Prototype C — Anchor + explicit shared axis
-→ [planned, implementation not started] CND1 — Attached Candidate marks
+→ [implemented, awaiting review] CND1 — Attached Candidate marks
 → [blocked] Candidate workspace / bounded comparison
 → [blocked] Decision / Configuration / Current order
 ```
 
-Prototype C was accepted for the current implementation scope by product-owner decision after formal, automated, designer-proxy, focus, and narrow-screen checks. No unfamiliar-participant evidence is claimed.
+Prototype C was accepted for the current implementation scope by product-owner decision. No unfamiliar-participant evidence is claimed.
 
 ## Research question
 
-> Can a diner preserve several serious possibilities directly on the canonical menu without mistaking them for an order, losing menu position, or creating a second product list?
+> Can a diner preserve several serious possibilities directly on the canonical menu without mistaking them for an order, losing menu position, or creating a second Product list?
 
-This slice investigates reversible consideration only.
+CND1 investigates reversible consideration only.
 
 It does not investigate:
 
@@ -41,7 +41,7 @@ It does not investigate:
 
 ## Product boundary
 
-The repository contract already defines:
+The repository contract defines:
 
 ```text
 Product ≠ Candidate ≠ DraftOrderItem ≠ ConfiguredOrderItem ≠ SubmittedOrderRound
@@ -77,7 +77,7 @@ Anchor / semantic axis
 = how the diner reads differences
 
 Candidate
-= which products the diner wants to keep considering
+= which Products the diner wants to keep considering
 ```
 
 Therefore:
@@ -86,17 +86,14 @@ Therefore:
 - a Product may be the Anchor but not a Candidate;
 - a Product may be a Candidate but not the Anchor;
 - a Product may be both the Anchor and a Candidate;
-- changing or clearing the Anchor must not change Candidates;
-- changing the semantic axis must not change Candidates;
-- adding or removing a Candidate must not change the Anchor or axis.
+- changing or clearing the Anchor does not change Candidates;
+- changing the semantic axis does not change Candidates;
+- adding or removing a Candidate does not change the Anchor or axis;
+- no action automatically converts an Anchor into a Candidate.
 
-No action automatically converts an Anchor into a Candidate.
+## Implemented state contract
 
-## State contract
-
-The Candidate collection belongs to application decision state, not inside the category reading state.
-
-Planned shape:
+Candidate membership lives beside reading state rather than inside `MenuReadingState`.
 
 ```ts
 type CandidateState = Readonly<{
@@ -109,26 +106,26 @@ type MenuAppState = Readonly<{
 }>;
 ```
 
-The exact wrapper name may change, but the observable separation may not.
-
-Candidate invariants:
+Implemented Candidate invariants:
 
 1. membership is keyed only by stable `ProductId`;
-2. one Product may appear at most once;
+2. one Product may appear at most once through normal operations;
 3. only an available Product may be newly added;
 4. removing a Candidate never changes Product data or order state;
 5. Candidate state survives all menu-reading transitions;
 6. Candidate state lasts only for the active client session;
-7. Candidate display order is derived from canonical menu order, not insertion order or ranking;
-8. no Candidate-specific Product copy is stored.
+7. Candidate display order derives from canonical menu order;
+8. no Candidate-specific Product copy is stored;
+9. summaries count only unique canonical ProductIds;
+10. stale invalid ProductIds are ignored by derived display and count.
 
-The first slice does not add `clear all` because bulk removal is not required to test reversible consideration.
+The slice does not add `clear all`.
 
 ## Eligibility and sold-out behavior
 
 ### Available Product
 
-An available Product exposes the Candidate toggle.
+An available Product exposes one Candidate toggle:
 
 ```text
 考慮
@@ -138,13 +135,13 @@ An available Product exposes the Candidate toggle.
 
 ### Sold-out Product
 
-A sold-out Product remains in the canonical menu but cannot be newly marked as a Candidate.
+A sold-out Product remains in the canonical menu but has no enabled Candidate action.
 
-The row keeps the same geometry and presents its sold-out state instead of an enabled Candidate action.
+The row preserves the same lower-lane geometry and displays its sold-out state.
 
-The first demo has static availability. If live availability is introduced later, an existing Candidate must not be silently deleted; that future transition requires an explicit unavailable-state policy.
+The current reference menu has static availability. A future live-availability transition would need an explicit policy and must not silently delete an existing Candidate.
 
-## Selected layout
+## Implemented layout
 
 The existing four-column ledger remains:
 
@@ -152,11 +149,11 @@ The existing four-column ledger remains:
 序｜菜名｜閱讀／操作｜價格
 ```
 
-The third column receives two fixed lanes:
+The third column now has two fixed lanes:
 
 ```text
 relation lane
-candidate lane
+candidate / status lane
 ```
 
 Example without an active Anchor:
@@ -176,7 +173,7 @@ Example with Prototype C active:
                          [ 考慮 ]
 ```
 
-The Candidate action does not replace or hide:
+Candidate state does not replace or hide:
 
 - ordinary menu cues;
 - C price delta;
@@ -184,13 +181,13 @@ The Candidate action does not replace or hide:
 - sold-out state;
 - incomplete-data state.
 
-The candidate lane is always reserved for eligible expanded rows, so toggling Candidate state does not move rows or the table.
+The lower lane is reserved on every expanded row, so toggling Candidate membership does not move the row or table.
 
-## Why the third-column lower lane
+## Why the lower third-column lane
 
 ### Not the name column
 
-At 320 px, the existing fixed index, relation, and price columns already leave a narrow flexible name column. Adding a fixed-width Candidate button beside the name would force unnecessary name wrapping and could alter row height.
+At 320 px, adding a fixed Candidate control beside the Product name would reduce the flexible name width and could alter wrapping.
 
 ### Not the price column
 
@@ -198,17 +195,15 @@ Candidate is not a commercial amount or transaction action. Placing it beside pr
 
 ### Not the relation lane
 
-The relation lane is already responsible for ordinary cues, Anchor selection, exact price deltas, and the active semantic axis. Replacing that evidence with Candidate state would make C and Candidate mutually exclusive.
+The relation lane already contains ordinary cues, Anchor selection, exact price deltas, and the active semantic axis. Candidate must coexist with that evidence.
 
 ### Not a fifth column
 
-A fifth mobile column would weaken the passed shared-ledger geometry and reduce readable width for product identity or evidence.
+A fifth mobile column would weaken the passed ledger geometry.
 
 ## Candidate control
 
-Use one native button per available expanded Product row.
-
-Planned behavior:
+Each available expanded Product row owns one persistent native button.
 
 ```text
 not a Candidate
@@ -222,25 +217,18 @@ aria-pressed: true
 accessible action: 將「商品名」移出考慮
 ```
 
-The off and on states use the same fixed dimensions.
+Implementation properties:
 
-The button remains the same DOM node when toggled so keyboard focus does not move.
-
-Avoid:
-
-- heart icons;
-- cart icons;
-- bookmark-only icons;
-- the words `加入`, `選取`, `已選`, or `點餐` as the primary row action;
-- row-wide click;
-- swipe or long-press as the only action;
-- automatic Candidate creation from Anchor selection.
+- off and on states use the same `3.4rem × 1.35rem` dimensions;
+- the same DOM node remains after toggling;
+- keyboard focus remains on that button;
+- visible state uses text and border/background treatment;
+- Product-name typography does not change with Candidate membership;
+- there is no heart, cart, bookmark-only icon, row-wide click, swipe-only action, or automatic Candidate creation from Anchor selection.
 
 ## Candidate summary
 
-The first slice includes a count and state-boundary explanation, but not a Candidate list.
-
-At the menu heading:
+CND1 includes one count and state-boundary explanation, not a Candidate list.
 
 ```text
 尚無考慮項目 · 不影響點餐
@@ -252,17 +240,20 @@ or:
 考慮中 3 道 · 尚未點餐
 ```
 
-The summary remains present at a fixed height so `0 → 1` does not shift category geometry.
+The summary:
 
-When the existing sticky menu context is visible, it may append the count to the current orientation text:
+- uses one fixed-height `1.5rem` line;
+- is noninteractive;
+- is the only polite live status region for Candidate count changes;
+- counts unique canonical ProductIds only.
+
+The existing sticky menu context may append:
 
 ```text
 準備｜山椒烤雞半隻 · 考慮中 3
 ```
 
-This remains the existing sticky context, not a second sticky Candidate surface.
-
-The count is informational only in CND1. It must not look clickable before a Candidate workspace exists.
+No second sticky Candidate surface exists.
 
 ## Interaction boundaries
 
@@ -285,32 +276,36 @@ or
 active-session reset / reload
 ```
 
-Removing a Product from Candidates while it is the Anchor leaves it as the Anchor.
+Removing Candidate membership from the active Anchor leaves the Anchor active.
 
-Clearing the Anchor while it is also a Candidate leaves it as a Candidate.
+Clearing an Anchor that is also a Candidate leaves Candidate membership intact.
 
 ## Canonical-menu integrity
 
-Candidate marks must not:
+Candidate marks do not:
 
-- reorder products;
+- reorder Products;
 - group Candidates at the top;
-- hide non-Candidates;
-- dim non-Candidates;
+- hide or dim non-Candidates;
 - filter categories;
 - copy Products into another list;
 - change prices or availability;
-- add quantity, modifiers, or total;
+- add quantity, modifiers, total, or submission state;
 - create Candidate-specific Product objects;
-- change the complete-menu count.
-
-Candidate count is derived from unique valid ProductIds.
+- change the complete-menu Product count.
 
 ## Geometry contract
 
-CND1 may establish one new row baseline by replacing the small status lane with a fixed candidate/action lane.
+CND1 establishes one new row baseline:
 
-After that baseline, these transitions must have zero row, table, and scroll geometry differences:
+```text
+relation lane       1.55rem
+Candidate lane      1.55rem
+Candidate button    3.4rem × 1.35rem
+Candidate summary   1.5rem
+```
+
+After that baseline, these transitions are structurally geometry-invariant:
 
 ```text
 not Candidate → Candidate
@@ -320,164 +315,201 @@ Candidate + portion → Candidate + preparation
 Candidate row → overview → reopen category
 ```
 
-Measure at 320 px and 390 px:
+The contract prevents Candidate-dependent Product-name font metrics, width changes, row-wide styling, and dynamic button replacement.
 
-- row height and top;
-- cue-column width;
-- product-name wrapping;
-- table height;
-- category positions;
-- scroll position;
-- Candidate button dimensions;
-- Candidate summary height;
-- sticky-context height.
+The current code keeps the existing mobile cue column at `7.2rem`. The button plus `資訊有限` status fits inside the padded cue column at the current font sizes.
 
-The fixed button labels `考慮` and `考慮中` must not change lane width or row height.
+No claim of real-device comfort or participant comprehension is made.
 
 ## Accessibility contract
 
-- use native buttons;
-- expose Candidate membership with `aria-pressed`;
-- include Product name in the accessible action;
-- keep focus on the same button after toggling;
-- do not add or remove the button DOM node when membership changes;
-- keep sold-out rows non-interactive for Candidate addition;
-- announce count changes through one bounded polite status region;
-- avoid duplicate live announcements from every row;
-- preserve C's row-local focus behavior for Anchor selection and Escape;
-- preserve visible focus styling;
-- do not require pointer gestures.
+Implemented behavior:
 
-## Test-first implementation plan
+- native buttons;
+- Candidate membership exposed through `aria-pressed`;
+- Product name included in the accessible action;
+- focus remains on the same button after toggling;
+- the button DOM node is never replaced by Candidate rendering;
+- sold-out rows have no Candidate-add button;
+- one bounded polite status region announces count changes;
+- C's row-local focus behavior for Anchor selection and Escape remains unchanged;
+- visible focus styling remains browser-accessible;
+- no pointer-only gesture is required.
 
-### Candidate domain tests
+## Test-first implementation record
 
-Add failing tests for:
+Implementation began with missing-module tests for Candidate domain and app-state contracts.
 
-- adding one available ProductId;
-- duplicate add remaining unique;
-- removing one ProductId;
-- removing a non-member being a no-op;
-- rejecting a sold-out Product;
-- candidate membership containing no quantity or configuration;
-- deriving Candidate products in canonical order;
-- ignoring invalid ProductIds in derived display without mutating source state.
-
-### State-transition tests
-
-Add failing tests proving Candidates survive:
-
-- category focus;
-- overview;
-- all-expanded mode;
-- Anchor selection, cancellation, selection, change, and clear;
-- semantic-axis changes;
-- same-category reopen;
-- different-category navigation.
-
-Also prove:
-
-- Candidate toggle does not alter Anchor or axis;
-- Anchor changes do not alter Candidate membership;
-- a Product may be both Candidate and Anchor;
-- removing Candidate membership does not clear Anchor;
-- no Candidate operation creates order state.
-
-### Structure tests
-
-Lock:
-
-- four columns only;
-- one canonical row per Product;
-- one Candidate button per available expanded Product;
-- no enabled Candidate button for sold-out rows;
-- fixed relation and Candidate lanes;
-- one noninteractive Candidate summary;
-- no Candidate list, rail, modal, sheet, footer, or copied workspace;
-- no quantity, modifier, total, cart, recommendation, or order language;
-- no row-wide Candidate click;
-- no sorting, filtering, hiding, or dimming.
-
-### Focus and geometry tests
-
-Lock:
-
-- toggle keeps focus on the same button;
-- Candidate on/off preserves scroll position;
-- Candidate on/off preserves row and table geometry;
-- C Anchor focus behavior remains unchanged;
-- 320 px and 390 px relation, Candidate, status, and price content fit the fixed lanes.
-
-## Designer reverse-review tasks
-
-Without treating this as unfamiliar-participant evidence:
-
-1. mark two products from different categories;
-2. verify both remain marked after changing category;
-3. choose one marked Product as C's Anchor;
-4. switch C from portion to preparation;
-5. remove Candidate membership from the Anchor;
-6. confirm the Anchor remains active;
-7. clear the Anchor;
-8. confirm the other Candidate remains;
-9. enter overview and all-expanded mode;
-10. confirm Candidate count and row marks remain accurate;
-11. attempt to mark a sold-out Product;
-12. confirm no quantity, configuration, total, or Current order appears.
-
-## Pass signals
-
-- Candidate membership is visibly attached to canonical rows;
-- marking is clearly reversible;
-- Candidate and Anchor can coexist without visual or state collision;
-- Candidate state survives all C and navigation transitions;
-- Candidate count is accurate and explicitly says it is not an order;
-- sold-out behavior is clear;
-- toggling does not move rows, table, focus, or scroll;
-- the full menu remains complete and canonical;
-- no transaction state appears.
-
-## Failure signals
-
-- `考慮` is interpreted as ordering or quantity selection;
-- Candidate and Anchor appear to be the same state;
-- the Candidate action hides C evidence;
-- toggling changes row height or product-name wrapping;
-- Candidate marks disappear on category or C changes;
-- non-Candidates are dimmed, hidden, or reordered;
-- the count looks like a cart total or dead clickable workspace;
-- sold-out Products can be newly marked;
-- implementation introduces a second Product list prematurely;
-- Candidate state acquires quantity, configuration, or order totals.
-
-## Planned implementation files
-
-Expected new pure domain module:
+Added:
 
 ```text
 src/customer/menu-candidates.ts
 src/customer/menu-candidates.test.ts
+src/customer/menu-app-state.ts
+src/customer/menu-app-state.test.ts
 ```
 
-Expected state and UI updates:
+Updated:
 
 ```text
-src/customer/menu-reading.ts or a small app-state wrapper
-src/customer/menu-reading.test.ts
-src/app/menu-category.ts
-src/app/menu-overview.ts
 src/app/App.ts
+src/app/menu-overview.ts
+src/app/menu-category.ts
 src/styles/menu-workspace.css
 scripts/menu-workspace-contract.test.mjs
 package.json
 ```
 
-Do not add a Candidate workspace module, Candidate comparison module, order module, persistence layer, router, backend, or generic state machine in CND1.
+No `MenuReadingState` Candidate field was added. The app wrapper preserves the separation.
+
+## Automated validation
+
+### Candidate domain
+
+Tests cover:
+
+- empty identity-only state;
+- add and remove;
+- duplicate-add no-op;
+- non-member removal no-op;
+- sold-out and invalid add rejection;
+- toggle behavior;
+- canonical derived Product order;
+- reuse of canonical Product objects;
+- stale and duplicate ID handling;
+- unique canonical count;
+- absence of quantity, configuration, total, order, and ranking fields.
+
+### App-state continuity
+
+Tests prove Candidate membership survives:
+
+- category focus and changes;
+- overview;
+- all-expanded mode;
+- Anchor begin, cancel, select, change, and clear;
+- semantic-axis switching;
+- same-category reopen.
+
+Tests also prove:
+
+- Candidate toggling preserves reading-state identity;
+- a Product may be Candidate and Anchor simultaneously;
+- removing Candidate membership does not clear Anchor;
+- clearing Anchor does not restore removed membership or remove remaining Candidates;
+- CND1 adds no Comparison, Decision, Configuration, quantity, total, Current order, or submitted state.
+
+### Structure and focus
+
+The static contract locks:
+
+- four columns and one canonical row per Product;
+- persistent Candidate buttons;
+- `aria-pressed` updates on the same DOM node;
+- fixed relation and Candidate lanes;
+- fixed noninteractive summary;
+- no Candidate-dependent Product-name typography;
+- one sticky context only;
+- no Candidate list, workspace, rail, modal, sheet, or fixed Candidate footer;
+- no row-wide Candidate click;
+- preservation of Prototype C focus contracts.
+
+Required CI passes:
+
+```text
+Typecheck         ✓
+Tests             ✓
+Static build      ✓
+```
+
+## Designer reverse review
+
+### Cross-category continuity
+
+Two Candidate ProductIds from different categories remain in one app-level Candidate state while reading state changes.
+
+Result:
+
+```text
+PASS — automated state evidence
+```
+
+### Candidate and Anchor coexistence
+
+A Product can become both Candidate and Anchor. Removing Candidate membership leaves the Anchor active. Clearing the Anchor leaves other Candidate membership intact.
+
+Result:
+
+```text
+PASS — automated state evidence
+```
+
+### Sold-out boundary
+
+Domain operations reject newly adding a sold-out Product, and sold-out rows have no enabled Candidate button.
+
+Result:
+
+```text
+PASS — domain and structure evidence
+```
+
+### Focus continuity
+
+Candidate toggling updates the existing button rather than replacing it. No focus-moving code runs in the Candidate callback.
+
+Result:
+
+```text
+PASS — structural focus evidence
+```
+
+### Geometry correction
+
+The first UI version made Candidate Product names heavier. That could change glyph width and line wrapping at 320 px. The style was removed and a contract now forbids Candidate-dependent Product-name metrics.
+
+Result:
+
+```text
+CORRECTED
+```
+
+### Count correction
+
+The first summary helper counted unique state IDs without confirming they existed in the canonical menu. It now counts only unique canonical ProductIds, and stale IDs are ignored.
+
+Result:
+
+```text
+CORRECTED
+```
+
+### Transaction boundary
+
+No Candidate list, quantity, configuration, total, Current order, submission, recommendation, or ranking state exists.
+
+Result:
+
+```text
+PASS — formal and structure evidence
+```
+
+## Remaining risks
+
+CND1 does not yet prove:
+
+- whether `考慮` is naturally understood as serious consideration;
+- whether the noninteractive count feels useful rather than like a dead cart entry point;
+- whether the additional row lane makes the dense menu feel too tall;
+- whether people expect a Candidate workspace immediately after marking several Products;
+- whether a future comparison entry should appear after two Candidates or remain separately invoked.
+
+These risks should inform product-owner review and the next bounded slice. They do not authorize Candidate workspace or comparison yet.
 
 ## Current disposition
 
 ```text
-[planned, implementation not started] CND1 — Attached Candidate marks
+[implemented, awaiting review] CND1 — Attached Candidate marks
 ```
 
-The plan must be reviewed before implementation. Candidate workspace, bounded comparison, Decision, Configuration, and Current order remain blocked.
+Candidate workspace, bounded comparison, Decision, Configuration, Current order, quantity, modifiers, totals, and submission remain blocked.
