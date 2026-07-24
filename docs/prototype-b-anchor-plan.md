@@ -22,6 +22,8 @@ Current sequence:
 
 The B pure projection remains isolated as research evidence. Its visible rendering path has been replaced by Prototype C. B does not authorize any deferred decision or transaction state.
 
+Prototype A's obsolete selector UI has been removed from the active application tree. A and B pure projection modules remain compiled and tested so the historical evidence is preserved without retaining inactive UI.
+
 The implemented correction is documented in `docs/prototype-c-anchor-axis-plan.md`.
 
 ## Research question
@@ -169,6 +171,8 @@ After `清除` removed itself, focus returned to the remaining `選擇` action w
 ### Anchor identity could scroll away
 
 The existing sticky menu context led with the anchor name. No second sticky comparison rail was added.
+
+Prototype C later refined row-local focus continuity. Choosing a row as anchor and cancelling with Escape from a row now keep focus on that canonical relation lane rather than moving it to an offscreen top control.
 
 ## Geometry evidence
 
