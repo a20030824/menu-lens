@@ -9,6 +9,8 @@ const appSource = normalized("../src/app/App.ts");
 const categorySource = normalized("../src/app/menu-category.ts");
 const overviewSource = normalized("../src/app/menu-overview.ts");
 const candidateSource = normalized("../src/customer/menu-candidates.ts");
+const candidateWorkspaceSource = normalized("../src/customer/candidate-workspace.ts");
+const candidateWorkspaceViewSource = normalized("../src/app/candidate-workspace.ts");
 
 const assertIncludes = (source, fragment, message) => {
   if (!source.includes(fragment.replace(/\s+/g, " ").trim())) {
@@ -29,7 +31,7 @@ if (css.includes(".category-anchor-axis-control { position: sticky")) {
   throw new Error("Prototype C must not create a second sticky axis surface");
 }
 if (css.includes(".candidate-summary { position: sticky")) {
-  throw new Error("CND1 must not create a second sticky Candidate surface");
+  throw new Error("Candidate state must not create a second sticky surface");
 }
 if (css.includes('.product-row[data-candidate="true"] .product-row__name')) {
   throw new Error("Candidate membership must not change Product-name metrics or wrapping");
@@ -39,9 +41,6 @@ if (categorySource.includes("button.textContent =") || categorySource.includes("
 }
 if (categorySource.includes("data-candidate")) {
   throw new Error("Candidate membership must not be mirrored into an unused row-wide DOM state");
-}
-if (candidateSource.includes("candidateProducts")) {
-  throw new Error("CND1 must not prebuild a detached Candidate-list projection before that surface exists");
 }
 
 assertIncludes(
@@ -61,13 +60,13 @@ assertIncludes(
 );
 assertIncludes(
   css,
-  ".category-anchor-axis-control__group { display: flex; flex-wrap: nowrap;",
-  "semantic-axis buttons must not wrap",
+  ".candidate-summary-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; block-size: 2rem;",
+  "zero and nonzero Candidate summary states must share one fixed heading geometry",
 );
 assertIncludes(
   css,
-  ".candidate-summary { display: block; block-size: 1.5rem;",
-  "Candidate count must reserve one fixed noninteractive summary line",
+  '.candidate-summary__action[data-empty="true"] { visibility: hidden; }',
+  "the zero-Candidate entry must stay out of interaction while preserving geometry",
 );
 assertIncludes(
   css,
@@ -81,23 +80,8 @@ assertIncludes(
 );
 assertIncludes(
   css,
-  ".product-row__index, .product-row__name, .product-row__cues, .product-row__price { padding: 0.52rem 0.25rem; vertical-align: top; }",
-  "product ledger cells must share top alignment",
-);
-assertIncludes(
-  css,
-  ".product-row__relation { display: block; block-size: var(--relation-lane-height); line-height: var(--relation-lane-height); overflow: hidden; }",
-  "the relation lane must reserve one fixed line box",
-);
-assertIncludes(
-  css,
-  ".product-row__candidate { display: flex; align-items: center; gap: 0.25rem; block-size: var(--candidate-lane-height);",
-  "each row must reserve one fixed Candidate and status lane",
-);
-assertIncludes(
-  css,
   ".candidate-toggle { inline-size: 3.4rem; block-size: 1.35rem;",
-  "Candidate off and on labels must share fixed button dimensions",
+  "Candidate off and on states must share fixed button dimensions",
 );
 assertIncludes(
   css,
@@ -106,23 +90,24 @@ assertIncludes(
 );
 assertIncludes(
   css,
-  ".product-row__relation-text { display: block; block-size: 100%; overflow: hidden; font-size: 0.62rem; line-height: inherit; text-overflow: ellipsis; white-space: nowrap; }",
-  "active relations must remain one stable line",
+  ".candidate-workspace__actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);",
+  "workspace row actions must share one bounded two-column mobile layout",
 );
+assertIncludes(
+  css,
+  ".candidate-workspace__row { padding: 0.72rem 0; border-top: 1px solid var(--line);",
+  "workspace rows must remain compact document rows rather than cards",
+);
+
 assertIncludes(
   categorySource,
   '["index", "name", "cue", "price"].forEach((column) => {',
-  "CND1 must keep the existing four-column ledger",
-);
-assertIncludes(
-  categorySource,
-  "category.anchorAxisRelations[activeAnchorId]?.[semanticAxis]?.[product.id]",
-  "every active row must project from one explicit shared semantic axis",
+  "CND2 must keep the existing four-column canonical ledger",
 );
 assertIncludes(
   categorySource,
   "const candidateButtons = new Map<ProductId, HTMLButtonElement>();",
-  "Candidate controls must be persistent per canonical Product row",
+  "Candidate controls must remain persistent per canonical Product row",
 );
 assertIncludes(
   categorySource,
@@ -132,17 +117,7 @@ assertIncludes(
 assertIncludes(
   categorySource,
   'button.setAttribute("aria-label", `考慮「${product.name}」`);',
-  "Candidate controls must keep one stable accessible name that includes the visible label",
-);
-assertIncludes(
-  categorySource,
-  'button.setAttribute("aria-pressed", "false");',
-  "Candidate controls must expose initial membership state",
-);
-assertIncludes(
-  categorySource,
-  "button.addEventListener(\"click\", () => onToggleCandidate(product.id));",
-  "Candidate membership must change only through an explicit row button",
+  "Candidate controls must keep one stable accessible name",
 );
 assertIncludes(
   categorySource,
@@ -151,119 +126,207 @@ assertIncludes(
 );
 assertIncludes(
   categorySource,
-  "revealInner.append(anchorControl.element, axisControl.element, ledger);",
-  "Candidate marks must remain attached to the canonical ledger",
+  "focusProductCandidate: (productId) => candidateButtons.get(productId)?.focus({ preventScroll: true }),",
+  "the workspace locator must be able to restore focus to the canonical Candidate toggle",
 );
 assertIncludes(
   categorySource,
-  "relation.tabIndex = -1;",
-  "each canonical relation lane must accept programmatic focus after its selection button is replaced",
+  "productRowFor: (productId) => rows.get(productId) ?? null,",
+  "the workspace locator must resolve the canonical Product row without copying it",
 );
-assertIncludes(
-  categorySource,
-  'target.setAttribute("aria-label", relation.accessibleLabel);',
-  "the focused active relation lane must expose the complete anchor-relative phrase",
-);
-assertIncludes(
-  categorySource,
-  "focusProductRelation: (productId) => relationTargets.get(productId)?.focus({ preventScroll: true }),",
-  "category focus restoration must stay on the chosen canonical row without moving the viewport",
-);
-assertIncludes(
-  overviewSource,
-  'candidateSummary.setAttribute("aria-live", "polite");',
-  "CND1 must announce count changes through one bounded status region",
-);
+
 assertIncludes(
   overviewSource,
   'const candidateSummary = element("p", "candidate-summary", "尚無考慮項目 · 不影響點餐");',
-  "the empty Candidate summary must exist before the live region enters the document",
+  "the Candidate summary must exist before the live region enters the document",
 );
 assertIncludes(
   overviewSource,
-  "let renderedCandidateCount = 0;",
-  "Candidate summary rendering must remember the last announced count",
+  'const candidateSummaryAction = element("button", "candidate-summary__action", "查看考慮項目") as HTMLButtonElement;',
+  "CND2 must expose one explicit native workspace entry",
+);
+assertIncludes(
+  overviewSource,
+  'candidateSummaryAction.dataset.empty = String(candidateCount === 0);',
+  "the workspace entry must expose its zero-state geometry without remaining interactive",
+);
+assertIncludes(
+  overviewSource,
+  'candidateSummaryAction.setAttribute("aria-label", candidateCount === 0 ? "尚無考慮項目" : `查看 ${candidateCount} 道考慮項目`);',
+  "the workspace entry accessible name must include the canonical Candidate count",
 );
 assertIncludes(
   overviewSource,
   "if (renderedCandidateCount !== candidateCount) {",
-  "unrelated reading renders must not mutate and reannounce the Candidate live region",
+  "unrelated reading renders must not reannounce Candidate count",
 );
 assertIncludes(
   overviewSource,
-  'candidateSummary.textContent = candidateCount === 0 ? "尚無考慮項目 · 不影響點餐" : `考慮中 ${candidateCount} 道 · 尚未點餐`; renderedCandidateCount = candidateCount;',
-  "Candidate summary must update only when its count changes",
+  "focusProductCandidate: (categoryId, productId) =>",
+  "the overview must expose canonical Candidate-toggle focus",
 );
 assertIncludes(
   overviewSource,
-  "const candidateIds = new Set(candidateState.productIds);",
-  "one Candidate membership set must drive all attached row marks",
+  "productRowFor: (categoryId, productId) =>",
+  "the overview must expose the canonical Product row for locator scrolling",
 );
 assertIncludes(
   overviewSource,
-  "? `${axisLabels[state.semanticAxis]}｜${anchorName}${candidateContext}`",
-  "the existing sticky context may append Candidate count without creating another surface",
+  "focusCandidateEntry: () => candidateSummaryAction.focus({ preventScroll: true }),",
+  "ordinary workspace Back must restore focus to the entry without moving scroll",
+);
+
+assertIncludes(
+  candidateWorkspaceSource,
+  "export const createCandidateWorkspaceModel =",
+  "CND2 must derive one explicit workspace model",
 );
 assertIncludes(
-  overviewSource,
-  'contextLabel.title = contextLabel.textContent ?? "";',
-  "truncated sticky context must retain its full text",
+  candidateWorkspaceSource,
+  "menu.categories.map((category) =>",
+  "workspace groups must originate from canonical category order",
 );
 assertIncludes(
-  overviewSource,
-  "focusProductRelation: (categoryId, productId) =>",
-  "the overview must expose row-local focus restoration",
+  candidateWorkspaceSource,
+  "menu.products.filter(",
+  "workspace rows must originate from canonical Product order",
 );
+assertIncludes(
+  candidateWorkspaceSource,
+  "products.length > 0",
+  "empty canonical category groups must be omitted",
+);
+
+assertIncludes(
+  candidateWorkspaceViewSource,
+  'const root = element("main", "candidate-workspace");',
+  "CND2 must use one document main surface rather than a modal",
+);
+assertIncludes(
+  candidateWorkspaceViewSource,
+  'const backButton = element("button", "candidate-workspace__back", "回到完整菜單") as HTMLButtonElement;',
+  "the workspace must expose one explicit in-app Back action",
+);
+assertIncludes(
+  candidateWorkspaceViewSource,
+  'const locateButton = element("button", "candidate-workspace__action", "在菜單中查看") as HTMLButtonElement;',
+  "each Candidate must expose one canonical-menu locator",
+);
+assertIncludes(
+  candidateWorkspaceViewSource,
+  'const removeButton = element("button", "candidate-workspace__action", "移出考慮") as HTMLButtonElement;',
+  "workspace removal must be an explicit non-toggle action",
+);
+assertIncludes(
+  candidateWorkspaceViewSource,
+  "removeButtons.set(product.id, removeButton);",
+  "workspace removal focus recovery must target remaining canonical Candidate IDs",
+);
+assertIncludes(
+  candidateWorkspaceViewSource,
+  "focusRemoval: (productId) => removeButtons.get(productId)?.focus({ preventScroll: true }),",
+  "workspace removal focus recovery must never fall to body or a detached node",
+);
+
 assertIncludes(
   appSource,
   "let state: MenuAppState = createInitialMenuAppState(menu);",
-  "Candidate state must remain separate from reading state in one app wrapper",
+  "reading, Candidate, and surface state must stay in one explicit app wrapper",
 );
 assertIncludes(
   appSource,
-  "state = toggleAppCandidate(state, menu, productId);",
-  "Candidate toggling must use the bounded pure state operation",
+  "let candidateReturnContext:",
+  "browser scroll and focus return context must remain in the controller rather than pure domain state",
 );
 assertIncludes(
   appSource,
-  "overview.focusProductRelation(categoryId, productId);",
-  "selecting an anchor must retain visible focus on the chosen row instead of moving focus offscreen",
+  "scrollY: window.scrollY,",
+  "workspace entry must capture the exact previous menu scroll position",
 );
 assertIncludes(
   appSource,
-  "const cancelAnchor = (returnFocusProductId: ProductId | null = null): void =>",
-  "anchor cancellation must distinguish a top-control action from an Escape action inside a row",
+  "state = openCandidateWorkspace(state, menu);",
+  "workspace open must use the bounded pure surface transition",
 );
 assertIncludes(
   appSource,
-  "if (returnFocusProductId) overview.focusProductRelation(categoryId, returnFocusProductId);",
-  "Escape cancellation inside a row must retain visible focus on that canonical row",
+  'overview.element.hidden = state.surface.kind !== "menu";',
+  "the canonical menu must remain mounted while hidden",
 );
 assertIncludes(
   appSource,
-  "cancelAnchor(focusedProductId());",
-  "the Escape handler must capture the currently focused product before replacing row buttons",
+  'candidateWorkspace.element.hidden = state.surface.kind !== "candidates";',
+  "only the Candidate workspace may be visible while its surface is active",
+);
+assertIncludes(
+  appSource,
+  'overview.element.setAttribute("inert", "");',
+  "the hidden canonical menu must be inert",
+);
+assertIncludes(
+  appSource,
+  "window.scrollTo({ top: returnContext.scrollY, behavior: \"auto\" });",
+  "ordinary workspace Back must restore the exact menu scroll position",
+);
+assertIncludes(
+  appSource,
+  "returnContext.focusElement?.focus({ preventScroll: true });",
+  "ordinary workspace Back must restore the previous focus origin without moving scroll",
+);
+assertIncludes(
+  appSource,
+  "const orderedProductIds = createCandidateWorkspaceModel(menu, state.candidates).groups.flatMap",
+  "deterministic removal focus must derive from current canonical workspace order",
+);
+assertIncludes(
+  appSource,
+  "state = showCandidateInMenu(state, menu, productId);",
+  "Product locator must reuse the pure category-focus transition",
+);
+assertIncludes(
+  appSource,
+  "row?.scrollIntoView({",
+  "Product locator must reveal the existing canonical row",
+);
+assertIncludes(
+  appSource,
+  "overview.focusProductCandidate(product.categoryId, productId);",
+  "Product locator must focus the canonical Candidate toggle",
 );
 
 [
-  "category-reading-control",
-  "menu-anchor-relations",
-  "anchorRelations",
-  ".tokens",
-  "row.addEventListener(\"click\"",
-  "getBoundingClientRect",
-  "scrollIntoView",
-  "window.scroll",
-  "candidate-list",
-  "candidate-workspace",
+  "dialog",
+  "showModal",
   "candidate-rail",
   "candidate-modal",
   "candidate-sheet",
   "candidate-footer",
+  "comparison-matrix",
+  "candidate-rank",
+  "candidate-score",
+  "row.addEventListener(\"click\"",
 ].forEach((forbidden) => {
-  if (categorySource.includes(forbidden) || overviewSource.includes(forbidden)) {
-    throw new Error(`CND1 must not contain ${forbidden}`);
+  if (
+    candidateWorkspaceViewSource.includes(forbidden) ||
+    appSource.includes(forbidden) ||
+    overviewSource.includes(forbidden)
+  ) {
+    throw new Error(`CND2 must not contain ${forbidden}`);
   }
 });
 
-console.log("✓ Prototype C + CND1 menu workspace contract");
+[
+  "quantity",
+  "modifier",
+  "checkout",
+  "current-order",
+  "order-total",
+  "decision-action",
+  "comparison-action",
+].forEach((forbidden) => {
+  if (candidateWorkspaceSource.includes(forbidden) || candidateWorkspaceViewSource.includes(forbidden)) {
+    throw new Error(`CND2 must not introduce ${forbidden}`);
+  }
+});
+
+console.log("✓ Prototype C + CND1 + CND2 menu workspace contract");
