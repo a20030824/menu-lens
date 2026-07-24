@@ -1,9 +1,6 @@
 import type { CategoryId, ProductId } from "../domain/menu-types.js";
 import type { SemanticAxis } from "../customer/menu-anchor-axis.js";
-import {
-  candidateCount as countCandidates,
-  type CandidateState,
-} from "../customer/menu-candidates.js";
+import type { CandidateState } from "../customer/menu-candidates.js";
 import {
   categoryIsExpanded,
   type CompleteMenuModel,
@@ -29,7 +26,11 @@ const axisLabels: Readonly<Record<SemanticAxis, string>> = {
 
 export type MenuOverviewView = Readonly<{
   element: HTMLElement;
-  render: (state: MenuReadingState, candidateState: CandidateState) => void;
+  render: (
+    state: MenuReadingState,
+    candidateState: CandidateState,
+    candidateCount: number,
+  ) => void;
   sectionFor: (categoryId: CategoryId) => HTMLElement | null;
   focusAnchorControl: (categoryId: CategoryId) => void;
   focusProductRelation: (categoryId: CategoryId, productId: ProductId) => void;
@@ -108,13 +109,16 @@ export const createMenuOverview = (
 
   root.append(context, intro, stack, footer);
 
-  const render = (state: MenuReadingState, candidateState: CandidateState): void => {
+  const render = (
+    state: MenuReadingState,
+    candidateState: CandidateState,
+    candidateCount: number,
+  ): void => {
     root.dataset.mode = state.expansion.kind;
     context.hidden = state.expansion.kind === "overview";
     footer.hidden = state.expansion.kind === "all";
     showAllButton.hidden = state.expansion.kind === "all";
 
-    const candidateCount = countCandidates(candidateState);
     candidateSummary.textContent = candidateCount === 0 ? "尚無考慮項目 · 不影響點餐" : `考慮中 ${candidateCount} 道 · 尚未點餐`;
     const candidateContext = candidateCount > 0 ? ` · 考慮中 ${candidateCount}` : "";
     const candidateIds = new Set(candidateState.productIds);
