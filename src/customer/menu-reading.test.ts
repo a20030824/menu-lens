@@ -45,7 +45,7 @@ test("initial state starts in overview with the first eligible category axis", (
   );
 });
 
-test("focusing a category resets to its first eligible semantic axis", () => {
+test("focusing a different category resets to its first eligible semantic axis", () => {
   const shared = focusCategory(createInitialMenuReadingState(referenceMenu), referenceMenu, sharedCategoryId);
   assert(shared.semanticAxis === "portion", "shared dishes default to portion before preparation");
   assert(shared.anchorReading.kind === "idle", "category focus starts without an anchor");
@@ -113,6 +113,8 @@ test("overview, all-expanded mode, clear, and category changes reset only the do
   );
   const overview = showMenuOverview(active);
   assert(overview.anchorReading.kind === "idle" && overview.semanticAxis === "preparation", "overview clears anchor but preserves category axis preference");
+  const reopened = focusCategory(overview, referenceMenu, sharedCategoryId);
+  assert(reopened.anchorReading.kind === "idle" && reopened.semanticAxis === "preparation", "reopening the same category preserves its explicit axis preference");
   const all = showAllCategories(active);
   assert(all.anchorReading.kind === "idle" && all.semanticAxis === "preparation", "all-expanded mode clears anchor but preserves axis preference");
   const cleared = clearAnchor(active);
