@@ -62,7 +62,7 @@ full menu
 → current order
 ```
 
-Prototype C establishes the accepted relational-reading substrate. CND1 establishes reversible Candidate membership directly on canonical Product rows. CND2 now plans a derived Candidate review workspace that can retrieve, revisit, and dismiss Candidates while preserving the prior menu context and without creating comparison or order state.
+Prototype C establishes the accepted relational-reading substrate. CND1 establishes reversible Candidate membership directly on canonical Product rows. CND2 now implements a derived Candidate review workspace that can retrieve, revisit, and dismiss Candidates while preserving the prior menu context and without creating comparison or order state.
 
 ### Later, only after the decision spine works
 
@@ -126,7 +126,7 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) — Prototype B implementation, task matrix, reverse review, and disposition
 - [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) — Prototype C implementation, evidence, accepted limitations, and final current-scope disposition
 - [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) — CND1 implementation, final re-review corrections, narrow-screen evidence, and accepted disposition
-- [`docs/candidate-workspace-plan.md`](docs/candidate-workspace-plan.md) — planned CND2 derived workspace, return-context contract, removal behavior, tests, and scope gates
+- [`docs/candidate-workspace-plan.md`](docs/candidate-workspace-plan.md) — CND2 implementation, derived-view boundary, return-context behavior, reverse-review corrections, and current review status
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
@@ -145,7 +145,7 @@ The customer decision spine is active on Draft PR #4:
 → [useful but insufficient] Prototype B — Anchor-only relation
 → [passed for current scope] Prototype C — Anchor + explicit shared axis
 → [passed for current scope] CND1 — Attached Candidate marks
-→ [planned, implementation not started] CND2 — Candidate review workspace
+→ [implemented, awaiting review] CND2 — Candidate review workspace
 → [blocked] Candidate comparison / Decision / Configuration / Current order
 ```
 
@@ -159,6 +159,10 @@ CND1 adds identity-only Candidate membership beside reading state. Available Pro
 
 The final CND1 re-review corrected stale-ID counting, Candidate-dependent Product typography, repeated live-region announcements, changing toggle labels, an unused row-wide state mirror, and a premature detached-list projection. A 320px/390px Chromium proxy reports zero Candidate on/off geometry differences and no overflow. Typecheck, Candidate domain tests, app-state continuity tests, structure contracts, and the static build pass.
 
-CND2 is now the active plan-review-gated slice. It authorizes only a canonical derived Candidate review view with explicit menu return, Product locator, and Candidate removal. Comparison, Decision, Configuration, Current order, transaction state, ranking, and recommendation remain blocked.
+CND2 adds one derived, grouped Candidate review `main` surface over canonical Category and Product references. It provides a single menu entry, exact ordinary Back restoration, canonical Product location, explicit Candidate removal, deterministic focus recovery, and an in-place empty state. It adds no comparison, ranking, quantity, Configuration, total, Current order, or copied Product data.
+
+CND2's first reverse review corrected final-removal Back focus, sold-out locator focus, unnecessary hidden-workspace rebuilds, and status-lane geometry. Typecheck, derived-model tests, app-surface tests, structure and focus contracts, and static build pass. Runtime Chromium verification at 320px and 390px remains unclaimed because the current execution environment could not materialize a runnable repository artifact.
+
+CND2 is implemented and awaiting explicit product-owner disposition. Candidate comparison, Decision, Configuration, Current order, transaction state, ranking, and recommendation remain blocked.
 
 See [`docs/workstreams.md`](docs/workstreams.md), [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md), and [`docs/candidate-workspace-plan.md`](docs/candidate-workspace-plan.md) for the active sequence and evidence.
