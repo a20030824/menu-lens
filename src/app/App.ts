@@ -1,12 +1,17 @@
 import type { CategoryId, Menu, ProductId } from "../domain/menu-types.js";
 import type { SemanticAxis } from "../customer/menu-anchor-axis.js";
 import {
+  createInitialMenuAppState,
+  toggleAppCandidate,
+  updateAppReading,
+  type MenuAppState,
+} from "../customer/menu-app-state.js";
+import {
   beginAnchorSelection,
   cancelAnchorSelection,
   categoryScrollBehavior,
   clearAnchor,
   createCompleteMenuModel,
-  createInitialMenuReadingState,
   focusCategory,
   isAnchorSelectionCancelKey,
   selectAnchor,
@@ -14,7 +19,6 @@ import {
   setSemanticAxis,
   showAllCategories,
   showMenuOverview,
-  type MenuReadingState,
 } from "../customer/menu-reading.js";
 import { createMenuOverview, type MenuOverviewView } from "./menu-overview.js";
 
@@ -35,10 +39,10 @@ const reducedMotion = (): boolean =>
 
 export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   const model = createCompleteMenuModel(menu);
-  let state: MenuReadingState = createInitialMenuReadingState(menu);
+  let state: MenuAppState = createInitialMenuAppState(menu);
   let overview: MenuOverviewView;
 
-  const render = (): void => overview.render(state);
+  const render = (): void => overview.render(state.reading, state.candidates);
 
   const focusedProductId = (): ProductId | null => {
     const focused = document.activeElement;
@@ -47,22 +51,28 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   };
 
   const selectCategory = (categoryId: CategoryId): void => {
+    const reading = state.reading;
     const isSameFocusedCategory =
-      state.expansion.kind === "category" && state.expansion.categoryId === categoryId;
-    state = isSameFocusedCategory
-      ? showMenuOverview(state)
-      : focusCategory(state, menu, categoryId);
+      reading.expansion.kind === "category" && reading.expansion.categoryId === categoryId;
+    state = updateAppReading(
+      state,
+      isSameFocusedCategory
+        ? showMenuOverview(reading)
+        : focusCategory(reading, menu, categoryId),
+    );
     render();
   };
 
   const beginAnchor = (): void => {
-    state = beginAnchorSelection(state);
+    state = updateAppReading(state, beginAnchorSelection(state.reading));
     render();
   };
 
   const cancelAnchor = (returnFocusProductId: ProductId | null = null): void => {
-    const categoryId = state.expansion.kind === "category" ? state.expansion.categoryId : null;
-    state = cancelAnchorSelection(state);
+    const categoryId = state.reading.expansion.kind === "category"
+      ? state.reading.expansion.categoryId
+      : null;
+    state = updateAppReading(state, cancelAnchorSelection(state.reading));
     render();
     if (!categoryId) return;
     if (returnFocusProductId) overview.focusProductRelation(categoryId, returnFocusProductId);
@@ -70,28 +80,37 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   };
 
   const chooseAnchor = (productId: ProductId): void => {
-    const categoryId = state.expansion.kind === "category" ? state.expansion.categoryId : null;
-    state = selectAnchor(state, menu, productId);
+    const categoryId = state.reading.expansion.kind === "category"
+      ? state.reading.expansion.categoryId
+      : null;
+    state = updateAppReading(state, selectAnchor(state.reading, menu, productId));
     render();
-    if (categoryId && state.anchorReading.kind === "active") {
+    if (categoryId && state.reading.anchorReading.kind === "active") {
       overview.focusProductRelation(categoryId, productId);
     }
   };
 
   const clearCurrentAnchor = (): void => {
-    const categoryId = state.expansion.kind === "category" ? state.expansion.categoryId : null;
-    state = clearAnchor(state);
+    const categoryId = state.reading.expansion.kind === "category"
+      ? state.reading.expansion.categoryId
+      : null;
+    state = updateAppReading(state, clearAnchor(state.reading));
     render();
     if (categoryId) overview.focusAnchorControl(categoryId);
   };
 
   const chooseSemanticAxis = (axis: SemanticAxis): void => {
-    state = setSemanticAxis(state, menu, axis);
+    state = updateAppReading(state, setSemanticAxis(state.reading, menu, axis));
+    render();
+  };
+
+  const toggleCandidate = (productId: ProductId): void => {
+    state = toggleAppCandidate(state, menu, productId);
     render();
   };
 
   const showOverviewFromContext = (): void => {
-    state = showMenuOverview(state);
+    state = updateAppReading(state, showMenuOverview(state.reading));
     render();
     overview.element.scrollIntoView({
       block: "start",
@@ -100,7 +119,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   };
 
   const showAll = (): void => {
-    state = showAllCategories(state);
+    state = updateAppReading(state, showAllCategories(state.reading));
     render();
   };
 
@@ -112,6 +131,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     chooseAnchor,
     clearCurrentAnchor,
     chooseSemanticAxis,
+    toggleCandidate,
     showOverviewFromContext,
     showAll,
   );
@@ -151,7 +171,10 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   render();
 
   document.addEventListener("keydown", (event) => {
-    if (state.anchorReading.kind !== "selecting" || !isAnchorSelectionCancelKey(event.key)) return;
+    if (
+      state.reading.anchorReading.kind !== "selecting" ||
+      !isAnchorSelectionCancelKey(event.key)
+    ) return;
     event.preventDefault();
     cancelAnchor(focusedProductId());
   });
@@ -159,7 +182,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   let scrollFrame: number | null = null;
   const syncAllModePosition = (): void => {
     scrollFrame = null;
-    if (state.expansion.kind !== "all") return;
+    if (state.reading.expansion.kind !== "all") return;
     const marker = window.innerHeight * 0.32;
     let activeCategoryId = model.categories[0]?.id ?? null;
     model.categories.forEach((category) => {
@@ -168,8 +191,11 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
         activeCategoryId = category.id;
       }
     });
-    if (activeCategoryId && activeCategoryId !== state.activeCategoryId) {
-      state = setActiveCategory(state, menu, activeCategoryId);
+    if (activeCategoryId && activeCategoryId !== state.reading.activeCategoryId) {
+      state = updateAppReading(
+        state,
+        setActiveCategory(state.reading, menu, activeCategoryId),
+      );
       render();
     }
   };
