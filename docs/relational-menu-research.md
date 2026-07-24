@@ -252,6 +252,39 @@ For one active axis:
 
 A reverse-review correction was required here: the first implementation reset `準備` to default `份量` when the user returned to overview and reopened the same category. The state transition now distinguishes same-category reopening from an actual category change.
 
+### Focus continuity re-review
+
+A second re-review found that choosing an anchor from a row moved keyboard focus to the top anchor control with `preventScroll`. The viewport stayed at the selected row, leaving focus outside the visible area.
+
+The active path now keeps focus local:
+
+```text
+choose anchor in row
+→ render active relation
+→ focus that row's relation lane
+→ preserve scroll position
+```
+
+The same issue existed when Escape cancelled selection while focus was on a row button. That path now captures the focused ProductId before replacing the button and returns focus to the same canonical row.
+
+Top-level actions remain top-local:
+
+```text
+press top Cancel
+→ focus anchor control
+
+press Clear
+→ focus anchor control
+```
+
+The relation lane uses `tabIndex=-1`, retains the complete accessible relation phrase, and receives programmatic focus only. It does not add another Tab stop.
+
+### Low-entropy cleanup
+
+The active C path no longer references Prototype A's old `category-reading-control.ts` selector UI. The unused module was removed and its absence is now part of the workspace contract.
+
+Prototype A and B pure projection modules remain compiled and tested as historical evidence. Obsolete UI is not retained merely because its experiment existed.
+
 ### Axis eligibility
 
 Axes are bounded to:
@@ -288,6 +321,10 @@ Tests cover:
 - category reset boundaries;
 - canonical order and sold-out retention;
 - four columns, fixed controls, one sticky context, and no row-wide click;
+- row-local focus after anchor selection;
+- row-local focus after Escape cancellation;
+- top-local focus after top Cancel and Clear;
+- absence of the obsolete Prototype A selector UI;
 - absence of B automatic semantics and all deferred states.
 
 The branch passes:
@@ -342,7 +379,7 @@ Equality and unknown:
 FORMAL PASS
 ```
 
-Orientation:
+Orientation and focus:
 
 ```text
 DESIGNER-PROXY PASS
