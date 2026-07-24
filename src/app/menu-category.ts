@@ -1,10 +1,11 @@
-import type { CategoryId } from "../domain/menu-types.js";
-import type { MenuReadingAxis } from "../customer/menu-relations.js";
+import type { CategoryId, ProductId } from "../domain/menu-types.js";
+import type { AnchorRelation } from "../customer/menu-anchor-relations.js";
 import type {
+  AnchorReading,
   CategoryReadingModel,
   ProductNodeModel,
 } from "../customer/menu-reading.js";
-import { createCategoryReadingControl } from "./category-reading-control.js";
+import { createCategoryAnchorControl } from "./category-anchor-control.js";
 
 const element = <K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -20,69 +21,61 @@ const element = <K extends keyof HTMLElementTagNameMap>(
 const visuallyHiddenText = (text: string): HTMLSpanElement =>
   element("span", "visually-hidden", text);
 
-const axisHeading: Record<MenuReadingAxis, string> = {
-  default: "閱讀線索",
-  price: "同類價位 低→高",
-  portion: "份量",
-  role: "餐點角色",
-  preparation: "準備節奏",
-};
-
 const defaultCueText = (product: ProductNodeModel): string =>
   [product.primaryCue, product.secondaryCue]
     .filter((cue): cue is string => cue !== null)
     .join(" · ");
 
-const renderRelation = (
+const renderDefaultRelation = (target: HTMLElement, product: ProductNodeModel): void => {
+  target.dataset.anchorMode = "idle";
+  target.replaceChildren();
+  const text = defaultCueText(product);
+  if (text) {
+    const cue = element("span", "product-row__relation-text", text);
+    cue.title = text;
+    target.append(cue);
+  } else {
+    target.append(
+      visuallyHiddenText("無額外閱讀線索"),
+      element("span", "product-row__cue-empty", "—"),
+    );
+  }
+};
+
+const renderSelectingRelation = (
   target: HTMLElement,
   product: ProductNodeModel,
-  axis: MenuReadingAxis,
+  onSelectAnchor: (productId: ProductId) => void,
 ): void => {
-  target.dataset.axis = axis;
+  target.dataset.anchorMode = "selecting";
   target.replaceChildren();
+  const button = element("button", "anchor-select-button", "作為基準") as HTMLButtonElement;
+  button.type = "button";
+  button.setAttribute("aria-label", `將「${product.name}」設為比較基準`);
+  button.addEventListener("click", () => onSelectAnchor(product.id));
+  target.append(button);
+};
 
-  if (axis === "default") {
-    const text = defaultCueText(product);
-    if (text) {
-      const cue = element("span", "product-row__relation-text", text);
-      cue.title = text;
-      target.append(cue);
-    } else {
-      target.append(
-        visuallyHiddenText("無額外閱讀線索"),
-        element("span", "product-row__cue-empty", "—"),
-      );
-    }
+const renderActiveRelation = (
+  target: HTMLElement,
+  relation: AnchorRelation | undefined,
+): void => {
+  target.dataset.anchorMode = "active";
+  target.replaceChildren();
+  if (!relation) {
+    target.append(visuallyHiddenText("無法建立相對關係"), element("span", "product-row__cue-empty", "—"));
     return;
   }
 
-  const value = product.axisValues[axis];
-  if (value.kind === "default") {
-    target.append(element("span", "product-row__cue-empty", "—"));
-    return;
-  }
-
-  if (value.kind === "price") {
-    const scale = element("span", "price-axis");
-    scale.setAttribute("aria-label", value.label);
-    const track = element("span", "price-axis__track");
-    const marker = element("span", "price-axis__marker");
-    marker.style.insetInlineStart = `${Math.round(value.position * 100)}%`;
-    track.append(marker);
-    scale.append(track, visuallyHiddenText(value.label));
-    if (value.scale === "single") scale.dataset.scale = "single";
-    target.append(scale);
-    return;
-  }
-
-  const text = element(
-    "span",
-    value.status === "unknown"
+  const hasUnknown = relation.kind === "relative" && relation.tokens.some((token) => token.status === "unknown");
+  const className = relation.kind === "anchor"
+    ? "product-row__relation-text product-row__relation-text--anchor"
+    : hasUnknown
       ? "product-row__relation-text product-row__relation-text--unknown"
-      : "product-row__relation-text",
-    value.label,
-  );
-  text.title = value.label;
+      : "product-row__relation-text";
+  const text = element("span", className, relation.label);
+  text.title = relation.label;
+  text.setAttribute("aria-label", relation.accessibleLabel);
   target.append(text);
 };
 
@@ -92,16 +85,20 @@ export type MenuCategorySection = Readonly<{
   setState: (
     expanded: boolean,
     current: boolean,
-    readingAxis: MenuReadingAxis,
-    axisControlVisible: boolean,
+    anchorReading: AnchorReading,
+    anchorControlVisible: boolean,
   ) => void;
+  focusAnchorControl: () => void;
 }>;
 
 export const createMenuCategorySection = (
   category: CategoryReadingModel,
   index: number,
   onSelectCategory: (categoryId: CategoryId) => void,
-  onSelectAxis: (axis: MenuReadingAxis) => void,
+  onBeginAnchorSelection: () => void,
+  onCancelAnchorSelection: () => void,
+  onSelectAnchor: (productId: ProductId) => void,
+  onClearAnchor: () => void,
 ): MenuCategorySection => {
   const section = element("section", "menu-category-zone");
   section.id = `category-${category.id}`;
@@ -149,11 +146,13 @@ export const createMenuCategorySection = (
   reveal.setAttribute("aria-hidden", "true");
   reveal.setAttribute("inert", "");
   const revealInner = element("div", "category-reveal__inner");
-  const readingControl = createCategoryReadingControl(
+  const anchorControl = createCategoryAnchorControl(
     category.id,
-    category.readingAxes,
-    onSelectAxis,
+    onBeginAnchorSelection,
+    onCancelAnchorSelection,
+    onClearAnchor,
   );
+
   const ledger = element("table", "product-ledger");
   const caption = element("caption", "visually-hidden", `${category.name}商品列表`);
   const columns = element("colgroup");
@@ -163,13 +162,6 @@ export const createMenuCategorySection = (
 
   const ledgerHead = element("thead");
   const ledgerHeadRow = element("tr");
-  const cueHeading = element(
-    "th",
-    "product-ledger__heading product-ledger__heading--cue",
-    axisHeading.default,
-  );
-  cueHeading.scope = "col";
-  cueHeading.title = axisHeading.default;
   const headings = [
     ["序", "product-ledger__heading product-ledger__heading--index"],
     ["菜名", "product-ledger__heading product-ledger__heading--name"],
@@ -179,6 +171,13 @@ export const createMenuCategorySection = (
     heading.scope = "col";
     ledgerHeadRow.append(heading);
   });
+  const cueHeading = element(
+    "th",
+    "product-ledger__heading product-ledger__heading--cue",
+    "閱讀線索",
+  );
+  cueHeading.scope = "col";
+  cueHeading.title = "閱讀線索";
   ledgerHeadRow.append(cueHeading);
   const priceHeading = element(
     "th",
@@ -189,14 +188,16 @@ export const createMenuCategorySection = (
   ledgerHeadRow.append(priceHeading);
   ledgerHead.append(ledgerHeadRow);
 
-  const relationTargets = new Map<string, HTMLElement>();
+  const relationTargets = new Map<ProductId, HTMLElement>();
+  const rows = new Map<ProductId, HTMLTableRowElement>();
   const ledgerBody = element("tbody");
   category.products.forEach((product, productIndex) => {
     const row = element(
       "tr",
       product.isSoldOut ? "product-row product-row--sold-out" : "product-row",
-    );
+    ) as HTMLTableRowElement;
     row.dataset.productId = product.id;
+    row.dataset.anchor = "false";
 
     const indexCell = element(
       "td",
@@ -208,7 +209,7 @@ export const createMenuCategorySection = (
 
     const cueCell = element("td", "product-row__cues");
     const relation = element("span", "product-row__relation");
-    renderRelation(relation, product, "default");
+    renderDefaultRelation(relation, product);
     cueCell.append(relation);
 
     const status = element("span", "product-row__status");
@@ -226,19 +227,20 @@ export const createMenuCategorySection = (
     row.append(indexCell, nameCell, cueCell, priceCell);
     ledgerBody.append(row);
     relationTargets.set(product.id, relation);
+    rows.set(product.id, row);
   });
 
   ledger.append(caption, columns, ledgerHead, ledgerBody);
-  revealInner.append(readingControl.element, ledger);
+  revealInner.append(anchorControl.element, ledger);
   reveal.append(revealInner);
   section.append(band, reveal);
 
-  let renderedAxis: MenuReadingAxis = "default";
+  let renderedState = "";
   const setState = (
     expanded: boolean,
     current: boolean,
-    readingAxis: MenuReadingAxis,
-    axisControlVisible: boolean,
+    anchorReading: AnchorReading,
+    anchorControlVisible: boolean,
   ): void => {
     section.dataset.expanded = String(expanded);
     section.dataset.current = String(current);
@@ -248,18 +250,51 @@ export const createMenuCategorySection = (
     reveal.setAttribute("aria-hidden", String(!expanded));
     if (expanded) reveal.removeAttribute("inert");
     else reveal.setAttribute("inert", "");
-    readingControl.setState(readingAxis, axisControlVisible);
 
-    if (renderedAxis !== readingAxis) {
-      category.products.forEach((product) => {
-        const target = relationTargets.get(product.id);
-        if (target) renderRelation(target, product, readingAxis);
-      });
-      cueHeading.textContent = axisHeading[readingAxis];
-      cueHeading.title = axisHeading[readingAxis];
-      renderedAxis = readingAxis;
-    }
+    const anchorProduct = anchorReading.kind === "active"
+      ? category.products.find((product) => product.id === anchorReading.productId)
+      : undefined;
+    anchorControl.setState(
+      anchorReading,
+      anchorProduct?.name ?? null,
+      anchorControlVisible && category.productCount >= 3,
+    );
+
+    const nextRenderedState = anchorReading.kind === "active"
+      ? `active:${anchorReading.productId}`
+      : anchorReading.kind;
+    if (renderedState === nextRenderedState) return;
+
+    category.products.forEach((product) => {
+      const target = relationTargets.get(product.id);
+      const row = rows.get(product.id);
+      if (!target || !row) return;
+      row.dataset.anchor = String(
+        anchorReading.kind === "active" && product.id === anchorReading.productId,
+      );
+      if (anchorReading.kind === "selecting") {
+        renderSelectingRelation(target, product, onSelectAnchor);
+      } else if (anchorReading.kind === "active") {
+        renderActiveRelation(target, category.anchorRelations[anchorReading.productId]?.[product.id]);
+      } else {
+        renderDefaultRelation(target, product);
+      }
+    });
+
+    const heading = anchorReading.kind === "selecting"
+      ? "選擇基準"
+      : anchorReading.kind === "active"
+        ? "相對基準"
+        : "閱讀線索";
+    cueHeading.textContent = heading;
+    cueHeading.title = heading;
+    renderedState = nextRenderedState;
   };
 
-  return { element: section, categoryId: category.id, setState };
+  return {
+    element: section,
+    categoryId: category.id,
+    setState,
+    focusAnchorControl: anchorControl.focusAction,
+  };
 };
