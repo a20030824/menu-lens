@@ -71,7 +71,7 @@ assertIncludes(
 );
 assertIncludes(
   categorySource,
-  "category.anchorAxisRelations[anchorReading.productId]?.[semanticAxis]?.[product.id]",
+  "category.anchorAxisRelations[activeAnchorId]?.[semanticAxis]?.[product.id]",
   "every active row must project from one explicit shared semantic axis",
 );
 assertIncludes(
