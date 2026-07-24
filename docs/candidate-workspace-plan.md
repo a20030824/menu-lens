@@ -1,13 +1,13 @@
-# Candidate review workspace plan
+# Candidate review workspace
 
 ## Document status
 
-This document defines the next bounded Candidate slice after CND1.
+This document records the second bounded Candidate slice after CND1.
 
 ```text
 branch  agent/menu-map-atlas
 PR      #4 — Build menu reading workspace
-status  [planned, implementation not started]
+status  [implemented, awaiting review]
 ```
 
 Current sequence:
@@ -15,25 +15,12 @@ Current sequence:
 ```text
 [passed for current scope] Prototype C — Anchor + explicit shared axis
 → [passed for current scope] CND1 — Attached Candidate marks
-→ [planned, implementation not started] CND2 — Candidate review workspace
+→ [implemented, awaiting review] CND2 — Candidate review workspace
 → [blocked] Candidate comparison
 → [blocked] Decision / Configuration / Current order
 ```
 
-CND2 is a separate authorization boundary. Passing CND1 did not automatically authorize a Candidate workspace.
-
-## Why CND2 comes before comparison
-
-The product contract requires Candidate and order state to remain distinct, and the interaction model says comparison is generated from Candidates.
-
-CND1 already proves that reversible Candidate membership can attach to canonical Product rows. It intentionally leaves two limitations:
-
-- the global count does not identify which collapsed categories contain Candidates;
-- there is no place to review several cross-category Candidates together.
-
-Comparison should not be added before the Candidate collection itself has a coherent retrieval, review, removal, and return path.
-
-CND2 therefore asks whether a small derived workspace can make the existing Candidate collection usable without becoming a cart, recommendation list, or second Product source of truth.
+CND2 is a separate authorization boundary. It does not automatically authorize comparison or transaction state.
 
 ## Research question
 
@@ -43,7 +30,7 @@ CND2 investigates Candidate retrieval and continuity only.
 
 It does not investigate:
 
-- comparison;
+- Candidate comparison;
 - ranking or recommendation;
 - selecting a winner;
 - explicit Decision;
@@ -63,22 +50,6 @@ canonical Products
 
 The workspace is a view over the canonical menu, not another maintained catalog.
 
-It may derive:
-
-- canonical Product references;
-- canonical category grouping;
-- canonical Product order;
-- current price, availability, and metadata-completeness labels.
-
-It must not store:
-
-- copied Product objects;
-- Candidate-specific names, prices, or availability;
-- insertion timestamps;
-- manual Candidate order;
-- comparison selections;
-- quantity, configuration, total, or order state.
-
 `CandidateState` remains identity-only:
 
 ```ts
@@ -87,22 +58,28 @@ type CandidateState = Readonly<{
 }>;
 ```
 
-## Surface and return-context boundary
+The derived model stores only:
 
-CND2 may add one application-level surface state beside reading and Candidate state.
+```ts
+type CandidateWorkspaceModel = Readonly<{
+  groups: ReadonlyArray<{
+    category: Category;
+    products: ReadonlyArray<Product>;
+  }>;
+  count: number;
+}>;
+```
 
-Observable shape:
+Category and Product values are canonical object references. CND2 stores no Candidate-specific name, price, availability, timestamp, insertion order, manual order, score, comparison selection, quantity, configuration, total, or order state.
+
+## Implemented surface state
+
+CND2 adds one application-level surface state beside reading and Candidate state:
 
 ```ts
 type MenuSurface =
   | { kind: "menu" }
-  | {
-      kind: "candidates";
-      returnContext: {
-        scrollY: number;
-        focusedProductId: ProductId | null;
-      };
-    };
+  | { kind: "candidates" };
 
 type MenuAppState = Readonly<{
   reading: MenuReadingState;
@@ -111,112 +88,108 @@ type MenuAppState = Readonly<{
 }>;
 ```
 
-The exact implementation may keep browser measurements in a small controller rather than the pure domain state. The observable contract may not change:
+Browser measurements and DOM focus references remain in the App controller rather than pure state:
 
-1. opening the workspace preserves the complete `MenuReadingState`;
-2. ordinary Back returns to the same menu mode, category, Anchor, semantic axis, scroll position, and focus origin;
-3. Candidate membership remains unchanged unless the user explicitly removes a Candidate;
-4. no workspace action creates comparison, Decision, Configuration, or order state.
+```ts
+type CandidateReturnContext = Readonly<{
+  scrollY: number;
+  focusElement: HTMLElement | null;
+}>;
+```
+
+Observable invariants:
+
+1. opening the workspace preserves the complete `MenuReadingState` reference;
+2. opening preserves Candidate membership;
+3. ordinary Back returns to the same menu mode, category, Anchor, semantic axis, scroll position, and focus origin when that origin remains available;
+4. removing the final Candidate falls back to the stable Candidate summary because the workspace entry is then disabled and invisible;
+5. no workspace operation creates comparison or transaction state.
 
 ## Entry point
 
-CND1's heading summary currently says:
+The existing Candidate summary remains informational:
 
 ```text
 考慮中 3 道 · 尚未點餐
 ```
 
-CND2 adds one explicit adjacent action when the canonical Candidate count is greater than zero:
+CND2 adds one adjacent native button:
 
 ```text
-[ 查看考慮項目 ]
+查看考慮項目
 ```
 
-Requirements:
+Behavior:
 
-- the count remains informational and continues to state the non-order boundary;
-- the entry action is a native button;
-- accessible name includes the count, for example `查看 3 道考慮項目`;
-- zero Candidates expose no enabled workspace entry;
-- the heading area establishes one fixed geometry for zero and nonzero states;
-- no second sticky Candidate bar is introduced;
-- the existing sticky `菜單全貌` action remains the path back to the heading when the diner is deep in the menu.
-
-The first CND2 slice does not add a second Candidate entry inside the sticky context. That mobile-width decision remains separate.
-
-## Opening behavior
-
-When the entry action is activated:
-
-1. capture the current menu scroll position and focus origin;
-2. preserve `MenuReadingState` and `CandidateState` unchanged;
-3. keep the menu surface mounted but hidden and inert;
-4. reveal the Candidate workspace as the only active `main` content;
-5. move focus to the workspace heading with `preventScroll` where supported;
-6. begin the workspace at its top.
-
-The workspace is not a modal, dialog, bottom sheet, side rail, overlay, or fixed footer.
+- zero Candidates keep the same heading geometry but expose no interactive entry;
+- the entry accessible name includes the canonical count;
+- the Candidate count remains the only polite live region;
+- no second sticky Candidate bar exists;
+- no router, URL state, modal, dialog, sheet, rail, overlay, or fixed footer is added.
 
 ## Workspace structure
 
-The workspace uses one compact document view:
+The workspace is one compact document `main` surface:
 
 ```text
 [ 回到完整菜單 ]
 
 考慮中的 3 道
-尚未點餐，可隨時移除或回菜單查看
+尚未點餐，可隨時移除或回菜單查看。
 
 共享料理
 山椒烤雞半隻                         NT$520
 多人分享 · 辣味
-[ 在菜單中查看 ]  [ 移出考慮 ]
-
-紹興奶油蝦                           NT$480
-2–3 人 · 資訊有限
-[ 在菜單中查看 ]  [ 移出考慮 ]
-
-甜點
-黑糖豆花                             NT$120
-[ 在菜單中查看 ]  [ 移出考慮 ]
+[ 在菜單中查看 ] [ 移出考慮 ]
 ```
 
 Grouping and ordering:
 
 1. categories follow canonical category order;
-2. Products follow canonical Product order within each category;
+2. Products follow canonical Product order;
 3. empty category groups are omitted;
-4. stale and duplicate ProductIds are ignored;
-5. rows reuse canonical Product values at render time;
-6. no Candidate is promoted because it was added earlier, later, or more recently.
+4. duplicate and stale ProductIds are ignored;
+5. rows reuse canonical Product references;
+6. Candidate insertion order is not presented or stored.
 
-## Candidate row evidence
-
-The review workspace displays enough evidence to identify a Product without becoming a comparison matrix.
-
-Allowed:
+Allowed row evidence:
 
 - canonical category name;
 - Product name;
-- current price;
-- ordinary primary and secondary cues when present;
-- sold-out label;
-- incomplete-data label.
+- current formatted price;
+- ordinary primary and secondary cues;
+- sold-out status;
+- incomplete-data status.
 
-Not allowed:
+Not present:
 
-- Prototype C Anchor-relative deltas;
-- a workspace-wide semantic axis;
-- side-by-side attribute columns;
-- recommendation reason;
-- score, rank, match percentage, or winner state;
+- Prototype C Anchor-relative projection;
+- a workspace semantic axis;
+- side-by-side comparison columns;
+- score, rank, recommendation, match percentage, or winner state;
 - quantity, modifiers, total, or order language.
 
-Prototype C remains a category-local reading tool on the canonical menu. CND2 does not reproduce C inside the Candidate workspace.
+## Surface ownership
 
-## Return to the previous menu context
+The canonical menu and Candidate workspace remain mounted as sibling `main` elements.
 
-The top action is:
+Only one is visible and interactive at a time:
+
+```text
+surface.kind = menu
+→ menu visible
+→ Candidate workspace hidden + inert
+
+surface.kind = candidates
+→ menu hidden + inert
+→ Candidate workspace visible
+```
+
+The hidden Candidate workspace does not rebuild during unrelated menu-reading renders. Its DOM rerenders only when the `CandidateState` reference changes.
+
+## Ordinary Back
+
+The workspace action is:
 
 ```text
 回到完整菜單
@@ -224,243 +197,200 @@ The top action is:
 
 It restores:
 
-- the exact prior menu expansion mode;
+- exact previous menu surface;
+- previous expansion mode;
 - active category;
 - active Anchor and semantic axis;
-- prior scroll position;
-- focus to the workspace entry action without changing scroll.
+- exact captured `window.scrollY`;
+- previous focus origin with `preventScroll`.
 
-Back does not:
+After the final Candidate is removed, the original entry becomes disabled and invisible. Back therefore focuses the stable Candidate summary instead of attempting to focus an unavailable button.
 
-- clear Candidates;
-- reset Prototype C;
-- focus the first Candidate;
-- reorder or expand categories;
-- scroll to the menu top.
+Browser Back integration is not part of CND2.
 
-Browser Back integration is not required in CND2. The first slice uses one explicit in-app return action and does not add routing or URL state.
+## Locate a canonical Product
 
-## Return to a specific canonical Product
-
-Each Candidate row may expose:
+Each row exposes:
 
 ```text
 在菜單中查看
 ```
 
-This is purposeful navigation rather than ordinary Back.
-
 Behavior:
 
-1. preserve all Candidate membership;
-2. close the Candidate workspace;
-3. focus the Product's canonical category using the existing menu-reading transition;
-4. reveal and scroll the canonical Product row into view;
-5. move focus to that row's Candidate toggle or relation target;
-6. do not open detail, start comparison, or create an order item.
+1. preserve Candidate membership;
+2. close the workspace;
+3. use the existing `focusCategory()` transition;
+4. reveal the canonical category and row;
+5. scroll that existing row into view;
+6. focus its existing Candidate toggle;
+7. if the Product is sold out and has no Candidate toggle, focus the canonical relation lane;
+8. do not open detail, comparison, Decision, or order state.
 
-If the Product belongs to the currently focused category, the current eligible semantic-axis preference remains. If it belongs to another category, existing category-focus rules apply, including clearing the old Anchor and using the destination category's eligible default axis.
+Cross-category locator behavior therefore inherits existing Anchor reset and destination-axis rules.
 
-The implementation must reuse current reading transitions rather than inventing a second category-navigation rule.
+## Removal
 
-## Removal behavior
-
-Candidate workspace removal uses an explicit action:
+Each workspace row exposes an explicit non-toggle action:
 
 ```text
 移出考慮
 ```
 
-It is not an `aria-pressed` toggle because the row is removed from the workspace after activation.
+Removal:
 
-Requirements:
+- changes only Candidate membership;
+- preserves reading state and active surface;
+- leaves an active Anchor active even when the same Product is removed from Candidates;
+- updates the canonical menu toggle through the shared Candidate state;
+- keeps the workspace open after the final removal.
 
-- removing a Candidate does not alter reading state;
-- removing the active Anchor's Candidate membership leaves the Anchor active;
-- the canonical menu row remains present and its attached Candidate toggle becomes unpressed;
-- focus moves to the next remaining row's removal action;
-- when the removed row was last, focus moves to the previous remaining row;
-- when no Candidates remain, focus moves to the empty-state heading;
-- the workspace never closes automatically after removal;
-- removal never affects DraftOrderItem, ConfiguredOrderItem, submitted state, or totals.
+Focus recovery derives from current canonical workspace order:
+
+```text
+next remaining removal action
+→ otherwise previous remaining removal action
+→ otherwise empty-state heading
+```
+
+No `clear all` action exists.
 
 ## Empty workspace
 
-Removing the final Candidate produces an in-place empty state:
+Removing the final Candidate produces:
 
 ```text
 尚無考慮項目
 你可以回到完整菜單繼續瀏覽。
-
-[ 回到完整菜單 ]
 ```
 
-The workspace remains open so the state change is understandable and reversible through the menu. It does not silently navigate away.
+The workspace remains open. It does not silently navigate away.
 
-No `clear all` action is added in CND2.
+## Accessibility
 
-## Accessibility contract
+Implemented contracts:
 
-- exactly one visible `main` surface exists at a time;
-- the hidden menu surface is inert while the workspace is active;
-- the workspace has one programmatically focusable heading;
+- native entry, Back, locator, and removal buttons;
+- exactly one visible and interactive `main` surface;
+- hidden surface is inert;
+- workspace heading is programmatically focusable;
 - category groups use real headings;
-- Product names and prices remain associated within each row;
-- `在菜單中查看` includes the Product name in its accessible name;
-- `移出考慮` includes the Product name in its accessible name;
-- removal focus recovery is deterministic;
-- ordinary Back restores the prior focus origin without moving the restored scroll position;
-- the workspace does not add a second Candidate-count live region;
-- no action depends on swipe, long press, hover, or row-wide click.
+- Product identity and price remain in the same row;
+- locator and removal accessible names include the Product name;
+- deterministic removal focus;
+- ordinary Back restores scroll before focus;
+- final-removal Back has a stable summary fallback;
+- sold-out locator has a relation-lane fallback;
+- no second Candidate live region;
+- no row-wide click, swipe, long press, hover-only action, or pointer-only gesture.
 
 ## Geometry contract
 
-Primary checks at 320px and 390px:
+The workspace establishes:
 
-- no horizontal scrolling;
-- Product name and price remain readable without overlap;
-- the two row actions do not wrap unpredictably between Candidate rows;
-- category headings do not become cards or detached panels;
-- empty and populated workspace headers share a stable baseline;
-- opening and closing the workspace restores the exact menu scroll position;
-- removing a row moves later rows only by the removed row's height;
-- focus recovery does not cause an additional unexpected scroll jump.
+```text
+full-width compact document rows
+two-column Product identity / price line
+two equal-width action columns
+fixed zero/nonzero Candidate summary row
+reserved status line height
+```
 
-The workspace may establish its own compact row geometry. It must not alter the hidden canonical menu's row geometry.
+CSS contracts target 320px and 390px without horizontal scrolling or unpredictable action wrapping.
 
-## Test-first implementation gate
+Runtime Chromium verification was not completed in this execution environment because the container could not resolve GitHub and the pull-request workflow did not publish a downloadable Pages artifact. No real-device or runtime-browser fit claim is made in this disposition.
 
-### Derived-view tests
+## Test-first implementation
 
-Add failing tests for:
-
-- deriving canonical Product references from Candidate ProductIds;
-- canonical category and Product ordering;
-- duplicate and stale ProductId handling;
-- empty category omission;
-- sold-out Candidate visibility if an existing Candidate later becomes unavailable;
-- no Candidate-specific Product copy;
-- absence of score, rank, quantity, configuration, total, or order fields.
-
-The previously removed `candidateProducts()` projection may return only when this real workspace consumes it.
-
-### Surface-state tests
-
-Add failing tests proving:
-
-- workspace open preserves reading and Candidate references;
-- ordinary Back restores the previous surface and context;
-- Candidate removal preserves reading state;
-- removing the active Anchor's Candidate membership preserves the Anchor;
-- empty state remains in the workspace;
-- `在菜單中查看` uses existing category-focus rules;
-- no operation creates comparison or transaction state.
-
-### Structure tests
-
-Lock:
-
-- one canonical menu surface and one derived Candidate workspace surface;
-- only one is active and interactive at a time;
-- no modal, dialog, rail, sheet, overlay, or fixed Candidate footer;
-- one explicit workspace entry;
-- one canonical-category group per represented category;
-- no copied Product dataset;
-- no sorting, ranking, filtering controls, comparison matrix, quantity, modifiers, totals, cart, or order language;
-- no row-wide click.
-
-### Focus and scroll tests
-
-Lock:
-
-- entry captures return focus and scroll;
-- workspace heading receives focus on open;
-- ordinary Back restores focus and exact scroll;
-- Product locator focuses the canonical row;
-- removal focuses next, previous, or empty-state target deterministically;
-- removing a row does not focus `body` or a detached node.
-
-### Narrow-screen checks
-
-At 320px and 390px verify:
-
-- populated and empty workspace headers;
-- longest Product names and prices;
-- two-action rows;
-- sold-out and incomplete-data labels;
-- no horizontal scrolling;
-- no clipped focus rings;
-- stable return to the hidden menu geometry.
-
-## Pass signals
-
-- Candidates from several categories are visible in one truthful derived view;
-- the workspace remains structurally a review surface rather than order state;
-- category and Product order remain canonical;
-- removal is explicit and leaves the menu and order state untouched;
-- ordinary Back restores the previous menu context exactly;
-- Product locator returns to the correct canonical row;
-- the workspace contains no comparison or transaction mechanics;
-- 320px and 390px layouts remain usable without horizontal scrolling;
-- Typecheck, tests, structure contracts, and static build pass.
-
-## Failure signals
-
-- the workspace resembles a cart or order summary;
-- Candidate rows acquire quantity, modifiers, totals, or checkout language;
-- Products are copied or become stale relative to the canonical menu;
-- order depends on Candidate insertion time or ranking;
-- returning loses the prior category, Anchor, axis, scroll, or focus;
-- removing a Candidate unexpectedly closes the workspace;
-- Product locator opens detail, comparison, or order state;
-- the workspace hides its relationship to the complete menu;
-- mobile actions overflow, wrap inconsistently, or cause horizontal scrolling;
-- a comparison control appears before a bounded comparison plan exists.
-
-## Expected implementation files
-
-Expected new modules:
+Added:
 
 ```text
 src/customer/candidate-workspace.ts
 src/customer/candidate-workspace.test.ts
 src/app/candidate-workspace.ts
+scripts/candidate-workspace-review.test.mjs
 ```
 
-Expected updates:
+Updated:
 
 ```text
 src/customer/menu-app-state.ts
 src/customer/menu-app-state.test.ts
 src/app/App.ts
 src/app/menu-overview.ts
+src/app/menu-category.ts
 src/styles/menu-workspace.css
 scripts/menu-workspace-contract.test.mjs
 package.json
 ```
 
-Do not add:
+Automated tests and contracts cover:
 
-- router or URL state;
-- backend or persistence;
-- generic navigation state machine;
-- Candidate comparison module;
-- Decision, Configuration, Current order, or submission modules;
-- copied Candidate Product storage;
-- analytics infrastructure.
+- canonical category and Product ordering;
+- canonical object reference reuse;
+- duplicate and stale ProductId handling;
+- empty category omission;
+- sold-out Candidate visibility;
+- surface open and close continuity;
+- reading and Candidate reference preservation;
+- explicit removal and active-Anchor independence;
+- final-removal empty workspace;
+- canonical Product locator transitions;
+- one visible and interactive `main`;
+- fixed Candidate entry geometry;
+- focus and scroll restoration code paths;
+- absence of comparison and transaction state.
+
+## Reverse-review corrections
+
+The first implementation passed CI, then narrow reverse review found and corrected:
+
+1. **Final-removal Back focus** — the original entry becomes unavailable after the final Candidate is removed. Back now focuses the stable Candidate summary.
+2. **Sold-out locator focus** — sold-out rows have no Candidate toggle. Locator now falls back to the canonical relation lane.
+3. **Hidden workspace rebuilds** — unrelated menu renders initially rebuilt the hidden Candidate workspace. Rendering now short-circuits when the Candidate-state reference is unchanged.
+4. **Status-lane geometry** — empty status rows initially used the `hidden` attribute. The lane now remains present and reserves geometry without depending on hidden-element CSS behavior.
+
+## CI evidence
+
+The latest implementation head passes:
+
+```text
+Typecheck         ✓
+Tests             ✓
+Static build      ✓
+```
+
+The test suite includes the initial red contracts and the later reverse-review contract.
 
 ## Current disposition
 
 ```text
-[planned, implementation not started] CND2 — Candidate review workspace
+[implemented, awaiting review] CND2 — Candidate review workspace
 ```
 
-The plan must be reviewed before implementation.
+Known review questions:
 
-Candidate comparison, Decision, Configuration, Current order, quantity, modifiers, totals, submission, recommendation, ranking, filtering, and shared-table composition remain blocked.
+- whether an entry available only near the menu heading is sufficient;
+- whether the grouped review surface feels like consideration rather than a cart;
+- whether the two row actions have acceptable mobile density;
+- whether ordinary Back and Product locator are clearly distinguishable;
+- whether the current CSS geometry holds in a runtime browser at 320px and 390px;
+- whether CND2 is accepted for the current scope.
+
+## Blocked later work
+
+CND2 does not authorize:
+
+- Candidate comparison or comparison matrix;
+- explicit Decision;
+- Configuration;
+- Current order;
+- quantity, modifiers, totals, cart, or submission;
+- recommendation, ranking, filtering, or shared-table composition;
+- backend, persistence, routing, analytics, or checkout.
 
 ## Contract impact
 
 None.
 
-CND2 authorizes a derived Candidate view already anticipated by `docs/product-contract.md`, `docs/interaction-model.md`, and `docs/demo-scope.md`. It does not change Candidate or transaction invariants.
+CND2 implements a derived Candidate workspace already anticipated by `docs/product-contract.md`, `docs/interaction-model.md`, and `docs/demo-scope.md`. It does not change Candidate or transaction invariants.
