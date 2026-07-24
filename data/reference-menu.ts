@@ -394,6 +394,9 @@ export const referenceMenuData: unknown = {
       price: 560,
       categoryId: "shared-dishes",
       availability: "available",
+      semanticOverrides: {
+        portionClass: confirmed("two_to_three", "low"),
+      },
     },
     {
       id: "kung-pao-king-oyster-mushroom",
