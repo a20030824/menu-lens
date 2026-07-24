@@ -211,7 +211,6 @@ export const createMenuCategorySection = (
     ) as HTMLTableRowElement;
     row.dataset.productId = product.id;
     row.dataset.anchor = "false";
-    row.dataset.candidate = "false";
 
     const indexCell = element(
       "td",
@@ -279,7 +278,6 @@ export const createMenuCategorySection = (
     candidateButtons.forEach((button, productId) => {
       const isMarked = candidateProductIds.has(productId);
       button.setAttribute("aria-pressed", String(isMarked));
-      rows.get(productId)?.setAttribute("data-candidate", String(isMarked));
     });
 
     const prototypeVisible = controlsVisible && category.semanticAxes.length > 0;
