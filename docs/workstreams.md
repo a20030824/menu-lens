@@ -32,7 +32,7 @@ It prevents parallel conversations from redefining the product, preserving faile
         → [rejected, removed] C1 fixed product focus rail
         → [useful but insufficient] Prototype A — Axis-only score
         → [useful but insufficient] Prototype B — Anchor-only relation
-        → [blocked] Prototype C — Combined relational score
+        → [planned, implementation not started] Prototype C — Anchor + explicit shared axis
         → [blocked] attached Candidate marks
         → [blocked] bounded comparison
         → [blocked] M3 accessibility and motion finalization
@@ -51,7 +51,7 @@ It prevents parallel conversations from redefining the product, preserving faile
 | Domain and reference data | Complete | types, validation, fictional menu, incomplete metadata cases | product contract | local typed dataset and tests |
 | Formative evaluation | Complete | tasks, observations, local events, falsification signals | product contract | protocol that shapes implementation |
 | Customer decision spine | In progress | menu overview → relational reading → consideration → comparison → decision → configuration → order | domain dataset and formative protocol | one coherent mobile-first flow |
-| Relational menu research | Active, no next prototype authorized | stable ledger, Axis-only evidence, Anchor-only evidence, failure gates | M1 shared ledger | evidence for or against relation-first menu reading |
+| Relational menu research | Active, C-plan-review-gated | stable ledger, Axis-only evidence, Anchor-only evidence, explicit-anchor-axis hypothesis | M1 shared ledger | reviewed plan or rejection of the next relational hypothesis |
 | Continuity and table state | Deferred | preserved candidates, submitted rounds, coarse table composition | validated decision spine | continuity over one state model |
 | Alternative lenses | Deferred | thin quick, shared-table, and featured views | stable decision spine | views over the canonical menu |
 | Merchant authoring | Deferred | defaults, exceptions, confidence, incomplete-data preview | proven semantic fields | small authoring test |
@@ -70,6 +70,7 @@ Current design research:
 
 - `docs/relational-menu-research.md`
 - `docs/prototype-b-anchor-plan.md`
+- `docs/prototype-c-anchor-axis-plan.md`
 
 Supporting documents:
 
@@ -224,21 +225,106 @@ It is neither one shared coordinate axis nor a complete relative profile.
 
 The full matrix is recorded in `docs/prototype-b-anchor-plan.md`.
 
-## Prototype C and later work
+## Prototype C — Anchor + explicit shared axis
 
-Prototype C is not automatically authorized by A and B being useful. Both experiments produced useful but insufficient evidence, and B exposed a truthfulness problem that must not be hidden by simply combining interfaces.
+Status:
 
-A new hypothesis requires a separately reviewed plan that explains:
+```text
+[planned, implementation not started]
+```
 
-- whether all known dimensions are exposed;
-- whether omission can be distinguished from equality;
-- how mobile density remains readable;
-- why the result is not a disguised comparison destination;
-- how the experiment can be evaluated independently.
+Prototype C is a separately testable correction rather than a direct accumulation of A and B interfaces.
 
-Until that plan is explicitly authorized, the following remain blocked:
+Question:
 
-- Prototype C;
+> Can one temporary anchor preserve exact price deltas while one explicit category-wide semantic axis keeps every row answering the same question, so no trusted difference is silently suppressed?
+
+Selected low-fidelity direction:
+
+```text
+anchor
++ exact price delta on every alternative
++ one explicit category-wide semantic axis
+```
+
+Shared-dish portion mode:
+
+```text
+比較基準：山椒烤雞半隻               更換  清除
+比較內容： [份量] [準備]
+──────────────────────────────────────────
+山椒烤雞半隻           基準 · 多人            NT$520
+紹興奶油蝦             少 NT$40 · 2–3 人      NT$480
+蒜酥椒鹽軟殼蟹         少 NT$60 · 2–3 人      NT$460
+豆豉蒸鱸魚             多 NT$40 · 未提供      NT$560
+```
+
+Preparation mode changes every row together:
+
+```text
+山椒烤雞半隻           基準 · 慢              NT$520
+紹興奶油蝦             少 NT$40 · 一般        NT$480
+蒜酥椒鹽軟殼蟹         少 NT$60 · 快          NT$460
+豆豉蒸鱸魚             多 NT$40 · 一般        NT$560
+```
+
+### Corrective properties
+
+- no row-level heuristic chooses between portion and preparation;
+- every row shows the same active axis;
+- every active-axis cell contains a trusted absolute label or `未提供`;
+- equality appears as matching visible labels rather than blank output;
+- the non-active axis remains visible in the axis control;
+- exact price delta remains present while switching semantic axes;
+- changing anchor preserves the selected semantic axis;
+- one-line relation geometry remains the planned mobile constraint;
+- the existing sticky context remains the only sticky orientation surface and must expose both axis and anchor.
+
+### Planned axis eligibility
+
+Axes are bounded to:
+
+```text
+portion
+preparation
+```
+
+Price is persistent evidence rather than an axis option. Meal role remains excluded because the current formal data makes it category-redundant.
+
+Eligibility is category-level and stable across anchor changes. An axis appears only when the category has at least three products and at least two trusted or explicit-unknown visible states.
+
+Expected current data:
+
+```text
+個人主餐       準備
+飯麵類         準備
+分享料理       份量 / 準備
+小食           準備
+飲料           no C control
+甜點           no C control
+```
+
+### Planning gate
+
+Before implementation, the plan must be reviewed for:
+
+- truthful complete projection of the active axis;
+- visible distinction between equality, unknown, and non-active dimensions;
+- mobile phrase width and reading size at 320 px;
+- fixed two-row control geometry;
+- sticky visibility of axis and anchor;
+- absence of a second comparison destination;
+- independent evaluation tasks and failure signals.
+
+The full contract is in `docs/prototype-c-anchor-axis-plan.md`.
+
+## Blocked later work
+
+Prototype C planning does not authorize implementation automatically.
+
+Until the C plan is explicitly reviewed and implementation is separately started, the following remain blocked:
+
+- Prototype C application code;
 - Candidate;
 - Comparison;
 - Decision;
@@ -267,4 +353,4 @@ Until that plan is explicitly authorized, the following remain blocked:
 
 None.
 
-The product contract already requires complete-menu access, browsing distinct from ordering, preserved browsing context, comparison support, and explicit uncertainty. Prototype B changes the experimental evidence; it does not change the requirements or authorize deferred states.
+The product contract already requires complete-menu access, browsing distinct from ordering, preserved browsing context, comparison support, and explicit uncertainty. Prototype C changes the planned experimental route; it does not change the requirements or authorize deferred states.
