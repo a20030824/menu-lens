@@ -1,4 +1,5 @@
 import type { CategoryId, ProductId } from "../domain/menu-types.js";
+import type { SemanticAxis } from "../customer/menu-anchor-axis.js";
 import {
   categoryIsExpanded,
   type CompleteMenuModel,
@@ -17,6 +18,11 @@ const element = <K extends keyof HTMLElementTagNameMap>(
   return node;
 };
 
+const axisLabels: Readonly<Record<SemanticAxis, string>> = {
+  portion: "份量",
+  preparation: "準備",
+};
+
 export type MenuOverviewView = Readonly<{
   element: HTMLElement;
   render: (state: MenuReadingState) => void;
@@ -31,6 +37,7 @@ export const createMenuOverview = (
   onCancelAnchorSelection: () => void,
   onSelectAnchor: (productId: ProductId) => void,
   onClearAnchor: () => void,
+  onSelectAxis: (axis: SemanticAxis) => void,
   onShowOverview: () => void,
   onShowAll: () => void,
 ): MenuOverviewView => {
@@ -72,6 +79,7 @@ export const createMenuOverview = (
       onCancelAnchorSelection,
       onSelectAnchor,
       onClearAnchor,
+      onSelectAxis,
     ),
   );
   sections.forEach((section) => stack.append(section.element));
@@ -109,8 +117,8 @@ export const createMenuOverview = (
       const anchorName = anchorProductId
         ? activeCategory?.products.find((product) => product.id === anchorProductId)?.name
         : null;
-      contextLabel.textContent = anchorName
-        ? `基準：${anchorName}　${activeCategory?.name ?? "分類聚焦"}`
+      contextLabel.textContent = anchorName && state.semanticAxis
+        ? `${axisLabels[state.semanticAxis]}｜${anchorName}`
         : state.anchorReading.kind === "selecting"
           ? `選擇比較基準　${activeCategory?.name ?? "分類聚焦"}`
           : categoryContext;
@@ -131,6 +139,9 @@ export const createMenuOverview = (
         state.expansion.kind === "category" && isCurrent
           ? state.anchorReading
           : { kind: "idle" },
+        state.expansion.kind === "category" && isCurrent
+          ? state.semanticAxis
+          : null,
         state.expansion.kind === "category" && isCurrent,
       );
     });
