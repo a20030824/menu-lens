@@ -34,6 +34,7 @@ const defaultCueText = (product: ProductNodeModel): string =>
 
 const renderDefaultRelation = (target: HTMLElement, product: ProductNodeModel): void => {
   target.dataset.anchorMode = "idle";
+  target.removeAttribute("aria-label");
   target.replaceChildren();
   const text = defaultCueText(product);
   if (!text) {
@@ -54,6 +55,7 @@ const renderSelectingRelation = (
   onSelectAnchor: (productId: ProductId) => void,
 ): void => {
   target.dataset.anchorMode = "selecting";
+  target.removeAttribute("aria-label");
   target.replaceChildren();
   const button = element("button", "anchor-select-button", "作為基準") as HTMLButtonElement;
   button.type = "button";
@@ -69,12 +71,14 @@ const renderActiveRelation = (
   target.dataset.anchorMode = "active";
   target.replaceChildren();
   if (!relation) {
+    target.setAttribute("aria-label", "目前比較內容未提供");
     target.append(
       visuallyHiddenText("目前比較內容未提供"),
       element("span", "product-row__cue-empty", "未提供"),
     );
     return;
   }
+  target.setAttribute("aria-label", relation.accessibleLabel);
   const className = relation.kind === "anchor"
     ? "product-row__relation-text product-row__relation-text--anchor"
     : relation.semantic.status === "unknown"
@@ -82,7 +86,6 @@ const renderActiveRelation = (
       : "product-row__relation-text";
   const text = element("span", className, relation.label);
   text.title = relation.label;
-  text.setAttribute("aria-label", relation.accessibleLabel);
   target.append(text);
 };
 
@@ -97,6 +100,7 @@ export type MenuCategorySection = Readonly<{
     controlsVisible: boolean,
   ) => void;
   focusAnchorControl: () => void;
+  focusProductRelation: (productId: ProductId) => void;
 }>;
 
 export const createMenuCategorySection = (
@@ -214,6 +218,7 @@ export const createMenuCategorySection = (
     nameCell.scope = "row";
     const cueCell = element("td", "product-row__cues");
     const relation = element("span", "product-row__relation");
+    relation.tabIndex = -1;
     renderDefaultRelation(relation, product);
     cueCell.append(relation);
 
@@ -313,5 +318,6 @@ export const createMenuCategorySection = (
     categoryId: category.id,
     setState,
     focusAnchorControl: anchorControl.focusAction,
+    focusProductRelation: (productId) => relationTargets.get(productId)?.focus({ preventScroll: true }),
   };
 };
