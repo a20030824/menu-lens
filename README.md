@@ -26,11 +26,11 @@ The experience should feel like **reading and arranging a meal**, not operating 
 
 - The full menu is a first-class experience, not a fallback.
 - Browsing is not ordering.
-- A candidate is not an order item.
+- A Candidate is not an order item.
 - Product details should not destroy browsing position or spatial memory.
 - Required configuration begins after explicit purchase intent.
 - Lenses are views over one canonical menu, not separately maintained catalogs.
-- Switching views must preserve candidates, order state, constraints, and browsing context.
+- Switching views must preserve Candidates, order state, constraints, and browsing context.
 - Merchant data supports progressive enhancement.
 - Missing semantic metadata should degrade enhanced features without breaking complete-menu browsing.
 - Wrong operational information is worse than absent information.
@@ -41,8 +41,8 @@ The authoritative version of these rules is [`docs/product-contract.md`](docs/pr
 
 The initial implementation investigates only three primary questions:
 
-1. Can a dense, stable full-menu view establish overview without making users fear that products are hidden?
-2. Does separating candidates from order items support genuine consideration without using the cart as a bookmark?
+1. Can a dense, stable full-menu view establish overview without making users fear that Products are hidden?
+2. Does separating Candidates from order items support genuine consideration without using the cart as a bookmark?
 3. Can relational reading, detail, and preserved browsing context improve comparison without destroying spatial memory?
 
 A conventional comparison interface is deliberately parked. The project should first make the Menu Lens interaction internally coherent and observable before deciding whether a formal baseline is useful.
@@ -61,7 +61,7 @@ full menu
 → current order
 ```
 
-Prototype C established the accepted relational-reading substrate. The current work is planning how reversible Candidate membership attaches to canonical Product rows without creating an order or a second product list.
+Prototype C established the accepted relational-reading substrate. CND1 now implements reversible Candidate membership directly on canonical Product rows without creating an order, Candidate workspace, or copied Product list.
 
 ### Later, only after the decision spine works
 
@@ -120,11 +120,11 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/workstreams.md`](docs/workstreams.md) — current sequencing, active scope, parked work, and entry criteria
 - [`docs/handoff.md`](docs/handoff.md) — required reading, opening prompt, escalation rules, and closing report
 - [`docs/problem-framing.md`](docs/problem-framing.md) — why current QR ordering often feels harder to read than paper
-- [`docs/interaction-model.md`](docs/interaction-model.md) — menu map, candidate workspace, lens behavior, table state, and reversibility
+- [`docs/interaction-model.md`](docs/interaction-model.md) — menu map, Candidate workspace, lens behavior, table state, and reversibility
 - [`docs/relational-menu-research.md`](docs/relational-menu-research.md) — failed menu-reading hypotheses and relational prototype evidence
 - [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) — Prototype B implementation, task matrix, reverse review, and disposition
 - [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) — Prototype C implementation, evidence, accepted limitations, and final current-scope disposition
-- [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) — planned first Candidate slice, state boundaries, row-attached layout, tests, and gates
+- [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) — CND1 implementation, state boundaries, attached-row layout, tests, corrections, and review status
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
@@ -142,16 +142,20 @@ The customer decision spine is active on Draft PR #4:
 → [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
 → [passed for current scope] Prototype C — Anchor + explicit shared axis
-→ [planned, implementation not started] CND1 — Attached Candidate marks
+→ [implemented, awaiting review] CND1 — Attached Candidate marks
 → [blocked] Candidate workspace / Comparison / Decision / Configuration / Current order
 ```
 
-Prototype A showed that one shared dimension can support simultaneous multi-product reading, but retained cross-axis memory work and a weak price axis.
+Prototype A showed that one shared dimension can support simultaneous multi-Product reading, but retained cross-axis memory work and a weak price axis.
 
-Prototype B showed that exact anchor-relative price deltas remove arithmetic while preserving the canonical menu, but its automatically selected semantic token mixed dimensions and could imply false exclusivity.
+Prototype B showed that exact Anchor-relative price deltas remove arithmetic while preserving the canonical menu, but its automatically selected semantic token mixed dimensions and could imply false exclusivity.
 
 Prototype C corrects that failure with one Anchor, persistent exact price deltas, and one explicit category-wide `份量` or `準備` axis. Formal projection tests, state tests, designer reverse review, focus re-review, narrow-screen proxies, and CI pass. It is accepted for the current scope by product-owner decision. No unfamiliar-participant evidence or measured usability claim is made.
 
-CND1 now plans the first Candidate state without implementing a Candidate workspace. Candidate membership will remain independent from Anchor and semantic-axis state, attach to the canonical row, survive reading transitions, and introduce no quantity, configuration, total, copied Product list, or order state.
+CND1 adds identity-only Candidate membership beside reading state. Available Product rows expose persistent `考慮 ↔ 考慮中` buttons; sold-out rows remain visible but cannot be newly marked. Candidate membership survives every category, overview, all-expanded, Anchor, and semantic-axis transition while preserving canonical order, four columns, focus, and fixed row geometry.
 
-See [`docs/workstreams.md`](docs/workstreams.md), [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md), and [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) for the active sequence and gates.
+CND1 includes one noninteractive count that explicitly says Candidates are not an order. It does not add a Candidate workspace, Comparison, quantity, Configuration, total, Current order, copied Product list, recommendation, or ranking state. Typecheck, Candidate domain tests, app-state continuity tests, structure contracts, and the static build pass.
+
+CND1 is implemented and awaiting product-owner review. Later Candidate and transaction slices remain blocked.
+
+See [`docs/workstreams.md`](docs/workstreams.md), [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md), and [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) for the active sequence and evidence.
