@@ -67,8 +67,10 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   };
 
   const clearCurrentAnchor = (): void => {
+    const categoryId = state.expansion.kind === "category" ? state.expansion.categoryId : null;
     state = clearAnchor(state);
     render();
+    if (categoryId) overview.focusAnchorControl(categoryId);
   };
 
   const showOverviewFromContext = (): void => {
