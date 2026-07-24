@@ -265,8 +265,8 @@ assertIncludes(
 );
 assertIncludes(
   appSource,
-  "window.scrollTo({ top: returnContext.scrollY, behavior: \"auto\" });",
-  "ordinary workspace Back must restore the exact menu scroll position",
+  'window.scrollTo({ top: returnContext.scrollY, behavior: "instant" });',
+  "ordinary workspace Back must restore the exact menu scroll position without inheriting smooth scrolling",
 );
 assertIncludes(
   appSource,
