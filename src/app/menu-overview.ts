@@ -1,6 +1,10 @@
 import type { CategoryId, ProductId } from "../domain/menu-types.js";
 import type { SemanticAxis } from "../customer/menu-anchor-axis.js";
 import {
+  candidateCount as countCandidates,
+  type CandidateState,
+} from "../customer/menu-candidates.js";
+import {
   categoryIsExpanded,
   type CompleteMenuModel,
   type MenuReadingState,
@@ -25,7 +29,7 @@ const axisLabels: Readonly<Record<SemanticAxis, string>> = {
 
 export type MenuOverviewView = Readonly<{
   element: HTMLElement;
-  render: (state: MenuReadingState) => void;
+  render: (state: MenuReadingState, candidateState: CandidateState) => void;
   sectionFor: (categoryId: CategoryId) => HTMLElement | null;
   focusAnchorControl: (categoryId: CategoryId) => void;
   focusProductRelation: (categoryId: CategoryId, productId: ProductId) => void;
@@ -39,6 +43,7 @@ export const createMenuOverview = (
   onSelectAnchor: (productId: ProductId) => void,
   onClearAnchor: () => void,
   onSelectAxis: (axis: SemanticAxis) => void,
+  onToggleCandidate: (productId: ProductId) => void,
   onShowOverview: () => void,
   onShowAll: () => void,
 ): MenuOverviewView => {
@@ -60,6 +65,10 @@ export const createMenuOverview = (
   const intro = element("header", "menu-map__heading");
   const title = element("h2", "menu-map__title", "整張菜單先縮成六個區域");
   title.id = "menu-map-title";
+  const candidateSummary = element("p", "candidate-summary");
+  candidateSummary.setAttribute("role", "status");
+  candidateSummary.setAttribute("aria-live", "polite");
+  candidateSummary.setAttribute("aria-atomic", "true");
   intro.append(
     element("p", "eyebrow", "菜單全貌"),
     title,
@@ -68,6 +77,7 @@ export const createMenuOverview = (
       "menu-map__hint",
       "先看每區的份量、價位與代表菜名；點一區會在原位置展開，其他區域仍留在整張菜單裡。",
     ),
+    candidateSummary,
   );
 
   const stack = element("div", "category-stack");
@@ -81,6 +91,7 @@ export const createMenuOverview = (
       onSelectAnchor,
       onClearAnchor,
       onSelectAxis,
+      onToggleCandidate,
     ),
   );
   sections.forEach((section) => stack.append(section.element));
@@ -97,11 +108,16 @@ export const createMenuOverview = (
 
   root.append(context, intro, stack, footer);
 
-  const render = (state: MenuReadingState): void => {
+  const render = (state: MenuReadingState, candidateState: CandidateState): void => {
     root.dataset.mode = state.expansion.kind;
     context.hidden = state.expansion.kind === "overview";
     footer.hidden = state.expansion.kind === "all";
     showAllButton.hidden = state.expansion.kind === "all";
+
+    const candidateCount = countCandidates(candidateState);
+    candidateSummary.textContent = candidateCount === 0 ? "尚無考慮項目 · 不影響點餐" : `考慮中 ${candidateCount} 道 · 尚未點餐`;
+    const candidateContext = candidateCount > 0 ? ` · 考慮中 ${candidateCount}` : "";
+    const candidateIds = new Set(candidateState.productIds);
 
     const activeIndex = model.categories.findIndex(
       (category) => category.id === state.activeCategoryId,
@@ -110,8 +126,8 @@ export const createMenuOverview = (
 
     if (state.expansion.kind === "category") {
       const categoryContext = activeCategory
-        ? `${activeIndex + 1} / ${model.categoryCount}　${activeCategory.name}　${activeCategory.productCount} 道`
-        : "分類聚焦";
+        ? `${activeIndex + 1} / ${model.categoryCount}　${activeCategory.name}　${activeCategory.productCount} 道${candidateContext}`
+        : `分類聚焦${candidateContext}`;
       const anchorProductId = state.anchorReading.kind === "active"
         ? state.anchorReading.productId
         : null;
@@ -119,14 +135,14 @@ export const createMenuOverview = (
         ? activeCategory?.products.find((product) => product.id === anchorProductId)?.name
         : null;
       contextLabel.textContent = anchorName && state.semanticAxis
-        ? `${axisLabels[state.semanticAxis]}｜${anchorName}`
+        ? `${axisLabels[state.semanticAxis]}｜${anchorName}${candidateContext}`
         : state.anchorReading.kind === "selecting"
-          ? `選擇比較基準　${activeCategory?.name ?? "分類聚焦"}`
+          ? `選擇比較基準　${activeCategory?.name ?? "分類聚焦"}${candidateContext}`
           : categoryContext;
     } else if (state.expansion.kind === "all") {
       contextLabel.textContent = activeCategory
-        ? `全部 ${model.productCount} 道　${activeIndex + 1} / ${model.categoryCount}　${activeCategory.name}`
-        : `全部 ${model.productCount} 道`;
+        ? `全部 ${model.productCount} 道　${activeIndex + 1} / ${model.categoryCount}　${activeCategory.name}${candidateContext}`
+        : `全部 ${model.productCount} 道${candidateContext}`;
     } else {
       contextLabel.textContent = "";
     }
@@ -144,6 +160,7 @@ export const createMenuOverview = (
           ? state.semanticAxis
           : null,
         state.expansion.kind === "category" && isCurrent,
+        candidateIds,
       );
     });
   };
