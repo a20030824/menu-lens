@@ -1,11 +1,15 @@
 import { referenceMenu } from "../domain/reference-menu.js";
 import {
+  beginAnchorSelection,
+  cancelAnchorSelection,
   categoryIsExpanded,
   categoryScrollBehavior,
+  clearAnchor,
   createCompleteMenuModel,
   createInitialMenuReadingState,
   focusCategory,
-  setReadingAxis,
+  isAnchorSelectionCancelKey,
+  selectAnchor,
   showAllCategories,
   showMenuOverview,
 } from "./menu-reading.js";
@@ -17,85 +21,70 @@ function assert(condition: unknown, message: string): asserts condition { if (!c
 
 const firstCategoryId = referenceMenu.categories[0]?.id;
 const secondCategoryId = referenceMenu.categories[1]?.id;
+const firstProductId = referenceMenu.products.find((product) => product.categoryId === firstCategoryId)?.id;
+const secondProductId = referenceMenu.products.find(
+  (product) => product.categoryId === firstCategoryId && product.id !== firstProductId,
+)?.id;
+const otherCategoryProductId = referenceMenu.products.find((product) => product.categoryId === secondCategoryId)?.id;
 assert(firstCategoryId !== undefined, "fixture must include a first category");
 assert(secondCategoryId !== undefined, "fixture must include a second category");
+assert(firstProductId !== undefined && secondProductId !== undefined, "fixture must include two products in the first category");
+assert(otherCategoryProductId !== undefined, "fixture must include a product in another category");
 
-test("initial state starts in overview with the default axis", () => {
+test("initial state starts in overview without an anchor", () => {
   const state = createInitialMenuReadingState(referenceMenu);
   assert(state.expansion.kind === "overview", "initial mode must be overview");
-  assert(state.readingAxis === "default", "initial axis must be default");
+  assert(state.anchorReading.kind === "idle", "initial anchor state must be idle");
   referenceMenu.categories.forEach((category) =>
     assert(!categoryIsExpanded(state, category.id), "overview keeps every category compressed"),
   );
 });
 
-test("single-category mode can change the reading axis", () => {
+test("selection mode preserves the focused category and canonical expansion", () => {
   const focused = focusCategory(createInitialMenuReadingState(referenceMenu), firstCategoryId);
-  const changed = setReadingAxis(focused, "price");
-  assert(changed.readingAxis === "price", "single-category mode must accept an axis");
-  assert(changed.expansion === focused.expansion, "axis change must preserve the expansion object");
+  const selecting = beginAnchorSelection(focused);
+  assert(selecting.anchorReading.kind === "selecting", "focused category may enter anchor selection");
+  assert(selecting.expansion === focused.expansion, "selection must preserve the expansion object");
+  assert(referenceMenu.categories.filter((category) => categoryIsExpanded(selecting, category.id)).length === 1, "exactly one category remains expanded");
 });
 
-test("returning to overview resets the axis", () => {
-  const changed = setReadingAxis(
-    focusCategory(createInitialMenuReadingState(referenceMenu), firstCategoryId),
-    "portion",
-  );
-  assert(showMenuOverview(changed).readingAxis === "default", "overview must reset the axis");
-});
-
-test("changing category resets the axis", () => {
-  const changed = setReadingAxis(
-    focusCategory(createInitialMenuReadingState(referenceMenu), firstCategoryId),
-    "role",
-  );
-  const next = focusCategory(changed, secondCategoryId);
-  assert(next.readingAxis === "default", "category change must reset the axis");
-  assert(next.activeCategoryId === secondCategoryId, "new category must become active");
-});
-
-test("all-expanded mode never retains a non-default axis", () => {
-  const changed = setReadingAxis(
-    focusCategory(createInitialMenuReadingState(referenceMenu), firstCategoryId),
-    "preparation",
-  );
-  const all = showAllCategories(changed);
-  assert(all.readingAxis === "default", "all-expanded mode must use default");
-  assert(setReadingAxis(all, "price").readingAxis === "default", "all-expanded mode must reject axis changes");
-});
-
-test("axis changes preserve category expansion", () => {
+test("cancelling selection returns to idle without changing category position", () => {
   const focused = focusCategory(createInitialMenuReadingState(referenceMenu), firstCategoryId);
-  const changed = setReadingAxis(focused, "price");
-  assert(changed.expansion.kind === "category" && changed.expansion.categoryId === firstCategoryId, "axis must not alter expansion");
-  assert(referenceMenu.categories.filter((category) => categoryIsExpanded(changed, category.id)).length === 1, "exactly one category remains expanded");
+  const cancelled = cancelAnchorSelection(beginAnchorSelection(focused));
+  assert(cancelled.anchorReading.kind === "idle", "cancel must leave no anchor");
+  assert(cancelled.expansion === focused.expansion, "cancel must preserve category expansion");
+  assert(cancelled.activeCategoryId === firstCategoryId, "cancel must preserve active category");
 });
 
-test("complete model preserves canonical product order for every axis", () => {
+test("selecting and changing an anchor stores exactly one category-local ProductId", () => {
+  const focused = focusCategory(createInitialMenuReadingState(referenceMenu), firstCategoryId);
+  const first = selectAnchor(beginAnchorSelection(focused), referenceMenu, firstProductId);
+  assert(first.anchorReading.kind === "active" && first.anchorReading.productId === firstProductId, "first product becomes the anchor");
+
+  const changed = selectAnchor(beginAnchorSelection(first), referenceMenu, secondProductId);
+  assert(changed.anchorReading.kind === "active" && changed.anchorReading.productId === secondProductId, "new anchor replaces the prior ProductId");
+  assert(JSON.stringify(changed).split(firstProductId).length === 1, "prior ProductId must not accumulate in state");
+
+  const invalid = selectAnchor(beginAnchorSelection(changed), referenceMenu, otherCategoryProductId);
+  assert(invalid.anchorReading.kind === "selecting", "a product outside the active category cannot become the anchor");
+});
+
+test("overview, all-expanded mode, category changes, and clear reset the anchor", () => {
+  const active = selectAnchor(
+    beginAnchorSelection(focusCategory(createInitialMenuReadingState(referenceMenu), firstCategoryId)),
+    referenceMenu,
+    firstProductId,
+  );
+  assert(showMenuOverview(active).anchorReading.kind === "idle", "overview clears the anchor");
+  assert(showAllCategories(active).anchorReading.kind === "idle", "all-expanded mode clears the anchor");
+  assert(focusCategory(active, secondCategoryId).anchorReading.kind === "idle", "category change clears the anchor");
+  assert(clearAnchor(active).anchorReading.kind === "idle", "explicit clear removes the anchor");
+});
+
+test("complete model preserves canonical product order", () => {
   const model = createCompleteMenuModel(referenceMenu);
   const productIds = model.categories.flatMap((category) => category.products.map((product) => product.id));
   assert(JSON.stringify(productIds) === JSON.stringify(referenceMenu.products.map((product) => product.id)), "model order must remain canonical");
-  const before = JSON.stringify(productIds);
-  ["default", "price", "portion", "role", "preparation"].forEach((axis) => {
-    const state = setReadingAxis(
-      focusCategory(createInitialMenuReadingState(referenceMenu), firstCategoryId),
-      axis as "default" | "price" | "portion" | "role" | "preparation",
-    );
-    assert(state.expansion.kind === "category", "axis state must remain category mode");
-    assert(JSON.stringify(model.categories.flatMap((category) => category.products.map((product) => product.id))) === before, "axis state must not reorder products");
-  });
-});
-
-test("category models expose only axes that can reduce product-by-product reading", () => {
-  const model = createCompleteMenuModel(referenceMenu);
-  const personal = model.categories.find((category) => category.id === "personal-mains");
-  const shared = model.categories.find((category) => category.id === "shared-dishes");
-  const desserts = model.categories.find((category) => category.id === "desserts");
-  assert(personal !== undefined && shared !== undefined && desserts !== undefined, "fixture categories must exist");
-  assert(JSON.stringify(personal.readingAxes) === JSON.stringify(["default", "price", "preparation"]), "personal mains should offer only differing category-local evidence");
-  assert(JSON.stringify(shared.readingAxes) === JSON.stringify(["default", "price", "portion", "preparation"]), "shared dishes should expose price, portion uncertainty, and preparation differences");
-  assert(JSON.stringify(desserts.readingAxes) === JSON.stringify(["default"]), "two desserts cannot satisfy the three-product relational gate");
-  assert(model.categories.every((category) => !category.readingAxes.includes("role")), "meal role must not be repeated row-by-row when it only restates category structure");
 });
 
 test("sold-out and partial metadata products remain in the shared ledger", () => {
@@ -107,15 +96,27 @@ test("sold-out and partial metadata products remain in the shared ledger", () =>
   assert(products.findIndex((product) => product.id === "sichuan-mapo-tofu-pot") === 4, "sold-out mapo tofu keeps its canonical position");
 });
 
-test("reading state introduces no anchor, Candidate, Comparison, or order state", () => {
-  const state = setReadingAxis(
-    focusCategory(createInitialMenuReadingState(referenceMenu), firstCategoryId),
-    "price",
+test("Prototype B state introduces no axis, Candidate, Comparison, detail, configuration, or order state", () => {
+  const state = selectAnchor(
+    beginAnchorSelection(focusCategory(createInitialMenuReadingState(referenceMenu), firstCategoryId)),
+    referenceMenu,
+    firstProductId,
   );
   const serialized = JSON.stringify(state).toLowerCase();
-  ["anchor", "candidate", "comparison", "order", "detail", "productid"].forEach((term) =>
+  ["readingaxis", "candidate", "comparison", "detail", "configuration", "quantity", "order"].forEach((term) =>
     assert(!serialized.includes(term), `${term} state must remain absent`),
   );
+});
+
+test("Escape cancels only temporary selection", () => {
+  assert(isAnchorSelectionCancelKey("Escape"), "Escape may cancel selecting state");
+  assert(!isAnchorSelectionCancelKey("Enter"), "Enter is not a cancel key");
+  const active = selectAnchor(
+    beginAnchorSelection(focusCategory(createInitialMenuReadingState(referenceMenu), firstCategoryId)),
+    referenceMenu,
+    firstProductId,
+  );
+  assert(cancelAnchorSelection(active) === active, "cancel helper must not clear an active anchor");
 });
 
 test("category scrolling respects reduced motion", () => {
