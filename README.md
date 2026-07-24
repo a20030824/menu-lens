@@ -124,7 +124,7 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/relational-menu-research.md`](docs/relational-menu-research.md) — failed menu-reading hypotheses and relational prototype evidence
 - [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) — Prototype B implementation, task matrix, reverse review, and disposition
 - [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) — Prototype C implementation, evidence, accepted limitations, and final current-scope disposition
-- [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) — CND1 implementation, state boundaries, attached-row layout, tests, corrections, and review status
+- [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) — CND1 implementation, state boundaries, attached-row layout, tests, corrections, and product-owner review status
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
@@ -142,7 +142,7 @@ The customer decision spine is active on Draft PR #4:
 → [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
 → [passed for current scope] Prototype C — Anchor + explicit shared axis
-→ [implemented, awaiting review] CND1 — Attached Candidate marks
+→ [implemented, awaiting product-owner review] CND1 — Attached Candidate marks
 → [blocked] Candidate workspace / Comparison / Decision / Configuration / Current order
 ```
 
@@ -156,6 +156,6 @@ CND1 adds identity-only Candidate membership beside reading state. Available Pro
 
 CND1 includes one noninteractive count that explicitly says Candidates are not an order. It does not add a Candidate workspace, Comparison, quantity, Configuration, total, Current order, copied Product list, recommendation, or ranking state. Typecheck, Candidate domain tests, app-state continuity tests, structure contracts, and the static build pass.
 
-CND1 is implemented and awaiting product-owner review. Later Candidate and transaction slices remain blocked.
+CND1 is implemented and awaiting an explicit product-owner disposition. The current gate does not require an unfamiliar-participant study. Later Candidate and transaction slices remain blocked.
 
 See [`docs/workstreams.md`](docs/workstreams.md), [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md), and [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) for the active sequence and evidence.
