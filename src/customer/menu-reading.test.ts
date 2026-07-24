@@ -86,6 +86,18 @@ test("complete model preserves canonical product order for every axis", () => {
   });
 });
 
+test("category models expose only axes that can reduce product-by-product reading", () => {
+  const model = createCompleteMenuModel(referenceMenu);
+  const personal = model.categories.find((category) => category.id === "personal-mains");
+  const shared = model.categories.find((category) => category.id === "shared-dishes");
+  const desserts = model.categories.find((category) => category.id === "desserts");
+  assert(personal !== undefined && shared !== undefined && desserts !== undefined, "fixture categories must exist");
+  assert(JSON.stringify(personal.readingAxes) === JSON.stringify(["default", "price", "preparation"]), "personal mains should offer only differing category-local evidence");
+  assert(JSON.stringify(shared.readingAxes) === JSON.stringify(["default", "price", "portion", "preparation"]), "shared dishes should expose price, portion uncertainty, and preparation differences");
+  assert(JSON.stringify(desserts.readingAxes) === JSON.stringify(["default"]), "two desserts cannot satisfy the three-product relational gate");
+  assert(model.categories.every((category) => !category.readingAxes.includes("role")), "meal role must not be repeated row-by-row when it only restates category structure");
+});
+
 test("sold-out and partial metadata products remain in the shared ledger", () => {
   const model = createCompleteMenuModel(referenceMenu);
   const products = model.categories.flatMap((category) => category.products);
