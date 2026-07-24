@@ -30,6 +30,9 @@ if (css.includes(".category-anchor-axis-control { position: sticky")) {
 if (css.includes(".candidate-summary { position: sticky")) {
   throw new Error("CND1 must not create a second sticky Candidate surface");
 }
+if (css.includes('.product-row[data-candidate="true"] .product-row__name')) {
+  throw new Error("Candidate membership must not change Product-name metrics or wrapping");
+}
 
 assertIncludes(
   css,
