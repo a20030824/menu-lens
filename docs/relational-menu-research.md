@@ -4,7 +4,7 @@
 
 This is the exploratory design record for the active Menu Lens menu-reading work.
 
-It records failed single-product interactions, the stable-ledger hypothesis, Prototype A and B evidence, and the current block on later decision states. It is not a product-contract change.
+It records failed single-product interactions, the stable-ledger hypothesis, Prototype A and B evidence, and the separately planned Prototype C correction. It is not a product-contract change and does not authorize Candidate, Comparison, Decision, Configuration, Current order, or checkout work.
 
 Current branch and Draft PR:
 
@@ -21,7 +21,7 @@ Current status:
 → [rejected, removed] C1 fixed product focus rail
 → [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
-→ [blocked] Prototype C — Combined relational score
+→ [planned, implementation not started] Prototype C — Anchor + explicit shared axis
 → [blocked] Candidate / Comparison / Decision / Configuration / Current order
 ```
 
@@ -177,32 +177,125 @@ Prototype A exposes one complete dimension but requires switching dimensions.
 Prototype B keeps one reference visible and removes price arithmetic, but compresses semantic evidence by hiding dimensions.
 
 ```text
-A failure
+A result
 complete one-axis evidence
 but cross-axis memory remains
 
-B failure
+B result
 persistent anchor and exact price delta
 but semantic omission becomes misleading
 ```
 
 Neither experiment should be treated as the finished relational-reading answer.
 
-## Prototype C and later work
+## Prototype C — Anchor + explicit shared axis
 
-Prototype C is not automatically authorized by A and B being useful.
+Status:
 
-Any next hypothesis must explicitly answer:
+```text
+[planned, implementation not started]
+```
 
-- whether all trusted dimensions remain discoverable;
-- how omission differs visibly from equality;
-- how mobile density remains readable;
-- why the interface is not a disguised comparison destination;
-- how the experiment will be evaluated independently.
+Prototype C is a new, separately testable hypothesis rather than an automatic accumulation of previous UI.
 
-Until a separate plan is reviewed and explicitly authorized, the following remain blocked:
+Question:
 
-- Prototype C;
+> Can one temporary anchor preserve exact price deltas while one explicit category-wide semantic axis keeps every row answering the same question, so no trusted difference is silently suppressed?
+
+### Planned correction
+
+```text
+Prototype B
+price delta + row-selected semantic dimension
+
+Prototype C
+price delta + user-selected category-wide semantic axis
+```
+
+The user explicitly chooses `份量` or `準備`. Every row then displays the same active axis using a trusted absolute value or `未提供`.
+
+Portion mode:
+
+```text
+山椒烤雞半隻           基準 · 多人            NT$520
+紹興奶油蝦             少 NT$40 · 2–3 人      NT$480
+蒜酥椒鹽軟殼蟹         少 NT$60 · 2–3 人      NT$460
+豆豉蒸鱸魚             多 NT$40 · 未提供      NT$560
+```
+
+Preparation mode:
+
+```text
+山椒烤雞半隻           基準 · 慢              NT$520
+紹興奶油蝦             少 NT$40 · 一般        NT$480
+蒜酥椒鹽軟殼蟹         少 NT$60 · 快          NT$460
+豆豉蒸鱸魚             多 NT$40 · 一般        NT$560
+```
+
+### Why absolute labels
+
+Absolute classes avoid inventing relative magnitude language such as `快很多` or numerical suitability scores.
+
+The anchor displays its value. Matching labels make equality visible. `未提供` makes unknown explicit. The non-active dimension remains visible in the shared axis control rather than disappearing through row-level heuristics.
+
+### Truthfulness invariants
+
+For one active axis:
+
+1. every canonical product remains present;
+2. every non-anchor row has one exact price delta;
+3. every row has one active-axis value;
+4. trusted values render their formal absolute class;
+5. low-confidence or missing values render `未提供`;
+6. no row selects a different dimension;
+7. no blank active-axis state exists;
+8. equal values render the same label;
+9. switching axis updates every row together;
+10. sold-out state remains independent.
+
+### Mobile constraint
+
+The selected direction keeps one semantic value per row rather than displaying all dimensions simultaneously.
+
+The plan requires:
+
+- a fixed anchor-control row;
+- a fixed shared-axis row;
+- one-line relation cells;
+- complete fixture phrases at 320 px without relying on hover or `title`;
+- the existing sticky context as the only sticky orientation surface;
+- sticky visibility of both active axis and anchor;
+- no state-dependent column widths or scroll correction.
+
+### Independent evaluation target
+
+The shared-dish task must verify that a participant can:
+
+- identify every faster dish in preparation mode;
+- identify the crab as the strongest absolute faster class without thinking it is the only faster dish;
+- identify all smaller dishes and the unknown item in portion mode;
+- distinguish matching values from unknown;
+- notice and switch the non-active axis;
+- retain price deltas and orientation while switching axis or anchor;
+- avoid interpreting the interaction as Candidate, recommendation, ranking, or order state.
+
+### Plan boundary
+
+No Prototype C application code has been added.
+
+The complete layout, state, projection, geometry, accessibility, test-first, and evaluation contracts are in:
+
+```text
+docs/prototype-c-anchor-axis-plan.md
+```
+
+## Blocked later work
+
+Prototype C planning does not authorize implementation automatically.
+
+Until the C plan is explicitly reviewed and implementation is separately started, the following remain blocked:
+
+- Prototype C application code;
 - Candidate;
 - Comparison;
 - Decision;
@@ -218,4 +311,4 @@ Until a separate plan is reviewed and explicitly authorized, the following remai
 
 None.
 
-The product contract already requires complete-menu access, browsing distinct from ordering, preserved browsing context, comparison support, and explicit uncertainty. These prototype dispositions change the evidence, not the requirements.
+The product contract already requires complete-menu access, browsing distinct from ordering, preserved browsing context, comparison support, and explicit uncertainty. These prototype dispositions and plans change the experimental route, not the requirements.
