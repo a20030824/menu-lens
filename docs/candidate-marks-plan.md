@@ -2,7 +2,7 @@
 
 ## Document status
 
-This document records the first Candidate implementation slice after Prototype C.
+This document records the completed first Candidate implementation slice after Prototype C.
 
 ```text
 branch  agent/menu-map-atlas
@@ -15,7 +15,8 @@ Current sequence:
 ```text
 [passed for current scope] Prototype C — Anchor + explicit shared axis
 → [passed for current scope] CND1 — Attached Candidate marks
-→ [blocked] Candidate workspace / bounded comparison
+→ [planned, implementation not started] CND2 — Candidate review workspace
+→ [blocked] Candidate comparison
 → [blocked] Decision / Configuration / Current order
 ```
 
@@ -28,16 +29,6 @@ No unfamiliar-participant evidence, measured usability gain, or conventional-int
 > Can a diner preserve several serious possibilities directly on the canonical menu without mistaking them for an order, losing menu position, or creating a second Product list?
 
 CND1 investigates reversible consideration only.
-
-It does not authorize:
-
-- Candidate workspace navigation;
-- Candidate comparison;
-- explicit Decision;
-- Configuration;
-- Current order;
-- quantity, modifiers, totals, or submission;
-- recommendation, ranking, filtering, or shared-table composition.
 
 ## Product boundary
 
@@ -123,21 +114,13 @@ Example:
 
 ```text
 01  山椒烤雞半隻       基準 · 多人             NT$520
-                          [ 考慮 ]  ← pressed
+                           [ 考慮 ]  ← pressed
 
 02  紹興奶油蝦         少 NT$40 · 2–3 人       NT$480
-                          [ 考慮 ]
+                           [ 考慮 ]
 ```
 
-Candidate membership does not replace or hide:
-
-- ordinary menu cues;
-- Prototype C price deltas;
-- Prototype C semantic values;
-- sold-out state;
-- incomplete-data state.
-
-The row order, category order, Product-name metrics, and price column remain unchanged.
+Candidate membership does not replace or hide ordinary menu cues, Prototype C evidence, sold-out state, or incomplete-data state. Row order, category order, Product-name metrics, and price remain unchanged.
 
 ## Candidate control
 
@@ -149,9 +132,7 @@ accessible name   考慮「商品名」
 aria-pressed      false / true
 ```
 
-The visible and accessible labels remain stable across state changes. Membership is communicated by `aria-pressed` and the pressed visual treatment.
-
-This follows the WAI-ARIA toggle-button rule that a toggle label must not change while `aria-pressed` changes.
+The visible and accessible labels remain stable across state changes. Membership is communicated by `aria-pressed` and pressed styling.
 
 Implementation properties:
 
@@ -187,7 +168,7 @@ The summary:
 - is the only polite Candidate-count status region;
 - counts unique canonical ProductIds only.
 
-The existing sticky orientation context may append the count. No second sticky Candidate surface exists.
+The existing sticky orientation context may append the count. CND1 creates no second sticky Candidate surface.
 
 ## Continuity
 
@@ -203,7 +184,7 @@ Candidate membership survives:
 
 Candidate operations do not alter scroll position, Product order, category order, Anchor, axis, price, availability, or transaction state.
 
-## Test-first implementation
+## Test-first implementation record
 
 Added:
 
@@ -237,7 +218,7 @@ Automated tests cover:
 - four columns and one canonical Product row;
 - fixed relation and Candidate lanes;
 - one bounded live status region;
-- absence of Candidate workspace and transaction state.
+- absence of Candidate workspace and transaction state in CND1.
 
 ## Final re-review corrections
 
@@ -248,13 +229,11 @@ The implementation and final re-review found and corrected:
 3. **Repeated live announcements** — the summary initially rewrote identical text on every render; it now mutates only when count changes.
 4. **Invalid toggle naming** — the `aria-pressed` button initially changed visible and accessible labels; both are now stable.
 5. **Unused row state mirror** — `data-candidate` duplicated button state without an active consumer; it was removed.
-6. **Premature list projection** — `candidateProducts()` existed only for tests even though CND1 has no Candidate list; it was removed and deferred.
+6. **Premature list projection** — `candidateProducts()` existed only for tests even though CND1 had no Candidate list; it was removed and deferred until an authorized workspace consumes it.
 
-## Narrow-screen proxy
+## Narrow-screen and CI evidence
 
-A code-derived Chromium proxy checked representative rows at 320px and 390px.
-
-Candidate off/on produced:
+A code-derived Chromium proxy at 320px and 390px found:
 
 ```text
 row-height difference       0px
@@ -266,19 +245,7 @@ lane-width difference       0px
 horizontal scrolling        none
 ```
 
-The following combinations fit the fixed lane without overflow:
-
-```text
-考慮 + 資訊有限
-已售完 + 資訊有限
-少 NT$40 · 2–3 人
-少 NT$180 · 2–3 人
-少 NT$140 · 一般
-```
-
-This is implementation evidence, not participant evidence or a deployed-device claim.
-
-## CI evidence
+Representative relation, sold-out, and incomplete-data combinations fit the fixed lane without overflow.
 
 The final reviewed head passes:
 
@@ -287,6 +254,8 @@ Typecheck         ✓
 Tests             ✓
 Static build      ✓
 ```
+
+This is implementation evidence, not participant evidence or a deployed-device claim.
 
 ## Final disposition
 
@@ -305,31 +274,34 @@ Accepted evidence:
 - bounded live announcements;
 - stable four-column and narrow-screen geometry;
 - sold-out rejection;
-- no second Product list;
+- no second Product list in CND1;
 - no premature list projection or row-wide state mirror;
 - passing Typecheck, tests, and static build.
 
 Known limitations that do not block this disposition:
 
-- no Candidate workspace exists;
 - the global count does not identify which collapsed categories contain Candidates;
+- no Candidate review workspace exists in CND1;
 - `考慮` terminology has not been validated with unfamiliar participants;
 - no persistence exists beyond the active session.
 
-## Blocked later work
+## Handoff to CND2
 
-CND1 acceptance does not automatically authorize the next surface.
+The first two limitations are now isolated in a separate bounded plan:
 
-Until a separate bounded plan is approved, do not begin:
+```text
+docs/candidate-workspace-plan.md
+```
 
-- Candidate workspace or copied Candidate list;
-- Candidate comparison;
-- Decision;
-- Configuration;
-- Current order;
-- quantity, modifiers, totals, or submission;
-- recommendation, ranking, filtering, or shared-table composition;
-- checkout.
+CND2 may investigate a derived Candidate review view with:
+
+- canonical category and Product order;
+- explicit workspace entry;
+- exact return to prior menu state, scroll, and focus;
+- `在菜單中查看` navigation back to a canonical row;
+- explicit Candidate removal and an in-place empty state.
+
+CND2 does not automatically authorize Candidate comparison, Decision, Configuration, Current order, quantity, modifiers, totals, submission, recommendation, ranking, filtering, or shared-table composition.
 
 ## Contract impact
 
