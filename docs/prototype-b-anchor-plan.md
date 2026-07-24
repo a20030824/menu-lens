@@ -2,7 +2,7 @@
 
 ## Document status
 
-This document records the planned and implemented boundary for Prototype B.
+This document records the layout, implementation, designer reverse review, and disposition for Prototype B.
 
 Current branch and Draft PR:
 
@@ -11,26 +11,18 @@ agent/menu-map-atlas
 PR #4 — Build menu reading workspace
 ```
 
-Current status:
+Current sequence:
 
 ```text
 [useful but insufficient] Prototype A — Axis-only score
-→ [implemented, awaiting review] Prototype B — Anchor-only relation
+→ [useful but insufficient] Prototype B — Anchor-only relation
 → [blocked] Prototype C — Combined relational score
 → [blocked] Candidate / Comparison / Decision / Configuration / Current order
 ```
 
-Prototype B is implemented as an isolated anchor-reading experiment. It does not authorize Prototype C, Candidate, Comparison, Decision, Configuration, Current order, sorting, filtering, ranking, recommendation, product detail, or checkout work.
+The B implementation remains intact as research evidence. This disposition does not authorize Prototype C or any deferred decision or transaction state.
 
-## Why Prototype B exists
-
-Prototype A proved that one shared dimension can make several products simultaneously comparable, but it remains insufficient:
-
-- the price scale duplicates a visible numeric price column;
-- only one dimension is visible at a time;
-- switching axes removes prior evidence and reintroduces cross-axis remembering.
-
-Prototype B asks:
+## Research question
 
 > Can a diner nominate one dish as a temporary comparison reference and read bounded differences to several alternatives on the same stable ledger, with less mental subtraction and cross-axis remembering than Prototype A?
 
@@ -38,7 +30,7 @@ The anchor is a temporary reading reference. It is not a Candidate, favorite, ca
 
 ## Isolated prototype rule
 
-The B implementation does not show the Axis-only selector.
+Prototype B does not show the Prototype A Axis-only selector.
 
 ```text
 Prototype A
@@ -48,39 +40,40 @@ Prototype B
 one temporary reference product across all rows
 
 Prototype C
-axis + anchor together — still blocked
+axis + anchor together — blocked
 ```
-
-Combining A and B would make it impossible to identify which mechanism produced the result.
 
 ## Implemented layout
 
-Selected direction:
+Prototype B uses:
 
 ```text
-B2 — existing top control row + existing third-column relation lane
+one fixed-height category anchor control
++ the existing third-column relation lane
++ the existing sticky menu context for persistent anchor identity
 ```
+
+It preserves:
+
+- one canonical table;
+- one canonical row per product;
+- the same four columns;
+- canonical row order;
+- visible prices, sold-out state, and incomplete-data state;
+- no filtering, sorting, ranking, hiding, copying, or dimming;
+- no modal, rail, sheet, fixed footer, detail row, or second product list.
 
 Active example:
 
 ```text
 比較基準：山椒烤雞半隻              更換  清除
 ────────────────────────────────────────
-菜名                   相對基準              價格
-山椒烤雞半隻           比較基準              NT$520
-紹興奶油蝦             少 NT$40 · 份量較小   NT$480
-軟殼蟹                 少 NT$60 · 較快       NT$460
-豆豉蒸鱸魚             多 NT$40 · 份量未知   NT$560
+菜名                   相對基準                 價格
+山椒烤雞半隻           比較基準                 NT$520
+紹興奶油蝦             少 NT$40 · 份量較小      NT$480
+蒜酥椒鹽軟殼蟹         少 NT$60 · 較快          NT$460
+豆豉蒸鱸魚             多 NT$40 · 份量未知      NT$560
 ```
-
-The implementation reuses:
-
-- one fixed-height context row above the table;
-- the existing relation lane in the third column;
-- the same four-column ledger;
-- the same canonical product rows, prices, statuses, and order.
-
-It adds no fifth column, detached comparison destination, rail, modal, sheet, fixed footer, detail row, or copied product list.
 
 ## Interaction state
 
@@ -91,15 +84,11 @@ type AnchorReading =
   | { kind: "active"; productId: ProductId };
 ```
 
-The state contains at most one `ProductId`.
-
 ### Idle
 
 ```text
 比較基準：尚未選擇                         選擇
 ```
-
-The ledger shows its ordinary reading cues.
 
 ### Selecting
 
@@ -107,40 +96,33 @@ The ledger shows its ordinary reading cues.
 選擇一項作為比較基準                       取消
 ```
 
-Every existing relation lane contains an explicit native button:
+Every relation lane temporarily contains a native button:
 
 ```text
 作為基準
 ```
 
-The product name and row are not converted into click targets. This keeps the action distinct from product detail or Candidate selection.
+Product rows and product names are not click targets.
 
 ### Active
 
-```text
-比較基準：山椒烤雞半隻              更換  清除
-```
-
 - the anchor row shows `比較基準`;
-- each alternative shows exact price difference plus at most one semantic difference;
-- the anchor row remains in canonical position;
-- non-anchor products are not dimmed or reordered.
+- each alternative shows an exact price delta plus at most one semantic token;
+- changing the anchor replaces one `ProductId`;
+- clearing returns to ordinary reading cues.
 
 ### Reset boundaries
 
-- entering overview clears the anchor;
-- entering all-expanded mode clears the anchor;
-- changing category clears the anchor;
-- an anchor may reference only a product in the active category;
-- changing anchor replaces the previous `ProductId` rather than accumulating products;
-- clearing restores ordinary reading cues;
-- there is no URL state or cross-category persistence.
+- overview clears the anchor;
+- all-expanded mode clears the anchor;
+- category changes clear the anchor;
+- an anchor must belong to the active category;
+- there is no URL state or cross-category persistence;
+- Escape cancels selecting state but does not clear an active anchor.
 
-Escape cancels only temporary selecting state. It does not clear an active anchor.
+## Relative grammar
 
-## Relative-language grammar
-
-Every non-anchor row starts with an exact price token using the menu currency formatter:
+Every alternative begins with exact price difference:
 
 ```text
 少 NT$40
@@ -148,105 +130,60 @@ Every non-anchor row starts with an exact price token using the menu currency fo
 同價
 ```
 
-Possible portion tokens:
+Possible semantic tokens:
 
 ```text
 份量較小
 份量較大
 同份量
 份量未知
-```
-
-Possible preparation tokens:
-
-```text
 較快
 較久
 同節奏
 節奏未知
 ```
 
-Each row displays:
+Maximum visible output:
 
 ```text
-price token
-+ at most one semantic token
+price token + at most one semantic token
 ```
 
-## Semantic-token selection
+The implemented deterministic rule is:
 
-The first implementation always preferred portion. Internal reverse review showed that this produced repeated `份量較小` labels and hid the soft-shell crab's more discriminating `較快` evidence.
+1. preserve explicit portion unknown;
+2. compare formal ordinal distance for trusted portion and preparation;
+3. show the dimension with the larger distance;
+4. prefer portion when distances tie;
+5. show price only when both semantic dimensions are equal.
 
-The corrected deterministic rule is:
+The rule is factual and non-personalized. It does not calculate suitability, similarity, value, or recommendation.
 
-1. preserve explicit portion unknown when portion cannot be compared;
-2. when trusted portion and preparation both differ, show the dimension with the larger formal ordinal distance;
-3. when distances tie, prefer portion;
-4. when portion is equal, show preparation if it differs or is unknown;
-5. when both semantic dimensions are equal, show price only.
+## Implementation reverse-review corrections
 
-This yields the intended shared-dish example:
+Before the disposition review, implementation-level reverse testing corrected three concrete failures.
+
+### Repeated portion token hid the strongest preparation difference
+
+The first rule always preferred portion. It was changed to prefer the larger formal semantic distance, which made the soft-shell crab's two-step preparation difference visible.
+
+### Clearing could discard keyboard focus
+
+After `清除` removes itself, focus now returns to the remaining `選擇` action without scrolling.
+
+### Anchor identity could scroll away
+
+The existing sticky menu context now leads with the anchor name:
 
 ```text
-紹興奶油蝦
-one-step portion difference + one-step preparation difference
-→ tie: 份量較小
-
-蒜酥椒鹽軟殼蟹
-one-step portion difference + two-step preparation difference
-→ larger difference: 較快
-
-豆豉蒸鱸魚
-low-confidence portion
-→ 份量未知
+基準：山椒烤雞半隻　分享料理
 ```
 
-This is a bounded factual display rule. It is not a personalized score, suitability judgment, similarity measure, or recommendation ranking.
+No second sticky comparison rail was added.
 
-## Explicit uncertainty
+## Geometry and accessibility evidence
 
-A directional semantic claim is made only when both anchor and target values are trusted.
-
-If a compared dimension is missing or low confidence, the visible output remains unknown. Accessible text explains that one side lacks trusted information.
-
-Unknown must not be interpreted as:
-
-- smaller;
-- slower;
-- unsuitable;
-- unavailable;
-- not recommended.
-
-## Forbidden language and behavior
-
-Prototype B does not emit or imply:
-
-- 比較好;
-- 更適合;
-- 最接近;
-- 推薦;
-- 最佳;
-- 最划算;
-- CP 值;
-- 相似商品;
-- 替代方案;
-- 應該選.
-
-It also does not:
-
-- sort, filter, hide, copy, rank, or dim products;
-- move the anchor to the top;
-- duplicate the anchor in a card;
-- create a Candidate mark;
-- add row-wide product clicks;
-- open product detail;
-- retain the anchor across categories.
-
-## Geometry contract
-
-The implementation makes one baseline change: the relation lane is reserved at a height that can contain the explicit `作為基準` button.
-
-After that baseline is established, idle, selecting, active, changed-anchor, and cleared states must preserve:
+A code-derived Chromium proxy at 320 px and 390 px reported `0 px` state-change difference across idle, selecting, active, changed-anchor, and cleared states for:
 
 ```text
 row height
@@ -258,77 +195,250 @@ control height
 scroll position
 ```
 
-The top control row has one fixed block size. Product names and context labels truncate instead of wrapping.
+The existing fixture phrases also fit the 6.7rem mobile relation lane in the proxy. The relation text is `0.6rem`, so actual mobile readability still requires participant evidence and is not treated as passed by the proxy.
 
-The relation lane has one fixed line box. Relative phrases truncate with full `title` and accessible labels instead of increasing row height.
+Accessibility behavior includes:
 
-A code-derived Chromium proxy measurement at 320 px and 390 px reported `0 px` difference across idle, selecting, active, changed-anchor, and cleared states for all geometry and scroll measurements above.
+- native buttons;
+- product-specific accessible action names;
+- a polite anchor status;
+- textual anchor identity;
+- full titles and accessible labels for truncated text;
+- focus preservation after select, cancel, and clear;
+- Escape limited to temporary selecting state.
 
-This is an internal implementation check, not deployed participant evidence.
+## Designer reverse-review method
 
-## Accessibility behavior
+This review is an adversarial designer proxy, not an unfamiliar-participant study.
 
-- all actions use native `<button>` elements;
-- row buttons explicitly name the product being made the reference;
-- the top context uses a polite live status;
-- anchor identity is communicated by text, not color alone;
-- visible truncation retains full `title` and accessible labels;
-- selecting an anchor moves focus to the top anchor control without scrolling;
-- cancelling selection returns focus to the top control;
-- clearing an active anchor returns focus to the remaining `選擇` control;
-- Escape cancels selecting state only.
+It can reject a logically misleading projection because the canonical source data and visible output are known. It cannot prove learnability, perceived meaning, or task effort for unfamiliar diners.
 
-## Implemented files
+The review used `分享料理` with `山椒烤雞半隻` as anchor.
+
+Canonical shared-dish semantics:
 
 ```text
-src/customer/menu-anchor-relations.ts
-src/customer/menu-anchor-relations.test.ts
-src/customer/menu-reading.ts
-src/customer/menu-reading.test.ts
-src/app/category-anchor-control.ts
-src/app/menu-category.ts
-src/app/menu-overview.ts
-src/app/App.ts
-src/styles/menu-workspace.css
-scripts/menu-workspace-contract.test.mjs
-package.json
+山椒烤雞半隻
+NT$520 · 多人分享 · 慢
+
+紹興奶油蝦
+NT$480 · 約 2–3 人 · 一般
+
+蒜酥椒鹽軟殼蟹
+NT$460 · 約 2–3 人 · 快
+
+豆豉蒸鱸魚
+NT$560 · 份量低可信度 · 一般
+
+宮保杏鮑菇
+NT$340 · 約 2–3 人 · 一般
+
+季節時蔬豆腐煲
+NT$380 · 約 2–3 人 · 一般 · 已售完
 ```
 
-Prototype A projection code remains in the repository as prior research evidence, but its selector and renderer are not active in the Prototype B evaluation path.
+## Task matrix
+
+### 1. Identify alternatives that cost less or more and the exact difference
+
+Visible output:
+
+```text
+紹興奶油蝦             少 NT$40
+蒜酥椒鹽軟殼蟹         少 NT$60
+豆豉蒸鱸魚             多 NT$40
+宮保杏鮑菇             少 NT$180
+季節時蔬豆腐煲         少 NT$140
+```
+
+Disposition:
+
+```text
+PASS — strong useful evidence
+```
+
+The diner no longer needs to subtract each numeric price from NT$520.
+
+### 2. Identify the strongest faster-preparation difference
+
+Visible output identifies:
+
+```text
+蒜酥椒鹽軟殼蟹         較快
+```
+
+That answer is locally correct because the crab is `fast` while the anchor is `slow`.
+
+However, the source data also says all four other alternatives with trusted preparation data are faster than the slow anchor:
+
+```text
+紹興奶油蝦             normal → faster than slow
+豆豉蒸鱸魚             normal → faster than slow
+宮保杏鮑菇             normal → faster than slow
+季節時蔬豆腐煲         normal → faster than slow
+```
+
+Their preparation difference is hidden by portion selection or portion unknown.
+
+Disposition:
+
+```text
+FAIL — visible output can imply false exclusivity
+```
+
+An unfamiliar diner can reasonably conclude that the crab is the only faster dish, even though it is only the strongest faster dish.
+
+### 3. Identify the dish with unknown portion comparison
+
+Visible output:
+
+```text
+豆豉蒸鱸魚             份量未知
+```
+
+Disposition:
+
+```text
+PASS — explicit uncertainty remains visible
+```
+
+But this row also has a trusted faster-preparation relation that is omitted.
+
+### 4. Explain what `比較基準` means
+
+The copy, explicit `作為基準` action, persistent anchor name, and unchanged menu support the intended interpretation of a temporary reference.
+
+Disposition:
+
+```text
+PROXY PASS — requires unfamiliar-participant confirmation
+```
+
+The designer proxy cannot prove that users will not interpret `選擇` as saved, favored, or ordered.
+
+### 5. Determine whether the action saved, ordered, recommended, filtered, or ranked anything
+
+Structural evidence:
+
+- no product disappears;
+- no row moves;
+- no row dims;
+- no Candidate or order state exists;
+- no recommendation language appears.
+
+Disposition:
+
+```text
+PROXY PASS — structural boundary is correct
+```
+
+Meaning still requires participant confirmation.
+
+### 6. Switch the anchor and explain what changes
+
+Changing to the soft-shell crab recalculates every relative phrase while preserving row and scroll geometry.
+
+Examples:
+
+```text
+山椒烤雞半隻           多 NT$60 · 較久
+紹興奶油蝦             多 NT$20 · 較久
+豆豉蒸鱸魚             多 NT$100 · 份量未知
+宮保杏鮑菇             少 NT$120 · 較久
+季節時蔬豆腐煲         少 NT$80 · 較久
+```
+
+Disposition:
+
+```text
+PASS for orientation and recalculation
+FAILURE REMAINS for hidden semantic dimensions
+```
+
+### 7. Does B reduce subtraction, remembering, and backtracking compared with A?
+
+Price:
+
+```text
+YES
+```
+
+The exact delta is directly visible and is more useful than Prototype A's duplicated price scale.
+
+Semantic comparison:
+
+```text
+PARTLY, BUT NOT RELIABLY
+```
+
+Each row may display a different semantic dimension, and the interface does not reveal which known dimensions were omitted. The diner can scan quickly, but cannot know whether absence of `較快`, `較久`, `份量較小`, or `份量較大` means equality or merely hidden evidence.
+
+This creates a new reconstruction problem:
+
+```text
+read one selected token
+→ infer why that dimension was selected
+→ wonder what other differences were suppressed
+→ return to source facts or another mode
+```
+
+## Decisive failure
+
+The documented failure signal occurred:
+
+> deterministic token selection hides useful evidence.
+
+The failure is deeper than choosing the wrong priority rule. Any single automatically selected semantic token can silently suppress another known difference.
+
+The second column therefore mixes dimensions across rows:
+
+```text
+row A → portion
+row B → preparation
+row C → uncertainty
+```
+
+It is not one shared coordinate axis, and it is not a complete relative profile. The surface can be fast to scan while still producing incomplete or misleading conclusions.
+
+## Useful evidence retained
+
+Prototype B still provides useful independent evidence:
+
+- exact price deltas clearly reduce arithmetic;
+- one temporary anchor is understandable in the model;
+- reference identity remains visible while scrolling;
+- canonical order and complete-menu credibility remain stable;
+- uncertainty is explicit;
+- no Candidate, recommendation, or transaction state is introduced;
+- changing and clearing preserve geometry and orientation.
+
+## Insufficient evidence
+
+Prototype B is insufficient as the semantic relational-reading answer because:
+
+- one semantic token hides other trusted differences;
+- token dimensions vary by row;
+- omission is indistinguishable from equality;
+- the surface can imply false exclusivity;
+- the diner may need to return to source facts to verify what was suppressed.
+
+## Disposition
+
+```text
+[useful but insufficient] Prototype B — Anchor-only relation
+```
+
+This is a designer reverse-review disposition, not a claim that an unfamiliar participant passed or failed the interface.
+
+The implementation should remain isolated as evidence rather than being further polished into a production feature.
+
+Prototype C remains blocked. Showing all dimensions, adding user-controlled dimensions, or combining Axis and Anchor would be a new hypothesis and requires a separately reviewed plan.
+
+Candidate, Comparison, Decision, Configuration, Current order, quantity, modifiers, recommendation, ranking, filtering, shared-table composition, and checkout remain blocked.
 
 ## Automated validation
 
-Tests cover:
-
-### State
-
-- initial idle state;
-- enter and cancel selecting state;
-- exactly one category-local anchor;
-- changing the anchor replaces rather than accumulates `ProductId` values;
-- overview, all-expanded mode, category change, and clear reset the anchor;
-- Escape cancels selecting state but not active state;
-- no axis, Candidate, Comparison, detail, quantity, configuration, or order state appears.
-
-### Projection
-
-- exact lower, higher, and equal price deltas;
-- portion larger, smaller, equal, and unknown;
-- preparation faster, slower, equal, and unknown;
-- low-confidence portion remains unknown;
-- the most discriminating semantic difference remains visible;
-- output is bounded to price plus one semantic token;
-- output contains no recommendation, similarity, suitability, or value language.
-
-### Structure
-
-- exactly four table columns;
-- no row-wide click handler;
-- no visible Axis-only selector;
-- no row measurement or scroll-restoration choreography in category rendering;
-- fixed control, heading, relation, and status line boxes.
-
-The latest verified GitHub Actions run completes:
+The implemented branch continues to require:
 
 ```text
 Typecheck         ✓
@@ -336,48 +446,4 @@ Test              ✓
 Build static site ✓
 ```
 
-## Review task
-
-Use `分享料理` and begin with `山椒烤雞半隻` as the reference.
-
-Without teaching the model, ask the participant to identify:
-
-1. several dishes that cost less or more and by how much;
-2. which dish exposes the strongest faster-preparation difference;
-3. which dish has unknown portion comparison;
-4. what `比較基準` means;
-5. whether the action saved, ordered, recommended, filtered, ranked, or selected anything;
-6. how the evidence changes after switching the anchor;
-7. whether visible relative evidence reduced subtraction, remembering, and backtracking.
-
-## Pass signals
-
-- at least three alternatives are understood relative to one reference at the same time;
-- exact price differences remove mental subtraction;
-- one semantic difference is understood without returning to an Axis-only mode;
-- the participant explains the anchor without calling it saved, ordered, or recommended;
-- unknown is understood as not confidently comparable;
-- changing and clearing preserve orientation and complete-menu credibility;
-- cross-axis remembering is lower than in Prototype A.
-
-## Failure signals
-
-- anchor is understood as Candidate, favorite, cart item, recommendation, or order selection;
-- participants expect product detail from the row action;
-- the reference name is forgotten after its row scrolls away;
-- relative phrases are slower than reading original values;
-- deterministic token selection hides the most useful difference;
-- participants still subtract prices manually;
-- changing anchors moves rows, table, or scroll position;
-- the interface behaves like a disguised comparison destination or product picker.
-
-## Current disposition
-
-```text
-[useful but insufficient] Prototype A — Axis-only score
-→ [implemented, awaiting review] Prototype B — Anchor-only relation
-→ [blocked] Prototype C — Combined relational score
-→ [blocked] Candidate / Comparison / Decision / Configuration / Current order
-```
-
-Automated checks and designer reverse review may reject implementation failures, but they do not prove learnability or reduced comprehension work. Prototype B remains unpassed until the review gate is completed.
+Automated checks prove implementation contracts, not comprehension.
