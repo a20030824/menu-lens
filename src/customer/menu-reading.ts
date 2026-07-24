@@ -13,6 +13,7 @@ import {
   resolveProductSemantics,
 } from "../domain/menu-validation.js";
 import {
+  availableReadingAxesFor,
   axisValueFor,
   type AxisValue,
   type MenuReadingAxis,
@@ -60,6 +61,7 @@ export type CategoryReadingModel = Readonly<{
   structuralSummary: string;
   relativeCount: number;
   previewProductNames: ReadonlyArray<string>;
+  readingAxes: ReadonlyArray<MenuReadingAxis>;
   products: ReadonlyArray<ProductNodeModel>;
 }>;
 
@@ -292,6 +294,7 @@ export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
         .filter((product) => !product.isSoldOut)
         .slice(0, 2)
         .map((product) => product.name),
+      readingAxes: availableReadingAxesFor(menu, products),
       products: productModels,
     } satisfies CategoryReadingModel;
   });
