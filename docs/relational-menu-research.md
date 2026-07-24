@@ -2,20 +2,15 @@
 
 ## Document status
 
-This is the exploratory design record for the current Menu Lens menu-reading work.
+This is the exploratory design record for the active Menu Lens menu-reading work.
 
-It records observed failures, the relational hypothesis, the Axis-only implementation, the failed first reverse review, the corrective iteration, and the remaining falsification gate. It is **not** a product-contract change and does not authorize Prototype B, Prototype C, Candidate, Comparison, Decision, Configuration, or order implementation.
+It records failed single-product interactions, the stable-ledger hypothesis, Prototype A evidence, Prototype B implementation, and the remaining falsification gates. It is not a product-contract change and does not authorize Prototype C, Candidate, Comparison, Decision, Configuration, Current order, or checkout work.
 
-Current implementation branch:
+Current branch and Draft PR:
 
 ```text
 agent/menu-map-atlas
-```
-
-Current Draft PR:
-
-```text
-#4 — Build menu reading workspace
+PR #4 — Build menu reading workspace
 ```
 
 Current status:
@@ -24,13 +19,13 @@ Current status:
 [passed] M1 compressed overview + shared ledger
 → [rejected] M2 modal product detail
 → [rejected, removed] C1 fixed product focus rail
-→ [implemented, awaiting re-review] Prototype A — Axis-only score
-→ [blocked] Prototype B — Anchor-only relation
+→ [useful but insufficient] Prototype A — Axis-only score
+→ [implemented, awaiting review] Prototype B — Anchor-only relation
 → [blocked] Prototype C — Combined relational score
 → [blocked] Candidate / Comparison / Decision / Configuration / Current order
 ```
 
-## Why this record exists
+## Why this research exists
 
 The menu-reading work produced one useful substrate and several failed interaction hypotheses.
 
@@ -42,44 +37,47 @@ desktop-first static workspace
 → rejected: meaningful differences disappeared on mobile
 
 M1 compressed overview
-→ passed: the restaurant's six-region shape remained visible
-
-M1 product-card expansion
-→ rejected: ordinary feed rhythm remained
+→ passed: restaurant structure remained visible
 
 M1 shared ledger
-→ passed as a stable coordinate plane
+→ passed: one stable category coordinate plane
 
 M2 modal product detail
 → rejected: source-row displacement and conventional single-product reading
 
 C1 fixed product focus rail
-→ rejected: severe perceived jumping and no meaningful reduction in linear comparison
+→ rejected: perceived jumping and no meaningful reduction in linear comparison
 ```
 
-The failures show that improving the transition into one product is not the same as helping users understand several products together.
+The failures show that improving access to one product is not the same as helping diners understand several products together.
 
-## Problem definition
-
-“Linear menu” currently refers to three different problems.
+## The three linearity problems
 
 ### Navigation linearity
 
-The user must move through categories and products as one long sequence. M1 partly improved this by exposing the complete menu shape before category expansion.
+The user must traverse categories and products as one long sequence. M1 partly improved this by exposing the complete menu shape before category expansion.
 
 ### Comprehension linearity
 
-The user must inspect one product, remember it, inspect another, reconstruct the first, and repeat. This remains the immediate research target.
+The user inspects one product, remembers it, inspects another, reconstructs the first, and repeats.
+
+```text
+inspect A
+→ remember A
+→ inspect B
+→ reconstruct A
+→ repeat
+```
+
+This remains the immediate research target.
 
 ### Decision linearity
 
-The user moves through a pipeline such as browse → save → comparison page → decide while the original menu stops participating. This remains deferred because relational reading has not yet proved value.
+The user moves through a pipeline such as browse → save → comparison page → decide while the original menu stops participating. This remains deferred until relational reading proves value.
 
-A successful relational prototype should let one interaction expose relationships among several products without moving rows, opening a second product list, or requiring the user to retain the previous product in memory.
+## Evidence from failed detail experiments
 
-## Evidence from the failed detail experiments
-
-The modal detail and fixed rail experiments failed for different visible reasons but shared the same deeper model:
+The modal and fixed rail looked different but shared one model:
 
 ```text
 one current product
@@ -87,9 +85,9 @@ one current product
 → replace it with the next product
 ```
 
-The rail reduced modal interruption but still represented only one current product, did not preserve prior comparison context, and did not reveal relationships among nearby alternatives.
+The rail reduced modal interruption but still represented only one current product. It did not preserve prior comparison context or expose relationships among alternatives.
 
-The scroll-restoration code became compensatory choreography:
+Its restoration code became compensatory choreography:
 
 ```text
 measure a row
@@ -99,397 +97,405 @@ measure a row
 → restore focus
 ```
 
-Future prototypes should prefer structures that do not need scroll correction over increasingly complex restoration logic.
+The research therefore prefers structures that do not require restoration over increasingly complex compensation.
 
 ## Design principles
 
 ### Stable substrate
 
-- canonical row order remains unchanged
-- row DOM identity remains unchanged
-- column structure and geometry remain unchanged
-- interaction does not add inline expansion rows
-- no fixed footer, rail, modal, or sheet is required
-- no axis-specific scroll restoration is required
-
-### Shared coordinate system
-
-At least one comparison dimension should use a common scale or consistent lane across all products in the category.
+- canonical row order remains unchanged;
+- row DOM identity remains unchanged;
+- four-column table structure remains unchanged;
+- no inline expansion row;
+- no fixed footer, rail, modal, or sheet;
+- no state-specific row measurement or scroll correction.
 
 ### Multiple simultaneous relationships
 
-One interaction must make relationships among at least three products visible at the same time. Without this property, the interface remains a single-product reader.
+One interaction must make relationships among at least three products visible at the same time. Otherwise the interface remains a single-product reader.
 
 ### Useful evidence, not schema exhibition
 
-A supported metadata field does not automatically deserve a visible mode. A mode should appear only when the current category contains enough products and distinct projected values to reduce product-by-product reading.
+A metadata field does not deserve visible UI merely because the schema supports it. Evidence should reduce product-by-product reading.
 
 ### Explicit uncertainty
 
-Missing or low-confidence data remains unknown. It must not become a negative property, false equivalence, recommendation, or inferred fact.
+Missing or low-confidence data remains unknown. It must not become a negative property, inferred fact, false equivalence, or recommendation.
 
 ### No hidden recommendation
 
-The prototype must not use or imply:
+The prototype must not imply:
 
-- best
-- recommended
-- most suitable
-- best value
-- closest match
-- automatic ranking
+- best;
+- recommended;
+- most suitable;
+- best value;
+- closest match;
+- automatic ranking.
 
 ### Complete-menu credibility
 
-Changing a reading mode must not make users believe products were filtered out or that the view is a recommendation subset.
+Changing a reading mechanism must not make diners believe products were filtered out or reduced to a recommendation subset.
 
-## Phase 0 implementation result — remove C1
+## Passed substrate — M1 shared ledger
 
-Status:
+M1 established the reusable coordinate plane:
 
-```text
-[complete]
-```
+- each category is one semantic table;
+- sequence, dish name, bounded evidence, and price use shared columns;
+- sold-out and incomplete-data status remain visible;
+- each product has one canonical row;
+- canonical ordering remains stable;
+- products do not become independent cards.
 
-Removed from the primary flow:
+The ledger is a passed substrate, not a finished product.
 
-- `src/app/product-focus-rail.ts`
-- the rejected modal/inspector product-detail UI
-- rail imports, creation, rendering, and focus callbacks in `App.ts`
-- product-row click and product-focus behavior
-- fixed rail DOM composition and all rail CSS
-- fixed `8.75rem` rail bottom reservation
-- `preserveSourceRow()`
-- rail-specific scroll correction and focus restoration
-- `focusedProductId` and `detailLevel` from menu-reading state
-- C1-only state transitions and tests
-- wide-screen detail-inspector workspace column
+## Removed experiment — C1
 
-Retained:
+The fixed product rail was fully removed from the primary flow:
 
-- M1 compressed overview
-- category semantic zoom
-- shared category ledger
-- canonical category and product order
-- sold-out and incomplete-metadata status
-- the canonical Product and semantic metadata model
+- rail module and DOM;
+- fixed rail CSS and bottom reservation;
+- product-row focus behavior;
+- focus and detail state;
+- `preserveSourceRow()`;
+- rail-specific row measurement, scroll correction, and focus restoration;
+- C1-only tests and wide-screen inspector structure.
 
-The remaining `requestAnimationFrame` use only throttles active-category tracking in all-expanded mode. It does not measure rows, correct scroll, restore focus, or compensate for a rail.
+The remaining `requestAnimationFrame` only throttles active-category tracking in all-expanded mode.
 
 ## Prototype A — Axis-only score
 
-Status:
+Disposition:
 
 ```text
-[implemented, awaiting re-review]
+[useful but insufficient]
 ```
 
-### Core research question
+### Question
 
 > Can one stable category ledger expose several product relationships at once, reduce memory work, and preserve complete-menu credibility without sorting, filtering, recommendation, or a second comparison destination?
 
-### Interaction boundary
+### Implemented mechanism
 
-A single expanded category may show one small native control:
-
-```text
-閱讀方式：[一般 ▾]
-```
-
-The schema supports:
+One category could display one shared dimension:
 
 ```text
-default
-price
-portion
-meal role
-preparation
+一般
+價格
+份量
+餐點角色
+準備節奏
 ```
 
-The visible options are category-specific. `一般` is always available. A non-default axis appears only when:
+A non-default axis appeared only when the category contained at least three products and at least two distinct visible states.
 
-- the category contains at least three products; and
-- the axis produces at least two distinct visible states.
+The same table and canonical rows remained. Only the third-column relation lane and its heading changed.
 
-Consequences in the current reference menu:
+### Corrective reverse review
 
-- `個人主餐` offers `一般`, `價格`, and `準備節奏`;
-- `分享料理` offers `一般`, `價格`, `份量`, and `準備節奏`;
-- meal role is not offered because it merely repeats the category structure row by row;
-- the two-item dessert category stays in `一般` because it cannot meet the three-product relational gate.
+The first internal review found:
 
-The eligibility rule changes only the available reading tools. It never changes the canonical collection, row count, or ordering.
+1. the price microbar changed row geometry on narrow screens;
+2. deployed data could not display axis-level `未提供`;
+3. uniform fields such as meal role merely repeated category structure.
 
-### State rules
+Corrections:
 
-- overview mode does not show the control
-- all-expanded mode uses the default ledger and does not show the control
-- entering overview resets the axis to `default`
-- entering all-expanded mode resets the axis to `default`
-- changing category resets the axis to `default`
-- there is no cross-category persistence or URL state
+- all table cells use top alignment;
+- relation and status lanes reserve fixed line boxes;
+- price rendering fits the same line box;
+- headings remain one line;
+- a low-confidence portion example makes `未提供` executable;
+- visible axes require real multi-product differences.
 
-The reading state remains deliberately small:
+A code-derived 320 px and 390 px geometry measurement then reported zero state-change difference in row, column, header, and table geometry.
 
-```ts
-type MenuReadingState = {
-  activeCategoryId: CategoryId | null;
-  expansion: MenuExpansion;
-  readingAxis: MenuReadingAxis;
-};
-```
+### Useful evidence
 
-It contains no product focus, detail, anchor, Candidate, Comparison, configuration, or order state.
+- preparation made several dishes simultaneously comparable;
+- portion exposed `多人分享`, `約 2–3 人`, and unknown;
+- canonical order and complete-menu credibility remained intact;
+- no detail, sorting, filtering, recommendation, or decision state was introduced.
 
-### Ledger invariants
+### Insufficient evidence
 
-All axes use the same table and canonical product rows:
+- the price scale duplicated the numeric price column;
+- only one dimension was visible at a time;
+- switching axes removed the previous evidence;
+- cross-axis remembering remained.
 
-- same product row DOM
-- same canonical order and row count
-- same four-column structure
-- same column widths
-- same price column
-- same status line
-- no detail row or row expansion
-- no fixed or sticky footer
-- no sorting, filtering, hiding, dimming, or copying products
-- no category expansion changes
-- no axis animation or scroll compensation
-
-Only the existing relation lane and its heading are updated.
-
-### Projection boundary
-
-Pure projection and useful-axis eligibility live in:
-
-```text
-src/customer/menu-relations.ts
-src/customer/menu-relations.test.ts
-```
-
-The module contains no DOM, state mutation, sorting, filtering, ranking, recommendation, Candidate state, similarity score, or order state.
-
-### Axis rules
-
-#### Default
-
-The M1 cue grammar remains:
-
-- at most two trusted cues
-- sold-out and incomplete-data status remain visible
-- unsupported and low-confidence cues are omitted rather than guessed
-
-#### Price
-
-- the numeric price remains in the existing price column
-- every product in a category uses the same category min–max scale
-- the relation lane shows one neutral position marker
-- the heading visibly states `低→高`
-- the scale does not label products cheap, expensive, high value, or good CP
-- if all category prices are identical, every marker uses the same centered safe fallback
-
-#### Portion
-
-Formal values are:
-
-```text
-小份
-一人份
-約 2–3 人
-多人分享
-未提供
-```
-
-#### Meal role
-
-Formal values remain supported by projection:
-
-```text
-個人主餐
-分享主菜
-小食或配菜
-飯麵主食
-飲品
-甜點
-未提供
-```
-
-The current menu does not expose this as a selectable mode because each category has one uniform role and the repeated labels do not reduce comprehension work.
-
-#### Preparation
-
-Formal coarse values are:
-
-```text
-較快
-一般準備
-需要較久
-未提供
-```
-
-No exact waiting time or live prediction is shown.
-
-#### Trust and availability
-
-- `high` and `medium` metadata may be projected
-- `low` or missing metadata becomes `未提供`
-- category defaults remain visible with their existing medium-confidence authority
-- sold-out products retain their axis value and canonical position
-- unavailable metadata never becomes a negative attribute
-
-The deployed reference menu now includes one low-confidence portion exception for `豆豉蒸鱸魚`. This makes the uncertainty path executable in the actual prototype rather than only in a synthetic test fixture.
-
-## First reverse review — failed
-
-The first internal reverse review deliberately tried to falsify the implementation rather than confirm it.
-
-It found two concrete failures.
-
-### Failure 1 — price mode changed geometry
-
-The text renderer and price microbar participated in different table-cell baseline calculations. At 320 px, switching to price mode increased some row heights by about 12 px and moved later rows by several dozen pixels.
-
-This violated the stable-substrate requirement even though row DOM identity and table columns were unchanged.
-
-### Failure 2 — unknown task was not executable
-
-All deployed portion, role, and preparation values resolved through category defaults or trusted overrides. `未提供` existed only in synthetic unit fixtures, so the Pages checklist asked for evidence the real prototype could not display.
-
-The first reverse review therefore rejected the implementation as not ready for a pass decision.
-
-## Corrective iteration
-
-### Geometry correction
-
-The shared table now uses explicit geometry rules:
-
-- all product cells use `vertical-align: top`
-- relation and status lanes reserve fixed block sizes
-- relation text inherits the shared relation line height
-- the price renderer uses flex centering inside the same line box and has no separate padding or baseline
-- axis headings are constrained to one line
-
-A headless measurement was repeated at 390 px and 320 px. Across default, price, portion, role, and preparation renderers, the measured differences are:
-
-```text
-row height      0 px
-row top         0 px
-column width    0 px
-header height   0 px
-table height    0 px
-```
-
-This is a proxy geometry check, not participant evidence.
-
-### Executable uncertainty
-
-The reference menu now contains one available shared dish whose portion value is low confidence. The portion axis displays `未提供` for that row while retaining the row, price, availability, and canonical position.
-
-### Remove non-relational modes from the control
-
-The control no longer exhibits every supported field. `availableReadingAxesFor()` evaluates actual category projections and offers only axes with multi-product differences.
-
-This keeps the experiment focused on comprehension linearity rather than proving that a dropdown can swap labels.
-
-## Automated safeguards
-
-The implementation tests cover:
-
-### State
-
-- initial axis is `default`
-- single-category mode can change axis
-- overview resets axis
-- category changes reset axis
-- all-expanded mode cannot retain a non-default axis
-- axis changes preserve category expansion
-- axis changes do not affect canonical product order
-- no anchor, Candidate, Comparison, detail, or order state appears
-
-### Projection and eligibility
-
-- price uses one category min–max scale
-- the minimum and maximum products map to scale endpoints
-- a single-price category uses a centered safe fallback
-- formal portion, role, and preparation labels are correct
-- missing and low-confidence metadata render `未提供`
-- the deployed reference menu contains real unknown-axis evidence
-- a visible non-default axis requires at least three products and at least two distinct values
-- redundant uniform role modes are not offered in the current dataset
-- sold-out products retain axis evidence and canonical position
-- projection output contains no recommendation, best-value, suitability, or CP language
-
-### Geometry contract
-
-A dependency-free script checks the source CSS contract for:
-
-- no mixed baseline alignment
-- fixed relation and status line boxes
-- price renderer containment inside the shared relation box
-- one-line axis headings
-
-The full repository workflow runs typecheck, tests, and static build.
-
-## Re-review gate
-
-Prototype A remains unpassed. Automated checks and designer self-review can reject implementation failures but cannot prove learnability or reduced comprehension work.
-
-Use an unfamiliar participant or an explicitly labeled independent proxy. Do not teach the control.
-
-### Tasks
-
-1. Open `個人主餐` and switch among every available reading mode.
-2. Confirm there is no visible row, column, table, or scroll movement.
-3. Without reading every numeric price one by one, identify products near the low, middle, and high ends of the shared price scale.
-4. Ask what visual evidence supported that answer.
-5. Use `準備節奏` to identify several simultaneous differences.
-6. Open `分享料理` and use `份量` to identify `多人分享`, `約 2–3 人`, and `未提供`.
-7. Ask what `未提供` means without offering interpretations.
-8. Confirm no product disappeared, moved, copied, dimmed, or changed order.
-9. Ask what the control changes without naming it.
-10. Ask whether it reduced remembering and backtracking, not whether it merely looks cleaner.
-
-### Pass signals
-
-- one switch makes at least three products simultaneously comparable
-- product detail is not needed for the task
-- users answer from visible evidence
-- the shared price scale contributes information beyond the existing number column
-- missing data is understood as unknown, not negative
-- the complete menu remains credible
-- no visible row, column, table, or scroll jump occurs
-- feedback indicates reduced comprehension work, not only visual polish or convenience
-
-### Failure signals
-
-- the control is understood as a filter, sorter, ranking, selection, or recommendation control
-- users still inspect one product at a time
-- the shared scale is ignored while users read every number independently
-- relation labels are slower to interpret than the original facts
-- row content causes orientation loss
-- missing metadata produces false conclusions
-- the result only resembles a spreadsheet without improving relational reading
-- any obvious jump remains
-
-No independent re-review has been recorded, so the status remains `[implemented, awaiting re-review]`.
+Prototype A is retained as research evidence but is not the active evaluation UI.
 
 ## Prototype B — Anchor-only relation
 
 Status:
 
 ```text
-[blocked]
+[implemented, awaiting review]
 ```
 
-Prototype B must not begin from implementation convenience. It requires an explicit disposition of Prototype A after independent re-review. No anchor state, baseline styling, product selection, relative phrases, or anchor tests are present in this implementation.
+### Question
+
+> Can a diner nominate one dish as a temporary reference and read bounded differences to several alternatives on the same stable ledger, with less mental subtraction and cross-axis remembering than Prototype A?
+
+### Isolation from Prototype A
+
+The B evaluation path does not show the Axis-only selector.
+
+```text
+Prototype A
+one dimension across all rows
+
+Prototype B
+one temporary reference across all rows
+
+Prototype C
+axis + anchor together — blocked
+```
+
+### Layout
+
+Prototype B reuses two existing attachment points:
+
+- one fixed-height context row above the table;
+- the third-column relation lane in each canonical product row.
+
+It adds no fifth column, detached comparison surface, rail, modal, sheet, footer, or copied list.
+
+### State
+
+```ts
+type AnchorReading =
+  | { kind: "idle" }
+  | { kind: "selecting" }
+  | { kind: "active"; productId: ProductId };
+```
+
+The state contains at most one category-local `ProductId`.
+
+Boundaries:
+
+- overview clears anchor;
+- all-expanded mode clears anchor;
+- category change clears anchor;
+- changing anchor replaces the prior ID;
+- clear returns to idle;
+- no URL or cross-category persistence;
+- Escape cancels selecting only.
+
+### Explicit selection
+
+Idle:
+
+```text
+比較基準：尚未選擇                         選擇
+```
+
+Selecting:
+
+```text
+選擇一項作為比較基準                       取消
+```
+
+Every relation lane temporarily contains an explicit native button:
+
+```text
+作為基準
+```
+
+Product names and rows are not click targets. The action therefore does not imply detail or Candidate selection.
+
+Active:
+
+```text
+比較基準：山椒烤雞半隻              更換  清除
+```
+
+The anchor row remains in place and displays `比較基準`. Other rows display bounded relative evidence.
+
+### Relative grammar
+
+Every alternative begins with exact price difference:
+
+```text
+少 NT$40
+多 NT$60
+同價
+```
+
+Then at most one semantic token:
+
+```text
+份量較小
+份量較大
+同份量
+份量未知
+較快
+較久
+同節奏
+節奏未知
+```
+
+Maximum visible output:
+
+```text
+price token + one semantic token
+```
+
+### Corrected semantic selection
+
+The first implementation always preferred portion. Reverse review showed that this hid the soft-shell crab's exceptional faster preparation behind repeated `份量較小` labels.
+
+The corrected rule is deterministic:
+
+1. explicit portion unknown remains visible;
+2. if trusted portion and preparation both differ, show the dimension with the larger formal ordinal distance;
+3. tied differences prefer portion;
+4. equal portion permits differing or unknown preparation;
+5. equal semantic dimensions leave price only.
+
+Example with `山椒烤雞半隻` as anchor:
+
+```text
+紹興奶油蝦
+→ 少 NT$40 · 份量較小
+
+蒜酥椒鹽軟殼蟹
+→ 少 NT$60 · 較快
+
+豆豉蒸鱸魚
+→ 多 NT$40 · 份量未知
+```
+
+This is a factual compression rule, not a recommendation, similarity score, suitability judgment, or personalized ranking.
+
+### Unknown handling
+
+A directional semantic claim requires trusted values on both sides. Unknown output carries accessible explanation that one side lacks trusted metadata.
+
+Unknown does not mean:
+
+- smaller;
+- slower;
+- unsuitable;
+- unavailable;
+- not recommended.
+
+### Stable geometry
+
+The relation lane was enlarged once to contain the explicit button. After establishing that baseline, idle, selecting, active, changed-anchor, and cleared states use the same fixed geometry.
+
+A code-derived Chromium proxy at 320 px and 390 px measured zero state-change difference for:
+
+```text
+row height
+row top
+column width
+header height
+table height
+control height
+scroll position
+```
+
+This is implementation evidence, not participant evidence.
+
+### Accessibility
+
+- actions are native buttons;
+- selection buttons name their product;
+- top context uses a polite live status;
+- anchor identity is textual, not color-only;
+- truncated text retains `title` and accessible labels;
+- selecting and cancelling return focus to the top control without scrolling;
+- clearing returns focus to the remaining `選擇` action;
+- Escape cancels selecting but does not clear an active anchor.
+
+### Automated safeguards
+
+State tests cover:
+
+- idle, selecting, active, changed, and cleared states;
+- category-local anchor validation;
+- replacement rather than accumulation;
+- overview, all, and category reset boundaries;
+- absence of axis, Candidate, Comparison, detail, quantity, configuration, and order state.
+
+Projection tests cover:
+
+- exact lower, higher, and equal price differences;
+- portion and preparation larger, smaller/faster, equal, and unknown;
+- low-confidence metadata;
+- bounded output;
+- the most discriminating semantic evidence;
+- absence of recommendation and value language.
+
+Structure tests cover:
+
+- four columns only;
+- no row-wide click;
+- no active Axis-only control;
+- fixed context, relation, status, and header line boxes;
+- no category-level row measurement or scroll correction.
+
+The verified GitHub Actions workflow completes typecheck, tests, and static build.
+
+## Prototype B review gate
+
+Use `分享料理` and initially choose `山椒烤雞半隻`.
+
+Without teaching the interaction, ask the participant to identify:
+
+1. alternatives that cost less or more and exact differences;
+2. the strongest faster-preparation difference;
+3. the dish with unknown portion comparison;
+4. what `比較基準` means;
+5. whether choosing it saved, ordered, recommended, filtered, ranked, or selected anything;
+6. how evidence changes after switching anchors;
+7. whether relative evidence reduced subtraction, remembering, and backtracking.
+
+Pass signals:
+
+- at least three alternatives are understood relative to one anchor at once;
+- exact deltas remove mental subtraction;
+- one semantic difference is understood without returning to A;
+- anchor is not confused with Candidate, cart, favorite, recommendation, or order state;
+- unknown is understood as not confidently comparable;
+- changing and clearing preserve orientation and complete-menu credibility;
+- cross-axis remembering is lower than in Prototype A.
+
+Failure signals:
+
+- anchor is interpreted as saved, ordered, or recommended;
+- users expect detail from the row action;
+- the reference is forgotten after scrolling;
+- relative phrases are slower than original facts;
+- deterministic selection hides useful evidence;
+- users still subtract prices manually;
+- changing anchor moves rows, table, or scroll position;
+- the interaction behaves as a disguised comparison destination or product picker.
+
+Prototype B remains unpassed until this review gate is completed.
 
 ## Prototype C and later work
 
-Prototype C remains blocked until Axis-only and Anchor-only each produce useful evidence independently. Candidate, Comparison, Decision, Configuration, Current order, quantity, modifiers, recommendation, ranking, filtering, product network, scatterplot, shared-table composition, and checkout remain blocked.
+Prototype C remains blocked until A and B each have explicit independent dispositions.
+
+The following remain blocked:
+
+- Candidate;
+- Comparison;
+- Decision;
+- Configuration;
+- Current order;
+- quantity and modifiers;
+- recommendation, ranking, or filtering;
+- product networks or scatterplots;
+- shared-table composition;
+- checkout.
 
 ## Contract impact
 
 None.
 
-The product contract already requires stable full-menu access, separation between browsing and ordering, preserved browsing context, comparison support, and explicit uncertainty for incomplete metadata. Prototype A changes the experimental route used to investigate those requirements, not the requirements themselves.
+The product contract already requires complete-menu access, browsing distinct from ordering, preserved browsing context, comparison support, and explicit uncertainty. Prototypes A and B change the experimental route used to investigate those requirements; they do not change the requirements or authorize deferred states.
