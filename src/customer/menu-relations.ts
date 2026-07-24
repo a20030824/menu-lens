@@ -36,6 +36,8 @@ export type AxisValue =
       status: "known" | "unknown";
     }>;
 
+const relationalAxes = ["price", "portion", "role", "preparation"] as const;
+
 const portionLabels: Record<PortionClass, string> = {
   small: "小份",
   one_person: "一人份",
@@ -119,4 +121,33 @@ export const axisValueFor = (
   if (axis === "portion") return trustedLabel(semantics.portionClass, portionLabels);
   if (axis === "role") return trustedLabel(semantics.mealRole, roleLabels);
   return trustedLabel(semantics.preparationClass, preparationLabels);
+};
+
+const comparisonKeyFor = (
+  menu: Menu,
+  product: Product,
+  categoryProducts: ReadonlyArray<Product>,
+  axis: Exclude<MenuReadingAxis, "default">,
+): string => {
+  if (axis === "price") return `price:${product.price}`;
+  const value = axisValueFor(menu, product, categoryProducts, axis);
+  if (value.kind !== "text") return value.kind;
+  return `${value.status}:${value.label}`;
+};
+
+export const availableReadingAxesFor = (
+  menu: Menu,
+  categoryProducts: ReadonlyArray<Product>,
+): ReadonlyArray<MenuReadingAxis> => {
+  const available: MenuReadingAxis[] = ["default"];
+  if (categoryProducts.length < 3) return available;
+
+  relationalAxes.forEach((axis) => {
+    const distinctValues = new Set(
+      categoryProducts.map((product) => comparisonKeyFor(menu, product, categoryProducts, axis)),
+    );
+    if (distinctValues.size > 1) available.push(axis);
+  });
+
+  return available;
 };
