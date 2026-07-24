@@ -117,7 +117,9 @@ test("Candidates survive every Prototype C Anchor and axis transition", () => {
     "removing Candidate membership must not clear Anchor",
   );
   const clearedAnchor = updateAppReading(removedCandidate, clearAnchor(removedCandidate.reading));
-  assertCandidatesPreserved(removedCandidate, clearedAnchor, "clear Anchor");
+  assert(clearedAnchor.candidates === removedCandidate.candidates, "clearing Anchor must preserve the post-removal Candidate state");
+  assert(!isCandidate(clearedAnchor.candidates, candidateProduct.id), "clearing Anchor must not restore removed Candidate membership");
+  assert(isCandidate(clearedAnchor.candidates, otherProduct.id), "clearing Anchor must preserve the remaining Candidate");
 });
 
 test("same-category reopen preserves both Candidate membership and explicit axis", () => {
