@@ -7,38 +7,35 @@ import type {
   MetadataConfidence,
   PortionClass,
   Product,
+  ProductId,
 } from "../domain/menu-types.js";
 import {
   hasCompleteComparisonSemantics,
   resolveProductSemantics,
 } from "../domain/menu-validation.js";
 import {
-  availableReadingAxesFor,
-  axisValueFor,
-  type AxisValue,
-  type MenuReadingAxis,
-} from "./menu-relations.js";
+  anchorRelationFor,
+  type AnchorRelation,
+} from "./menu-anchor-relations.js";
 
 export type MenuExpansion =
   | Readonly<{ kind: "overview" }>
   | Readonly<{ kind: "category"; categoryId: CategoryId }>
   | Readonly<{ kind: "all" }>;
 
+export type AnchorReading =
+  | Readonly<{ kind: "idle" }>
+  | Readonly<{ kind: "selecting" }>
+  | Readonly<{ kind: "active"; productId: ProductId }>;
+
 export type MenuReadingState = Readonly<{
   activeCategoryId: CategoryId | null;
   expansion: MenuExpansion;
-  readingAxis: MenuReadingAxis;
-}>;
-
-export type ProductAxisValues = Readonly<{
-  price: AxisValue;
-  portion: AxisValue;
-  role: AxisValue;
-  preparation: AxisValue;
+  anchorReading: AnchorReading;
 }>;
 
 export type ProductNodeModel = Readonly<{
-  id: string;
+  id: ProductId;
   categoryId: CategoryId;
   name: string;
   price: string;
@@ -47,7 +44,6 @@ export type ProductNodeModel = Readonly<{
   primaryCue: string | null;
   secondaryCue: string | null;
   metadataCompleteness: "complete" | "partial";
-  axisValues: ProductAxisValues;
 }>;
 
 export type CategoryReadingModel = Readonly<{
@@ -61,8 +57,8 @@ export type CategoryReadingModel = Readonly<{
   structuralSummary: string;
   relativeCount: number;
   previewProductNames: ReadonlyArray<string>;
-  readingAxes: ReadonlyArray<MenuReadingAxis>;
   products: ReadonlyArray<ProductNodeModel>;
+  anchorRelations: Readonly<Record<ProductId, Readonly<Record<ProductId, AnchorRelation>>>>;
 }>;
 
 export type CompleteMenuModel = Readonly<{
@@ -197,7 +193,6 @@ const categoryStructuralSummary = (
 const createProductNodeModel = (
   menu: Menu,
   product: Product,
-  products: ReadonlyArray<Product>,
 ): ProductNodeModel => ({
   id: product.id,
   categoryId: product.categoryId,
@@ -207,18 +202,27 @@ const createProductNodeModel = (
   isSoldOut: product.availability === "sold_out",
   ...productCues(menu, product),
   metadataCompleteness: metadataCompleteness(menu, product),
-  axisValues: {
-    price: axisValueFor(menu, product, products, "price"),
-    portion: axisValueFor(menu, product, products, "portion"),
-    role: axisValueFor(menu, product, products, "role"),
-    preparation: axisValueFor(menu, product, products, "preparation"),
-  },
 });
+
+const createAnchorRelations = (
+  menu: Menu,
+  products: ReadonlyArray<Product>,
+): Readonly<Record<ProductId, Readonly<Record<ProductId, AnchorRelation>>>> =>
+  Object.fromEntries(
+    products.map((anchor) => [
+      anchor.id,
+      Object.fromEntries(
+        products.map((target) => [target.id, anchorRelationFor(menu, anchor, target, formatPrice)]),
+      ),
+    ]),
+  );
+
+const idleAnchor = (): AnchorReading => ({ kind: "idle" });
 
 export const createInitialMenuReadingState = (menu: Menu): MenuReadingState => ({
   activeCategoryId: menu.categories[0]?.id ?? null,
   expansion: { kind: "overview" },
-  readingAxis: "default",
+  anchorReading: idleAnchor(),
 });
 
 export const focusCategory = (
@@ -228,19 +232,19 @@ export const focusCategory = (
   ...state,
   activeCategoryId: categoryId,
   expansion: { kind: "category", categoryId },
-  readingAxis: "default",
+  anchorReading: idleAnchor(),
 });
 
 export const showMenuOverview = (state: MenuReadingState): MenuReadingState => ({
   ...state,
   expansion: { kind: "overview" },
-  readingAxis: "default",
+  anchorReading: idleAnchor(),
 });
 
 export const showAllCategories = (state: MenuReadingState): MenuReadingState => ({
   ...state,
   expansion: { kind: "all" },
-  readingAxis: "default",
+  anchorReading: idleAnchor(),
 });
 
 export const setActiveCategory = (
@@ -249,16 +253,36 @@ export const setActiveCategory = (
 ): MenuReadingState => ({
   ...state,
   activeCategoryId: categoryId,
-  readingAxis: state.expansion.kind === "category" ? state.readingAxis : "default",
+  anchorReading: state.activeCategoryId === categoryId ? state.anchorReading : idleAnchor(),
 });
 
-export const setReadingAxis = (
-  state: MenuReadingState,
-  readingAxis: MenuReadingAxis,
-): MenuReadingState =>
+export const beginAnchorSelection = (state: MenuReadingState): MenuReadingState =>
   state.expansion.kind === "category"
-    ? { ...state, readingAxis }
-    : { ...state, readingAxis: "default" };
+    ? { ...state, anchorReading: { kind: "selecting" } }
+    : { ...state, anchorReading: idleAnchor() };
+
+export const cancelAnchorSelection = (state: MenuReadingState): MenuReadingState =>
+  state.anchorReading.kind === "selecting"
+    ? { ...state, anchorReading: idleAnchor() }
+    : state;
+
+export const selectAnchor = (
+  state: MenuReadingState,
+  menu: Menu,
+  productId: ProductId,
+): MenuReadingState => {
+  if (state.expansion.kind !== "category" || state.anchorReading.kind !== "selecting") return state;
+  const product = menu.products.find((entry) => entry.id === productId);
+  if (!product || product.categoryId !== state.expansion.categoryId) return state;
+  return { ...state, anchorReading: { kind: "active", productId } };
+};
+
+export const clearAnchor = (state: MenuReadingState): MenuReadingState =>
+  state.anchorReading.kind === "idle"
+    ? state
+    : { ...state, anchorReading: idleAnchor() };
+
+export const isAnchorSelectionCancelKey = (key: string): boolean => key === "Escape";
 
 export const categoryIsExpanded = (
   state: MenuReadingState,
@@ -276,7 +300,7 @@ export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
 
   const categories = menu.categories.map((category) => {
     const products = categoryProducts(menu, category.id);
-    const productModels = products.map((product) => createProductNodeModel(menu, product, products));
+    const productModels = products.map((product) => createProductNodeModel(menu, product));
     const availableCount = products.filter((product) => product.availability === "available").length;
     return {
       id: category.id,
@@ -294,8 +318,8 @@ export const createCompleteMenuModel = (menu: Menu): CompleteMenuModel => {
         .filter((product) => !product.isSoldOut)
         .slice(0, 2)
         .map((product) => product.name),
-      readingAxes: availableReadingAxesFor(menu, products),
       products: productModels,
+      anchorRelations: createAnchorRelations(menu, products),
     } satisfies CategoryReadingModel;
   });
 
