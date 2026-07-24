@@ -27,6 +27,9 @@ if (css.includes(".category-anchor-control { position: sticky")) {
 if (css.includes(".category-anchor-axis-control { position: sticky")) {
   throw new Error("Prototype C must not create a second sticky axis surface");
 }
+if (css.includes(".candidate-summary { position: sticky")) {
+  throw new Error("CND1 must not create a second sticky Candidate surface");
+}
 
 assertIncludes(
   css,
@@ -50,8 +53,18 @@ assertIncludes(
 );
 assertIncludes(
   css,
+  ".candidate-summary { display: block; block-size: 1.5rem;",
+  "Candidate count must reserve one fixed noninteractive summary line",
+);
+assertIncludes(
+  css,
+  ".product-ledger { --relation-lane-height: 1.55rem; --candidate-lane-height: 1.55rem;",
+  "relation and Candidate lanes must establish fixed row geometry",
+);
+assertIncludes(
+  css,
   ".product-ledger__col--cue { width: 7.2rem; }",
-  "the mobile relation lane must reserve the Prototype C baseline width",
+  "the mobile relation and Candidate column must preserve the passed width",
 );
 assertIncludes(
   css,
@@ -65,13 +78,28 @@ assertIncludes(
 );
 assertIncludes(
   css,
+  ".product-row__candidate { display: flex; align-items: center; gap: 0.25rem; block-size: var(--candidate-lane-height);",
+  "each row must reserve one fixed Candidate and status lane",
+);
+assertIncludes(
+  css,
+  ".candidate-toggle { inline-size: 3.4rem; block-size: 1.35rem;",
+  "Candidate off and on labels must share fixed button dimensions",
+);
+assertIncludes(
+  css,
+  '.candidate-toggle[aria-pressed="true"] {',
+  "Candidate membership must have a visible pressed treatment",
+);
+assertIncludes(
+  css,
   ".product-row__relation-text { display: block; block-size: 100%; overflow: hidden; font-size: 0.62rem; line-height: inherit; text-overflow: ellipsis; white-space: nowrap; }",
   "active relations must remain one stable line",
 );
 assertIncludes(
   categorySource,
   '["index", "name", "cue", "price"].forEach((column) => {',
-  "Prototype C must keep the existing four-column ledger",
+  "CND1 must keep the existing four-column ledger",
 );
 assertIncludes(
   categorySource,
@@ -80,8 +108,33 @@ assertIncludes(
 );
 assertIncludes(
   categorySource,
+  "const candidateButtons = new Map<ProductId, HTMLButtonElement>();",
+  "Candidate controls must be persistent per canonical Product row",
+);
+assertIncludes(
+  categorySource,
+  'button.setAttribute("aria-pressed", "false");',
+  "Candidate controls must expose initial membership state",
+);
+assertIncludes(
+  categorySource,
+  "button.addEventListener(\"click\", () => onToggleCandidate(product.id));",
+  "Candidate membership must change only through an explicit row button",
+);
+assertIncludes(
+  categorySource,
+  'button.setAttribute("aria-pressed", String(isMarked));',
+  "Candidate toggling must update the existing button instead of replacing it",
+);
+assertIncludes(
+  categorySource,
+  "button.textContent = isMarked ? \"考慮中\" : \"考慮\";",
+  "Candidate button must use explicit reversible language",
+);
+assertIncludes(
+  categorySource,
   "revealInner.append(anchorControl.element, axisControl.element, ledger);",
-  "the fixed axis row must remain attached to the canonical ledger",
+  "Candidate marks must remain attached to the canonical ledger",
 );
 assertIncludes(
   categorySource,
@@ -100,8 +153,23 @@ assertIncludes(
 );
 assertIncludes(
   overviewSource,
-  "? `${axisLabels[state.semanticAxis]}｜${anchorName}`",
-  "the existing sticky context must lead with active axis and anchor identity",
+  'candidateSummary.setAttribute("aria-live", "polite");',
+  "CND1 must announce count changes through one bounded status region",
+);
+assertIncludes(
+  overviewSource,
+  'candidateSummary.textContent = candidateCount === 0 ? "尚無考慮項目 · 不影響點餐" : `考慮中 ${candidateCount} 道 · 尚未點餐`;',
+  "Candidate summary must state the non-order boundary",
+);
+assertIncludes(
+  overviewSource,
+  "const candidateIds = new Set(candidateState.productIds);",
+  "one Candidate membership set must drive all attached row marks",
+);
+assertIncludes(
+  overviewSource,
+  "? `${axisLabels[state.semanticAxis]}｜${anchorName}${candidateContext}`",
+  "the existing sticky context may append Candidate count without creating another surface",
 );
 assertIncludes(
   overviewSource,
@@ -112,6 +180,16 @@ assertIncludes(
   overviewSource,
   "focusProductRelation: (categoryId, productId) =>",
   "the overview must expose row-local focus restoration",
+);
+assertIncludes(
+  appSource,
+  "let state: MenuAppState = createInitialMenuAppState(menu);",
+  "Candidate state must remain separate from reading state in one app wrapper",
+);
+assertIncludes(
+  appSource,
+  "state = toggleAppCandidate(state, menu, productId);",
+  "Candidate toggling must use the bounded pure state operation",
 );
 assertIncludes(
   appSource,
@@ -143,10 +221,16 @@ assertIncludes(
   "getBoundingClientRect",
   "scrollIntoView",
   "window.scroll",
+  "candidate-list",
+  "candidate-workspace",
+  "candidate-rail",
+  "candidate-modal",
+  "candidate-sheet",
+  "candidate-footer",
 ].forEach((forbidden) => {
-  if (categorySource.includes(forbidden)) {
-    throw new Error(`Prototype C menu rows must not contain ${forbidden}`);
+  if (categorySource.includes(forbidden) || overviewSource.includes(forbidden)) {
+    throw new Error(`CND1 must not contain ${forbidden}`);
   }
 });
 
-console.log("✓ Prototype C menu workspace contract");
+console.log("✓ Prototype C + CND1 menu workspace contract");
