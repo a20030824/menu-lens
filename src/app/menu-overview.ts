@@ -66,7 +66,7 @@ export const createMenuOverview = (
   const intro = element("header", "menu-map__heading");
   const title = element("h2", "menu-map__title", "整張菜單先縮成六個區域");
   title.id = "menu-map-title";
-  const candidateSummary = element("p", "candidate-summary");
+  const candidateSummary = element("p", "candidate-summary", "尚無考慮項目 · 不影響點餐");
   candidateSummary.setAttribute("role", "status");
   candidateSummary.setAttribute("aria-live", "polite");
   candidateSummary.setAttribute("aria-atomic", "true");
@@ -109,6 +109,7 @@ export const createMenuOverview = (
 
   root.append(context, intro, stack, footer);
 
+  let renderedCandidateCount = 0;
   const render = (
     state: MenuReadingState,
     candidateState: CandidateState,
@@ -119,7 +120,10 @@ export const createMenuOverview = (
     footer.hidden = state.expansion.kind === "all";
     showAllButton.hidden = state.expansion.kind === "all";
 
-    candidateSummary.textContent = candidateCount === 0 ? "尚無考慮項目 · 不影響點餐" : `考慮中 ${candidateCount} 道 · 尚未點餐`;
+    if (renderedCandidateCount !== candidateCount) {
+      candidateSummary.textContent = candidateCount === 0 ? "尚無考慮項目 · 不影響點餐" : `考慮中 ${candidateCount} 道 · 尚未點餐`;
+      renderedCandidateCount = candidateCount;
+    }
     const candidateContext = candidateCount > 0 ? ` · 考慮中 ${candidateCount}` : "";
     const candidateIds = new Set(candidateState.productIds);
 
