@@ -122,6 +122,7 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/problem-framing.md`](docs/problem-framing.md) — why current QR ordering often feels harder to read than paper
 - [`docs/interaction-model.md`](docs/interaction-model.md) — menu map, candidate workspace, lens behavior, table state, and reversibility
 - [`docs/relational-menu-research.md`](docs/relational-menu-research.md) — failed menu-reading hypotheses, relational design space, prototype implementation, and review gates
+- [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) — Prototype B layout, implementation, projection grammar, validation, and review gate
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
@@ -136,17 +137,16 @@ The customer decision spine is active on Draft PR #4. Current evidence is:
 [passed] M1 compressed overview + shared ledger
 → [rejected] M2 modal product detail
 → [rejected, removed] C1 fixed product focus rail
-→ [current research] relational menu reading
-    [implemented, awaiting re-review] Prototype A — Axis-only score
-    → [blocked] Prototype B — Anchor-only relation
-    → [blocked] Prototype C — Combined relational score
+→ [useful but insufficient] Prototype A — Axis-only score
+→ [implemented, awaiting review] Prototype B — Anchor-only relation
+→ [blocked] Prototype C — Combined relational score
 → [blocked] Candidate / Comparison / Decision / Configuration / Current order
 ```
 
-Prototype A keeps every product row in canonical order and changes only one bounded relation lane in a single expanded category. The native reading control now offers only axes that expose actual differences among at least three products in the current category. Price remains a shared category scale; portion and preparation appear only where the reference data makes them relationally useful. Meal role is not offered in the current menu because it only restates category structure row by row.
+Prototype A established that one shared dimension can make several products simultaneously comparable, but it retained cross-axis memory work and the price scale had weak independent value.
 
-The first reverse review found two concrete failures: the price renderer changed row geometry on narrow screens, and the deployed dataset could not produce an axis-level `未提供`. The corrective iteration fixed the shared line-box geometry and added one explicit low-confidence portion example. A 390 px and 320 px headless measurement now reports zero difference in row height, row position, column width, header height, and table height across all renderer modes.
+Prototype B replaces the visible Axis-only selector with one temporary category-local comparison reference. The same canonical ledger then shows exact price difference plus at most one bounded semantic difference for each alternative. It does not sort, filter, recommend, move, hide, copy, or dim products, and it introduces no Candidate or order state.
 
-Prototype A is still not passed. Automated tests and self-review can reject broken implementation, but they cannot prove that an unfamiliar diner understands the control or experiences lower comprehension work. Prototype B and all later decision states remain blocked until that re-review is explicitly dispositioned.
+The implemented B2 layout reuses one fixed-height context row and the existing third-column relation lane. A code-derived Chromium proxy at 320 px and 390 px reports zero state-change difference in row, table, control, and scroll geometry. Typecheck, tests, and static build pass. These checks do not prove that unfamiliar diners understand the anchor or experience lower comprehension work, so Prototype B remains unpassed pending review.
 
-See [`docs/workstreams.md`](docs/workstreams.md) for the authoritative sequence and [`docs/relational-menu-research.md`](docs/relational-menu-research.md) for the implementation and review record.
+See [`docs/workstreams.md`](docs/workstreams.md), [`docs/relational-menu-research.md`](docs/relational-menu-research.md), and [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) for the sequence and evidence record.
