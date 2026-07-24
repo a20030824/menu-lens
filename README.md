@@ -121,8 +121,8 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/handoff.md`](docs/handoff.md) — required reading, opening prompt, escalation rules, and closing report
 - [`docs/problem-framing.md`](docs/problem-framing.md) — why current QR ordering often feels harder to read than paper
 - [`docs/interaction-model.md`](docs/interaction-model.md) — menu map, candidate workspace, lens behavior, table state, and reversibility
-- [`docs/relational-menu-research.md`](docs/relational-menu-research.md) — failed menu-reading hypotheses, relational design space, prototype implementation, and review gates
-- [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) — Prototype B layout, implementation, projection grammar, validation, and review gate
+- [`docs/relational-menu-research.md`](docs/relational-menu-research.md) — failed menu-reading hypotheses and relational prototype evidence
+- [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) — Prototype B implementation, task matrix, reverse review, and disposition
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
@@ -138,15 +138,15 @@ The customer decision spine is active on Draft PR #4. Current evidence is:
 → [rejected] M2 modal product detail
 → [rejected, removed] C1 fixed product focus rail
 → [useful but insufficient] Prototype A — Axis-only score
-→ [implemented, awaiting review] Prototype B — Anchor-only relation
+→ [useful but insufficient] Prototype B — Anchor-only relation
 → [blocked] Prototype C — Combined relational score
 → [blocked] Candidate / Comparison / Decision / Configuration / Current order
 ```
 
-Prototype A established that one shared dimension can make several products simultaneously comparable, but it retained cross-axis memory work and the price scale had weak independent value.
+Prototype A proved that one shared dimension can make several products simultaneously comparable, but it retained cross-axis memory work and its price scale had weak independent value.
 
-Prototype B replaces the visible Axis-only selector with one temporary category-local comparison reference. The same canonical ledger then shows exact price difference plus at most one bounded semantic difference for each alternative. It does not sort, filter, recommend, move, hide, copy, or dim products, and it introduces no Candidate or order state.
+Prototype B proved that exact anchor-relative price deltas remove mental subtraction while preserving canonical order, stable geometry, explicit uncertainty, and complete-menu credibility. However, the automatically selected semantic token varies by row and silently suppresses other trusted differences. In the formal shared-dish fixture, several dishes are faster than the slow anchor, but only the soft-shell crab displays `較快`; the surface can therefore imply false exclusivity.
 
-The implemented B2 layout reuses one fixed-height context row and the existing third-column relation lane. A code-derived Chromium proxy at 320 px and 390 px reports zero state-change difference in row, table, control, and scroll geometry. Typecheck, tests, and static build pass. These checks do not prove that unfamiliar diners understand the anchor or experience lower comprehension work, so Prototype B remains unpassed pending review.
+Prototype B is retained as useful research evidence rather than treated as a passed feature. The designer reverse review does not replace unfamiliar-participant evidence. Prototype C and all later decision and transaction states remain blocked.
 
 See [`docs/workstreams.md`](docs/workstreams.md), [`docs/relational-menu-research.md`](docs/relational-menu-research.md), and [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) for the sequence and evidence record.
