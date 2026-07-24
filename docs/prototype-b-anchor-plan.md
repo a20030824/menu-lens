@@ -10,7 +10,7 @@ Current sequence:
 [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
 → [passed for current scope] Prototype C — Anchor + explicit shared axis
-→ [implemented, awaiting product-owner review] CND1 — Attached Candidate marks
+→ [passed for current scope] CND1 — Attached Candidate marks
 ```
 
 Prototype B remains historical evidence. Its automatic semantic-token rendering is not active.
@@ -112,7 +112,7 @@ Maximum visible output:
 price token + at most one semantic token
 ```
 
-The final deterministic rule attempted to:
+The deterministic rule attempted to:
 
 1. preserve explicit portion unknown;
 2. compare formal ordinal distance for trusted portion and preparation;
@@ -120,7 +120,7 @@ The final deterministic rule attempted to:
 4. prefer portion when distances tied;
 5. show price only when semantic dimensions were equal.
 
-The rule remained factual but could not make omitted differences visible.
+The rule remained individually factual but could not make omitted differences visible.
 
 ## Useful evidence
 
@@ -188,7 +188,7 @@ Visible B output selected:
 
 The crab correctly exposed the strongest preparation difference, but four other true faster relationships were hidden.
 
-An unfamiliar diner could reasonably read the crab as the only faster Product.
+A diner could reasonably read the crab as the only faster Product.
 
 This triggered the predefined failure:
 
@@ -219,17 +219,7 @@ reliable reduction of semantic reconstruction   INSUFFICIENT
 
 ## Geometry evidence
 
-A code-derived Chromium proxy at 320 px and 390 px reported zero state-change differences for:
-
-```text
-row height
-row top
-column width
-header height
-table height
-control height
-scroll position
-```
+A code-derived Chromium proxy at 320px and 390px reported zero state-change differences for row height, row top, column width, header height, table height, control height, and scroll position.
 
 This was implementation evidence, not participant evidence.
 
@@ -241,12 +231,19 @@ This was implementation evidence, not participant evidence.
 
 B's useful price and Anchor evidence was retained in Prototype C.
 
-C replaced automatic row-level token selection with one explicit category-wide axis and has since passed for the current scope.
+Prototype C replaced automatic row-level token selection with one explicit category-wide axis and passed for the current scope.
 
-Candidate remains independent from Anchor. CND1 does not automatically convert an Anchor into a Candidate.
+Candidate remains independent from Anchor. CND1 attaches Candidate membership to canonical rows without automatically converting an Anchor into a Candidate and has also passed for the current scope.
 
-Current Candidate implementation record:
+Current accepted records:
 
 ```text
+docs/prototype-c-anchor-axis-plan.md
 docs/candidate-marks-plan.md
 ```
+
+## Contract impact
+
+None.
+
+Prototype B was an isolated experiment and did not alter the product invariants in `docs/product-contract.md`.
