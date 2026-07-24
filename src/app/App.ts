@@ -40,6 +40,12 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
 
   const render = (): void => overview.render(state);
 
+  const focusedProductId = (): ProductId | null => {
+    const focused = document.activeElement;
+    if (!(focused instanceof Element)) return null;
+    return focused.closest<HTMLElement>("[data-product-id]")?.dataset.productId ?? null;
+  };
+
   const selectCategory = (categoryId: CategoryId): void => {
     const isSameFocusedCategory =
       state.expansion.kind === "category" && state.expansion.categoryId === categoryId;
@@ -54,11 +60,13 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     render();
   };
 
-  const cancelAnchor = (): void => {
+  const cancelAnchor = (returnFocusProductId: ProductId | null = null): void => {
     const categoryId = state.expansion.kind === "category" ? state.expansion.categoryId : null;
     state = cancelAnchorSelection(state);
     render();
-    if (categoryId) overview.focusAnchorControl(categoryId);
+    if (!categoryId) return;
+    if (returnFocusProductId) overview.focusProductRelation(categoryId, returnFocusProductId);
+    else overview.focusAnchorControl(categoryId);
   };
 
   const chooseAnchor = (productId: ProductId): void => {
@@ -145,7 +153,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   document.addEventListener("keydown", (event) => {
     if (state.anchorReading.kind !== "selecting" || !isAnchorSelectionCancelKey(event.key)) return;
     event.preventDefault();
-    cancelAnchor();
+    cancelAnchor(focusedProductId());
   });
 
   let scrollFrame: number | null = null;
