@@ -15,10 +15,13 @@ const assertIncludes = (source, fragment, message) => {
 };
 
 if (css.includes("vertical-align: baseline")) {
-  throw new Error("product ledger cells must not use baseline alignment across relation renderers");
+  throw new Error("product ledger cells must not use baseline alignment across renderers");
 }
 if (css.includes(".category-anchor-control { position: sticky")) {
-  throw new Error("Prototype B must not create a second sticky comparison rail");
+  throw new Error("Prototype C must not create a sticky anchor rail");
+}
+if (css.includes(".category-anchor-axis-control { position: sticky")) {
+  throw new Error("Prototype C must not create a second sticky axis surface");
 }
 
 assertIncludes(
@@ -29,12 +32,22 @@ assertIncludes(
 assertIncludes(
   css,
   ".category-anchor-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.45rem; min-height: 2.6rem; block-size: 2.6rem;",
-  "idle, selecting, and active anchor controls must share one fixed block size",
+  "all anchor states must share one fixed control height",
 );
 assertIncludes(
   css,
-  ".category-anchor-control__label { min-width: 0; margin: 0; overflow: hidden;",
-  "anchor names must truncate instead of wrapping the control row",
+  ".category-anchor-axis-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.45rem; min-height: 2.4rem; block-size: 2.4rem;",
+  "idle, selecting, active, and switched-axis states must reserve one fixed axis row",
+);
+assertIncludes(
+  css,
+  ".category-anchor-axis-control__group { display: flex; flex-wrap: nowrap;",
+  "semantic-axis buttons must not wrap",
+);
+assertIncludes(
+  css,
+  ".product-ledger__col--cue { width: 7.2rem; }",
+  "the mobile relation lane must reserve the Prototype C baseline width",
 );
 assertIncludes(
   css,
@@ -44,50 +57,52 @@ assertIncludes(
 assertIncludes(
   css,
   ".product-row__relation { display: block; block-size: var(--relation-lane-height); line-height: var(--relation-lane-height); overflow: hidden; }",
-  "the relation lane must reserve one fixed line box in every anchor state",
+  "the relation lane must reserve one fixed line box",
 );
 assertIncludes(
   css,
-  ".anchor-select-button { display: block; width: 100%; block-size: 100%;",
-  "the explicit anchor action must fit inside the existing relation lane",
-);
-assertIncludes(
-  css,
-  ".product-row__relation-text { display: block; block-size: 100%; line-height: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }",
-  "relative evidence must truncate instead of increasing row height",
-);
-assertIncludes(
-  css,
-  ".product-ledger__heading { padding: 0.38rem 0.25rem 0.34rem; border-bottom: 1px solid var(--line-strong); color: var(--ink-soft); font-size: 0.55rem; font-weight: 850; letter-spacing: 0.06em; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }",
-  "relation headings must remain a single stable table-header line",
+  ".product-row__relation-text { display: block; block-size: 100%; overflow: hidden; font-size: 0.62rem; line-height: inherit; text-overflow: ellipsis; white-space: nowrap; }",
+  "active relations must remain one stable line",
 );
 assertIncludes(
   categorySource,
   '["index", "name", "cue", "price"].forEach((column) => {',
-  "Prototype B must keep the existing four-column ledger",
+  "Prototype C must keep the existing four-column ledger",
+);
+assertIncludes(
+  categorySource,
+  "category.anchorAxisRelations[anchorReading.productId]?.[semanticAxis]?.[product.id]",
+  "every active row must project from one explicit shared semantic axis",
+);
+assertIncludes(
+  categorySource,
+  "revealInner.append(anchorControl.element, axisControl.element, ledger);",
+  "the fixed axis row must remain attached to the canonical ledger",
 );
 assertIncludes(
   overviewSource,
-  "? `基準：${anchorName}　${activeCategory?.name ?? \"分類聚焦\"}`",
-  "the existing sticky menu context must lead with the anchor name before narrow-screen truncation",
+  "? `${axisLabels[state.semanticAxis]}｜${anchorName}`",
+  "the existing sticky context must lead with active axis and anchor identity",
 );
 assertIncludes(
   overviewSource,
   'contextLabel.title = contextLabel.textContent ?? "";',
-  "truncated sticky anchor context must retain its full text",
+  "truncated sticky context must retain its full text",
 );
 
 [
   "category-reading-control",
-  "onSelectAxis",
+  "menu-anchor-relations",
+  "anchorRelations",
+  ".tokens",
   "row.addEventListener(\"click\"",
   "getBoundingClientRect",
   "scrollIntoView",
   "window.scroll",
 ].forEach((forbidden) => {
   if (categorySource.includes(forbidden)) {
-    throw new Error(`Prototype B menu rows must not contain ${forbidden}`);
+    throw new Error(`Prototype C menu rows must not contain ${forbidden}`);
   }
 });
 
-console.log("✓ Prototype B menu workspace contract");
+console.log("✓ Prototype C menu workspace contract");
