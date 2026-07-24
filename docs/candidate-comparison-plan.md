@@ -142,23 +142,25 @@ The Candidate workspace exposes comparison only when at least two canonical Cand
 Opening behavior:
 
 1. fewer than two Candidates → no surface transition;
-2. sanitize any previous comparison selection against current Candidates;
-3. if the sanitized selection is empty and exactly two or three Candidates exist, select all of them in canonical order;
-4. if more than three Candidates exist and no valid prior selection exists, begin with no selected Products;
-5. preserve an existing valid one-, two-, or three-Product selection;
-6. preserve the complete menu reading state, Candidate state, active Anchor, and semantic axis.
+2. sanitize the current comparison selection against current Candidates;
+3. preserve the sanitized selection, including an intentionally empty selection;
+4. preserve the complete menu reading state, Candidate state, active Anchor, and semantic axis;
+5. never select a Product solely because comparison was opened.
 
-This rule avoids arbitrary ranking:
+The first opening therefore begins with no selected Products.
 
 ```text
-2–3 Candidates
-→ all fit the comparison bound
-→ compare all
+2 Candidates
+→ user explicitly selects 2
+
+3 Candidates
+→ user explicitly selects 2 or 3
 
 4+ Candidates
-→ no arbitrary first-three projection
-→ user explicitly selects 2–3
+→ user explicitly selects any 2 or 3
 ```
+
+This keeps comparison selection observable and avoids needing a hidden `initialized` flag to distinguish first open from an intentionally cleared selection.
 
 CMP1 must not require removing Candidates merely to compare a subset.
 
@@ -253,7 +255,7 @@ It restores:
 - exact captured `window.scrollY`;
 - the prior Candidate-workspace focus origin when still available;
 - Candidate membership;
-- comparison selection;
+- comparison selection, including an empty or one-item selection;
 - the still-preserved menu reading state and Candidate-to-menu return context.
 
 Comparison opening and Back use explicit `behavior: "instant"`. They do not inherit global smooth scrolling.
@@ -552,7 +554,7 @@ The following transitions must be formally tested:
 
 ```text
 Candidate added
-→ comparison selection unchanged unless first-open initialization applies
+→ comparison selection unchanged
 
 Candidate removed
 → same Product removed from comparison selection
@@ -689,10 +691,10 @@ The exact file list may become smaller during implementation. It must not expand
 ### Opening and surface state
 
 - open is a no-op with fewer than two Candidates;
-- first open selects all when exactly two Candidates exist;
-- first open selects all when exactly three Candidates exist;
-- first open selects none when more than three Candidates exist;
-- valid prior selection survives reopen;
+- first open remains explicitly empty with two Candidates;
+- first open remains explicitly empty with three Candidates;
+- first open remains explicitly empty with more than three Candidates;
+- valid prior empty, one-, two-, or three-item selection survives reopen;
 - open preserves reading and Candidate references;
 - close returns to Candidate surface;
 - close preserves comparison selection;
@@ -746,20 +748,21 @@ The exact file list may become smaller during implementation. It must not expand
 
 Before any disposition, perform at least these bounded reviews:
 
-1. compare exactly two Candidates from the same category;
+1. open comparison with exactly two Candidates and explicitly select both;
 2. compare exactly three Candidates from different categories;
 3. open comparison with four or more Candidates and explicitly choose a subset;
 4. attempt to select a fourth Product;
-5. compare equal-price Products;
-6. compare Products with different portion classes;
-7. compare one missing and one known semantic value;
-8. compare one low-confidence and one high-confidence value;
-9. compare Products that differ in required customization;
-10. include a sold-out existing Candidate;
-11. deselect from three to one without leaving the surface;
-12. return to Candidate workspace and then to the exact previous menu context;
-13. repeat by keyboard at 320px and 390px;
-14. inspect whether any control appears to mean order selection or winner selection.
+5. clear all comparison selection, leave, reopen, and confirm it stays empty;
+6. compare equal-price Products;
+7. compare Products with different portion classes;
+8. compare one missing and one known semantic value;
+9. compare one low-confidence and one high-confidence value;
+10. compare Products that differ in required customization;
+11. include a sold-out existing Candidate;
+12. deselect from three to one without leaving the surface;
+13. return to Candidate workspace and then to the exact previous menu context;
+14. repeat by keyboard at 320px and 390px;
+15. inspect whether any control appears to mean order selection or winner selection.
 
 Designer review may establish broken flows, geometry problems, unclear hierarchy, or state collisions.
 
@@ -768,6 +771,7 @@ It is not unfamiliar-participant evidence.
 ## Pass signals
 
 - comparison contains only current Candidates;
+- the user explicitly selects every compared Product;
 - two or three Products are compared without arbitrary ranking;
 - more than three Candidates can coexist without destructive removal;
 - comparison selection is visibly distinct from Candidate membership;
@@ -777,6 +781,7 @@ It is not unfamiliar-participant evidence.
 - comparison does not name a best Product;
 - comparison does not create Decision or transaction state;
 - Candidate workspace and menu context survive the round trip;
+- empty and partial selections survive reopen without hidden initialization;
 - selection and Back focus are deterministic;
 - 320px and 390px do not require horizontal scrolling;
 - Typecheck, tests, contracts, and static build pass.
@@ -784,9 +789,11 @@ It is not unfamiliar-participant evidence.
 ## Failure signals
 
 - comparison selection is interpreted structurally as order selection;
+- opening comparison silently preselects Products;
+- an intentionally empty selection is repopulated on reopen;
 - Candidate membership changes when a Product is selected for comparison;
 - a fourth selection silently replaces another Product;
-- the system automatically compares the first or cheapest three out of a larger Candidate set;
+- the system automatically compares the first, cheapest, or otherwise preferred three;
 - users must remove Candidates to compare a subset;
 - comparison becomes an exhaustive specification table;
 - missing data appears as a negative Product property;
