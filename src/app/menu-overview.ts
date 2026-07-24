@@ -34,6 +34,9 @@ export type MenuOverviewView = Readonly<{
   sectionFor: (categoryId: CategoryId) => HTMLElement | null;
   focusAnchorControl: (categoryId: CategoryId) => void;
   focusProductRelation: (categoryId: CategoryId, productId: ProductId) => void;
+  focusProductCandidate: (categoryId: CategoryId, productId: ProductId) => void;
+  productRowFor: (categoryId: CategoryId, productId: ProductId) => HTMLTableRowElement | null;
+  focusCandidateEntry: () => void;
 }>;
 
 export const createMenuOverview = (
@@ -45,6 +48,7 @@ export const createMenuOverview = (
   onClearAnchor: () => void,
   onSelectAxis: (axis: SemanticAxis) => void,
   onToggleCandidate: (productId: ProductId) => void,
+  onOpenCandidates: () => void,
   onShowOverview: () => void,
   onShowAll: () => void,
 ): MenuOverviewView => {
@@ -70,6 +74,14 @@ export const createMenuOverview = (
   candidateSummary.setAttribute("role", "status");
   candidateSummary.setAttribute("aria-live", "polite");
   candidateSummary.setAttribute("aria-atomic", "true");
+  const candidateSummaryAction = element("button", "candidate-summary__action", "查看考慮項目") as HTMLButtonElement;
+  candidateSummaryAction.type = "button";
+  candidateSummaryAction.disabled = true;
+  candidateSummaryAction.dataset.empty = "true";
+  candidateSummaryAction.setAttribute("aria-label", "尚無考慮項目");
+  candidateSummaryAction.addEventListener("click", onOpenCandidates);
+  const candidateSummaryRow = element("div", "candidate-summary-row");
+  candidateSummaryRow.append(candidateSummary, candidateSummaryAction);
   intro.append(
     element("p", "eyebrow", "菜單全貌"),
     title,
@@ -78,7 +90,7 @@ export const createMenuOverview = (
       "menu-map__hint",
       "先看每區的份量、價位與代表菜名；點一區會在原位置展開，其他區域仍留在整張菜單裡。",
     ),
-    candidateSummary,
+    candidateSummaryRow,
   );
 
   const stack = element("div", "category-stack");
@@ -124,6 +136,10 @@ export const createMenuOverview = (
       candidateSummary.textContent = candidateCount === 0 ? "尚無考慮項目 · 不影響點餐" : `考慮中 ${candidateCount} 道 · 尚未點餐`;
       renderedCandidateCount = candidateCount;
     }
+    candidateSummaryAction.dataset.empty = String(candidateCount === 0);
+    candidateSummaryAction.disabled = candidateCount === 0;
+    candidateSummaryAction.setAttribute("aria-label", candidateCount === 0 ? "尚無考慮項目" : `查看 ${candidateCount} 道考慮項目`);
+
     const candidateContext = candidateCount > 0 ? ` · 考慮中 ${candidateCount}` : "";
     const candidateIds = new Set(candidateState.productIds);
 
@@ -182,5 +198,10 @@ export const createMenuOverview = (
       sections.find((section) => section.categoryId === categoryId)?.focusAnchorControl(),
     focusProductRelation: (categoryId, productId) =>
       sections.find((section) => section.categoryId === categoryId)?.focusProductRelation(productId),
+    focusProductCandidate: (categoryId, productId) =>
+      sections.find((section) => section.categoryId === categoryId)?.focusProductCandidate(productId),
+    productRowFor: (categoryId, productId) =>
+      sections.find((section) => section.categoryId === categoryId)?.productRowFor(productId) ?? null,
+    focusCandidateEntry: () => candidateSummaryAction.focus({ preventScroll: true }),
   };
 };
