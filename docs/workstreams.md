@@ -34,7 +34,8 @@ It prevents parallel conversations from redefining the product, retaining failed
         → [useful but insufficient] Prototype B — Anchor-only relation
         → [passed for current scope] Prototype C — Anchor + explicit shared axis
     → [passed for current scope] CND1 — Attached Candidate marks
-    → [blocked] Candidate workspace / bounded comparison
+    → [active, plan-review-gated] CND2 — Candidate review workspace
+    → [blocked] Candidate comparison
     → [blocked] Decision / Configuration / Current order
 → [deferred] continuity and table state
 → [deferred] thin alternative lenses
@@ -51,7 +52,8 @@ It prevents parallel conversations from redefining the product, retaining failed
 | Formative evaluation | Complete | tasks, observations, events, falsification signals | observation contract |
 | Relational menu research | Passed for current scope | stable ledger and A/B/C evidence | accepted C reading substrate |
 | CND1 Attached Candidate marks | Passed for current scope | row-attached reversible Candidate membership only | accepted consideration state |
-| Candidate workspace / bounded comparison | Blocked | second-stage decision support | separate bounded plan required |
+| CND2 Candidate review workspace | Active, plan-review-gated | derived Candidate retrieval, revisit, removal, and exact menu return | approved workspace contract |
+| Candidate comparison | Blocked | bounded decision-relevant comparison generated from Candidates | explicit CND2 disposition first |
 | Decision / Configuration / Current order | Blocked | transaction-boundary states | Candidate and comparison coherence first |
 | Continuity and table state | Deferred | submitted rounds and coarse composition | stable decision spine first |
 | Alternative lenses | Deferred | quick, shared-table, featured | stable decision spine first |
@@ -69,6 +71,12 @@ Read before new work:
 4. `docs/workstreams.md`
 5. the active slice document
 
+Active slice:
+
+```text
+docs/candidate-workspace-plan.md
+```
+
 Accepted substrate records:
 
 ```text
@@ -77,8 +85,6 @@ docs/prototype-b-anchor-plan.md
 docs/prototype-c-anchor-axis-plan.md
 docs/candidate-marks-plan.md
 ```
-
-No next slice is active yet.
 
 ## Passed substrate — M1 shared ledger
 
@@ -89,7 +95,7 @@ M1 established one stable table surface per category:
 - canonical order and one continuous reading order remain stable;
 - Products do not receive separate card identities.
 
-This remains the coordinate plane for C and Candidate marks.
+This remains the coordinate plane for Prototype C and CND1 Candidate marks.
 
 ## Relational prototype dispositions
 
@@ -107,7 +113,7 @@ Useful:
 
 Insufficient:
 
-- price duplicated the visible numeric column;
+- price duplicated the visible numeric price column;
 - only one dimension remained visible;
 - axis switching retained memory work.
 
@@ -216,14 +222,94 @@ Known limitations:
 - `考慮` terminology has no unfamiliar-participant validation;
 - state lasts only for the active session.
 
-These limitations do not block the current-scope disposition.
+The first two limitations motivate CND2. The latter two remain accepted current-scope limitations.
+
+## Active workstream — CND2 Candidate review workspace
+
+### Question
+
+> Can a diner retrieve, review, revisit, and dismiss Candidates collected across the canonical menu without losing the previous menu position or mistaking the workspace for an order?
+
+### Why this precedes comparison
+
+Comparison is generated from Candidates, but CND1 exposes only attached row marks and a global count. A bounded Candidate collection view must first establish:
+
+- which Products are currently Candidates;
+- which canonical categories they belong to;
+- how to remove one without affecting reading or order state;
+- how to return to the exact previous menu context;
+- how to navigate back to one Candidate's canonical row.
+
+Comparison would otherwise combine an unproven Candidate collection surface with a second new interaction problem.
+
+### Authorized derived view
+
+```text
+canonical Products
++ Candidate ProductId membership
+→ derived Candidate review workspace
+```
+
+CND2 may derive canonical Product references and group them by canonical category order. It may not store copied Product objects, insertion order, ranking, selection, comparison state, quantity, configuration, totals, or order state.
+
+### Entry and return
+
+The menu heading may add one explicit `查看考慮項目` action when count is greater than zero.
+
+Opening the workspace must preserve:
+
+- complete `MenuReadingState`;
+- Candidate membership;
+- previous scroll position;
+- previous focus origin.
+
+Ordinary `回到完整菜單` restores those values exactly.
+
+A separate row action, `在菜單中查看`, may intentionally focus the Candidate's canonical category and row using existing menu-reading transitions.
+
+### Workspace content
+
+The workspace is a compact derived document, not a modal, rail, sheet, overlay, fixed footer, cart, or comparison matrix.
+
+Allowed row evidence:
+
+- canonical category name;
+- Product name;
+- current price;
+- ordinary cues;
+- sold-out and incomplete-data labels;
+- `在菜單中查看`;
+- `移出考慮`.
+
+Not allowed:
+
+- Prototype C Anchor-relative projections;
+- workspace semantic-axis controls;
+- side-by-side comparison fields;
+- score, rank, match, winner, quantity, modifiers, total, checkout, or order language.
+
+### Removal and empty state
+
+`移出考慮` removes only Candidate membership. It leaves reading state, Anchor, semantic axis, Product data, and all order states unchanged.
+
+Removing the final Candidate leaves an in-place empty workspace with an explicit return action. The workspace does not auto-close and CND2 does not add `clear all`.
+
+### Plan and gate
+
+Full plan:
+
+```text
+docs/candidate-workspace-plan.md
+```
+
+Before implementation, the plan must be accepted. Implementation must then begin with failing tests for canonical derivation, stale and duplicate handling, surface continuity, exact scroll/focus return, Product locator behavior, removal focus recovery, narrow-screen fit, and absence of comparison or transaction state.
 
 ## Blocked later work
 
-Until a separate bounded plan is approved, do not begin:
+Until CND2 receives an explicit implementation disposition, do not begin:
 
-- Candidate workspace or copied Candidate list;
 - Candidate comparison;
+- comparison selection or matrix;
 - explicit Decision;
 - Configuration;
 - Current order;
@@ -249,4 +335,4 @@ Until a separate bounded plan is approved, do not begin:
 
 None.
 
-Prototype C and CND1 implement existing product invariants without changing `docs/product-contract.md`.
+Prototype C, CND1, and the CND2 plan refine existing product invariants without changing `docs/product-contract.md`.
