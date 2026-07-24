@@ -123,7 +123,7 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/interaction-model.md`](docs/interaction-model.md) — menu map, candidate workspace, lens behavior, table state, and reversibility
 - [`docs/relational-menu-research.md`](docs/relational-menu-research.md) — failed menu-reading hypotheses and relational prototype evidence
 - [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) — Prototype B implementation, task matrix, reverse review, and disposition
-- [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) — Prototype C hypothesis, layout, truthfulness invariants, mobile gate, and test-first contract
+- [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) — Prototype C implementation, formal evidence, mobile proxy, and review gate
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
@@ -140,16 +140,18 @@ The customer decision spine is active on Draft PR #4. Current evidence is:
 → [rejected, removed] C1 fixed product focus rail
 → [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
-→ [planned, implementation not started] Prototype C — Anchor + explicit shared axis
+→ [implemented, awaiting review] Prototype C — Anchor + explicit shared axis
 → [blocked] Candidate / Comparison / Decision / Configuration / Current order
 ```
 
 Prototype A proved that one shared dimension can make several products simultaneously comparable, but it retained cross-axis memory work and its price scale had weak independent value.
 
-Prototype B proved that exact anchor-relative price deltas remove mental subtraction while preserving canonical order, stable geometry, explicit uncertainty, and complete-menu credibility. However, the automatically selected semantic token varies by row and silently suppresses other trusted differences. In the formal shared-dish fixture, several dishes are faster than the slow anchor, but only the soft-shell crab displays `較快`; the surface can therefore imply false exclusivity.
+Prototype B proved that exact anchor-relative price deltas remove mental subtraction while preserving canonical order, stable geometry, explicit uncertainty, and complete-menu credibility. However, the automatically selected semantic token varied by row and silently suppressed other trusted differences. In the formal shared-dish fixture, several dishes were faster than the slow anchor, but only the soft-shell crab displayed `較快`; the surface could therefore imply false exclusivity.
 
-Prototype C is now planned as a separately testable correction. It preserves one anchor and exact price deltas, but removes row-level automatic dimension selection. Every row will display the same explicit category-wide semantic axis—`份量` or `準備`—using a trusted absolute value or `未提供`. The other axis remains visibly discoverable in the control rather than silently omitted.
+Prototype C is now implemented as a separately testable correction. It preserves one anchor and exact price deltas, removes row-level automatic dimension selection, and gives the category one explicit shared semantic axis. Every row displays the same `份量` or `準備` question using a trusted absolute value or `未提供`. Switching the axis updates all rows together, changing the anchor preserves the axis, and reopening the same category preserves the explicit axis preference.
 
-No Prototype C application code has been added. Candidate and every later decision or transaction state remain blocked until the plan is reviewed and explicitly authorized.
+Automated tests and a code-derived Chromium proxy show that C satisfies its formal truthfulness, state, structure, and narrow-screen geometry contracts. This does not prove unfamiliar-user comprehension, discoverability, or reduced memory work, so C remains awaiting review.
+
+Candidate and every later decision or transaction state remain blocked until Prototype C receives an explicit disposition.
 
 See [`docs/workstreams.md`](docs/workstreams.md), [`docs/relational-menu-research.md`](docs/relational-menu-research.md), [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md), and [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) for the sequence and evidence record.
