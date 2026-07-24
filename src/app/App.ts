@@ -1,4 +1,5 @@
 import type { CategoryId, Menu, ProductId } from "../domain/menu-types.js";
+import type { SemanticAxis } from "../customer/menu-anchor-axis.js";
 import {
   beginAnchorSelection,
   cancelAnchorSelection,
@@ -10,6 +11,7 @@ import {
   isAnchorSelectionCancelKey,
   selectAnchor,
   setActiveCategory,
+  setSemanticAxis,
   showAllCategories,
   showMenuOverview,
   type MenuReadingState,
@@ -41,7 +43,9 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   const selectCategory = (categoryId: CategoryId): void => {
     const isSameFocusedCategory =
       state.expansion.kind === "category" && state.expansion.categoryId === categoryId;
-    state = isSameFocusedCategory ? showMenuOverview(state) : focusCategory(state, categoryId);
+    state = isSameFocusedCategory
+      ? showMenuOverview(state)
+      : focusCategory(state, menu, categoryId);
     render();
   };
 
@@ -73,6 +77,11 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     if (categoryId) overview.focusAnchorControl(categoryId);
   };
 
+  const chooseSemanticAxis = (axis: SemanticAxis): void => {
+    state = setSemanticAxis(state, menu, axis);
+    render();
+  };
+
   const showOverviewFromContext = (): void => {
     state = showMenuOverview(state);
     render();
@@ -94,6 +103,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     cancelAnchor,
     chooseAnchor,
     clearCurrentAnchor,
+    chooseSemanticAxis,
     showOverviewFromContext,
     showAll,
   );
@@ -151,7 +161,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
       }
     });
     if (activeCategoryId && activeCategoryId !== state.activeCategoryId) {
-      state = setActiveCategory(state, activeCategoryId);
+      state = setActiveCategory(state, menu, activeCategoryId);
       render();
     }
   };
