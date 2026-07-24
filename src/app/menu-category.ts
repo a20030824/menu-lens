@@ -234,7 +234,7 @@ export const createMenuCategorySection = (
       const button = element("button", "candidate-toggle", "考慮") as HTMLButtonElement;
       button.type = "button";
       button.setAttribute("aria-pressed", "false");
-      button.setAttribute("aria-label", `將「${product.name}」列入考慮`);
+      button.setAttribute("aria-label", `考慮「${product.name}」`);
       button.addEventListener("click", () => onToggleCandidate(product.id));
       candidate.append(button);
       candidateButtons.set(product.id, button);
@@ -277,16 +277,8 @@ export const createMenuCategorySection = (
     else reveal.setAttribute("inert", "");
 
     candidateButtons.forEach((button, productId) => {
-      const product = category.products.find((entry) => entry.id === productId);
       const isMarked = candidateProductIds.has(productId);
       button.setAttribute("aria-pressed", String(isMarked));
-      button.textContent = isMarked ? "考慮中" : "考慮";
-      button.setAttribute(
-        "aria-label",
-        isMarked
-          ? `將「${product?.name ?? productId}」移出考慮`
-          : `將「${product?.name ?? productId}」列入考慮`,
-      );
       rows.get(productId)?.setAttribute("data-candidate", String(isMarked));
     });
 
