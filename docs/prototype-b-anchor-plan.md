@@ -10,7 +10,7 @@ Current sequence:
 [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
 → [passed for current scope] Prototype C — Anchor + explicit shared axis
-→ [planned] CND1 — Attached Candidate marks
+→ [implemented, awaiting review] CND1 — Attached Candidate marks
 ```
 
 Prototype B remains historical evidence. Its automatic semantic-token rendering is not active.
@@ -243,9 +243,9 @@ B's useful price and Anchor evidence was retained in Prototype C.
 
 C replaced automatic row-level token selection with one explicit category-wide axis and has since passed for the current scope.
 
-Candidate remains independent from Anchor. CND1 must not automatically convert an Anchor into a Candidate.
+Candidate remains independent from Anchor. CND1 does not automatically convert an Anchor into a Candidate.
 
-Current Candidate plan:
+Current Candidate implementation record:
 
 ```text
 docs/candidate-marks-plan.md
