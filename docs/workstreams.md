@@ -13,7 +13,7 @@ It prevents parallel conversations from redefining the product, retaining failed
 - Failed or insufficient experiments remain isolated as evidence instead of accumulating in the active path.
 - Conventional-interface comparison remains parked.
 - Prefer fewer moving parts, dependencies, and abstractions while the product model is still being tested.
-- Do not merge Product, Candidate, DraftOrderItem, ConfiguredOrderItem, or SubmittedOrderRound state.
+- Do not merge Product, Candidate, comparison selection, DraftOrderItem, ConfiguredOrderItem, or SubmittedOrderRound state.
 - Passing one slice does not automatically authorize the next surface.
 
 ## Current sequence
@@ -35,7 +35,7 @@ It prevents parallel conversations from redefining the product, retaining failed
         → [passed for current scope] Prototype C — Anchor + explicit shared axis
     → [passed for current scope] CND1 — Attached Candidate marks
     → [passed for current scope] CND2 — Candidate review workspace
-    → [blocked] Candidate comparison
+    → [planned, implementation not started] CMP1 — Bounded Candidate comparison
     → [blocked] Decision / Configuration / Current order
 → [deferred] continuity and table state
 → [deferred] thin alternative lenses
@@ -53,8 +53,8 @@ It prevents parallel conversations from redefining the product, retaining failed
 | Relational menu research | Passed for current scope | stable ledger and A/B/C evidence | accepted C reading substrate |
 | CND1 Attached Candidate marks | Passed for current scope | row-attached reversible Candidate membership only | accepted consideration state |
 | CND2 Candidate review workspace | Passed for current scope | derived retrieval, revisit, removal, exact menu return | accepted Candidate collection surface |
-| Candidate comparison | Blocked | bounded decision-relevant comparison generated from Candidates | separate bounded plan required |
-| Decision / Configuration / Current order | Blocked | transaction-boundary states | Candidate and comparison coherence first |
+| CMP1 Bounded Candidate comparison | Planned, implementation not started | explicit 2–3 Candidate selection and difference-only evidence | reviewed plan required before code |
+| Decision / Configuration / Current order | Blocked | transaction-boundary states | accepted comparison first |
 | Continuity and table state | Deferred | submitted rounds and coarse composition | stable decision spine first |
 | Alternative lenses | Deferred | quick, shared-table, featured | stable decision spine first |
 | Merchant authoring | Deferred | defaults, exceptions, confidence preview | proven semantic value first |
@@ -63,13 +63,23 @@ It prevents parallel conversations from redefining the product, retaining failed
 
 ## Authoritative entry points
 
-Read before new work:
+Read before CMP1 work:
 
 1. `README.md`
 2. `docs/product-contract.md`
 3. `docs/glossary.md`
 4. `docs/workstreams.md`
-5. the document for the next explicitly approved slice
+5. `docs/candidate-workspace-plan.md`
+6. `docs/candidate-comparison-plan.md`
+7. `docs/interaction-model.md`
+8. `docs/demo-scope.md`
+9. `docs/evaluation-plan.md`
+
+Active planning record:
+
+```text
+docs/candidate-comparison-plan.md
+```
 
 Accepted substrate records:
 
@@ -80,8 +90,6 @@ docs/prototype-c-anchor-axis-plan.md
 docs/candidate-marks-plan.md
 docs/candidate-workspace-plan.md
 ```
-
-No next slice is active yet.
 
 ## Passed substrate — M1 shared ledger
 
@@ -324,13 +332,157 @@ Evidence not claimed:
 
 These limitations remain recorded but do not block the current-scope disposition.
 
+## CMP1 — Bounded Candidate comparison
+
+```text
+[planned, implementation not started]
+```
+
+### Question
+
+> Can a diner reduce repeated memory work across two or three serious Candidates using a bounded, truthful comparison without mistaking comparison selection for commitment or losing the Candidate workspace?
+
+### Planned boundary
+
+```text
+canonical Products
++ Candidate ProductId membership
++ reversible comparison selection
+→ bounded comparison projection
+```
+
+Comparison selection is identity-only and distinct from Candidate membership.
+
+Proposed state:
+
+```ts
+type CandidateComparisonState = Readonly<{
+  productIds: ReadonlyArray<ProductId>;
+}>;
+```
+
+Proposed surface state:
+
+```text
+surface.kind = menu | candidates | comparison
+```
+
+Selection rules:
+
+- only current Candidates;
+- no duplicates;
+- canonical Product order;
+- maximum three Products;
+- no arbitrary replacement at the limit;
+- Candidate removal sanitizes selection;
+- comparison toggling never changes Candidate membership.
+
+### Entry and selection
+
+CND2 row actions remain unchanged.
+
+The Candidate workspace header gains one fixed-geometry `比較考慮項目` entry when at least two Candidates exist.
+
+Opening:
+
+- preserves menu reading, Anchor, Candidate, and Candidate-to-menu return state;
+- selects all when exactly two or three Candidates exist and no prior selection exists;
+- selects none from a larger Candidate set rather than choosing an arbitrary first three;
+- captures Candidate-workspace scroll and focus for exact return.
+
+The comparison surface lists all current Candidates in canonical order with stable native `aria-pressed` buttons labeled `比較`.
+
+### Mobile comparison grammar
+
+CMP1 does not use a wide Product-column matrix.
+
+At 320px and 390px it uses vertical dimension blocks:
+
+```text
+價格
+Product A                NT$320
+Product B                NT$360
+
+份量
+Product A                一人份
+Product B                約 2–3 人
+```
+
+This keeps two or three values simultaneous within one dimension without horizontal scrolling or unreadably narrow Product columns.
+
+### Bounded dimensions
+
+Allowed fixed-priority dimensions:
+
+1. price;
+2. portion class;
+3. meal role;
+4. preparation class;
+5. shareability;
+6. coarse traits;
+7. required customization presence.
+
+Price is always shown.
+
+Semantic dimensions appear only when values differ or selected evidence includes missing or low-confidence data. Equal complete dimensions and all-missing dimensions are omitted.
+
+Required customization appears only when selected Products differ and shows only:
+
+```text
+有必選項目
+無必選項目
+```
+
+No modifier names, options, prices, or controls appear.
+
+### Evidence truthfulness
+
+Semantic projection reuses canonical category defaults and Product overrides.
+
+Evidence states:
+
+```text
+known
+low confidence
+missing
+```
+
+Required labels include:
+
+```text
+商家確認
+分類預設
+低可信
+未提供
+```
+
+Missing data must not appear as a negative Product property, and low-confidence data must not look identical to confirmed data.
+
+### Explicit exclusions
+
+CMP1 does not add:
+
+- winner selection;
+- `決定點這道`;
+- quantity;
+- modifier selection;
+- Configuration;
+- Current order;
+- total or submission;
+- score, rank, recommendation, best-value badge, or automatic first-three selection;
+- Product descriptions or exhaustive specifications;
+- modal, sheet, carousel, fixed footer, horizontal matrix, routing, persistence, backend, or analytics.
+
+### Current gate
+
+Implementation must not begin until `docs/candidate-comparison-plan.md` receives explicit product-owner approval.
+
+Designer review, tests, geometry evidence, and CI may later support a current-scope disposition, but no unfamiliar-participant memory reduction, comprehension, decision-quality, speed, real-device, or conventional-interface claim may be inferred from implementation evidence alone.
+
 ## Blocked later work
 
-CND2 acceptance does not automatically authorize the next surface.
+Until CMP1 receives an explicit disposition, do not begin:
 
-Until a separate bounded plan is explicitly approved, do not begin:
-
-- Candidate comparison or comparison selection;
 - explicit Decision;
 - Configuration;
 - Current order;
@@ -347,13 +499,13 @@ Until a separate bounded plan is explicitly approved, do not begin:
 - no alternative lens implementation;
 - no merchant CMS;
 - no remote analytics;
-- no generic state machine, repository abstraction, plugin system, or design-system package;
+- no generic state machine, repository abstraction, plugin system, dynamic comparison-field registry, or design-system package;
 - preserve canonical Product and category order;
-- preserve `Product ≠ Candidate ≠ DraftOrderItem ≠ ConfiguredOrderItem ≠ SubmittedOrderRound`;
+- preserve `Product ≠ Candidate ≠ comparison selection ≠ DraftOrderItem ≠ ConfiguredOrderItem ≠ SubmittedOrderRound`;
 - do not count visual polish or desktop-only behavior as proof.
 
 ## Contract impact
 
 None.
 
-Prototype C, CND1, and CND2 implement existing product invariants without changing `docs/product-contract.md`.
+Prototype C, CND1, CND2, and the CMP1 plan refine existing product invariants without changing `docs/product-contract.md`.
