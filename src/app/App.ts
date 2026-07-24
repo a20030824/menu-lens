@@ -6,6 +6,7 @@ import {
   updateAppReading,
   type MenuAppState,
 } from "../customer/menu-app-state.js";
+import { candidateCount } from "../customer/menu-candidates.js";
 import {
   beginAnchorSelection,
   cancelAnchorSelection,
@@ -42,7 +43,8 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   let state: MenuAppState = createInitialMenuAppState(menu);
   let overview: MenuOverviewView;
 
-  const render = (): void => overview.render(state.reading, state.candidates);
+  const render = (): void =>
+    overview.render(state.reading, state.candidates, candidateCount(menu, state.candidates));
 
   const focusedProductId = (): ProductId | null => {
     const focused = document.activeElement;
