@@ -152,7 +152,8 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     render();
     if (returnContext) {
       window.scrollTo({ top: returnContext.scrollY, behavior: "auto" });
-      returnContext.focusElement?.focus({ preventScroll: true });
+      if (candidateCount(menu, state.candidates) === 0) overview.focusCandidateSummary();
+      else returnContext.focusElement?.focus({ preventScroll: true });
     } else {
       overview.focusCandidateEntry();
     }
@@ -183,7 +184,8 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
       block: "center",
       behavior: categoryScrollBehavior(reducedMotion()),
     });
-    overview.focusProductCandidate(product.categoryId, productId);
+    if (product.availability === "sold_out") overview.focusProductRelation(product.categoryId, productId);
+    else overview.focusProductCandidate(product.categoryId, productId);
     candidateReturnContext = null;
   };
 
