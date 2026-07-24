@@ -37,6 +37,7 @@ export type MenuOverviewView = Readonly<{
   focusProductCandidate: (categoryId: CategoryId, productId: ProductId) => void;
   productRowFor: (categoryId: CategoryId, productId: ProductId) => HTMLTableRowElement | null;
   focusCandidateEntry: () => void;
+  focusCandidateSummary: () => void;
 }>;
 
 export const createMenuOverview = (
@@ -71,6 +72,7 @@ export const createMenuOverview = (
   const title = element("h2", "menu-map__title", "整張菜單先縮成六個區域");
   title.id = "menu-map-title";
   const candidateSummary = element("p", "candidate-summary", "尚無考慮項目 · 不影響點餐");
+  candidateSummary.tabIndex = -1;
   candidateSummary.setAttribute("role", "status");
   candidateSummary.setAttribute("aria-live", "polite");
   candidateSummary.setAttribute("aria-atomic", "true");
@@ -203,5 +205,6 @@ export const createMenuOverview = (
     productRowFor: (categoryId, productId) =>
       sections.find((section) => section.categoryId === categoryId)?.productRowFor(productId) ?? null,
     focusCandidateEntry: () => candidateSummaryAction.focus({ preventScroll: true }),
+    focusCandidateSummary: () => candidateSummary.focus({ preventScroll: true }),
   };
 };
