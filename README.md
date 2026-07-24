@@ -55,13 +55,14 @@ A conventional comparison interface is deliberately parked. The project should f
 full menu
 → relational reading
 → reversible consideration
+→ Candidate review workspace
 → bounded comparison
 → explicit decision
 → required configuration
 → current order
 ```
 
-Prototype C establishes the accepted relational-reading substrate. CND1 establishes reversible Candidate membership directly on canonical Product rows without creating an order, Candidate workspace, or copied Product list.
+Prototype C establishes the accepted relational-reading substrate. CND1 establishes reversible Candidate membership directly on canonical Product rows. CND2 now plans a derived Candidate review workspace that can retrieve, revisit, and dismiss Candidates while preserving the prior menu context and without creating comparison or order state.
 
 ### Later, only after the decision spine works
 
@@ -125,6 +126,7 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/prototype-b-anchor-plan.md`](docs/prototype-b-anchor-plan.md) — Prototype B implementation, task matrix, reverse review, and disposition
 - [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) — Prototype C implementation, evidence, accepted limitations, and final current-scope disposition
 - [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) — CND1 implementation, final re-review corrections, narrow-screen evidence, and accepted disposition
+- [`docs/candidate-workspace-plan.md`](docs/candidate-workspace-plan.md) — planned CND2 derived workspace, return-context contract, removal behavior, tests, and scope gates
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
@@ -138,12 +140,13 @@ The customer decision spine is active on Draft PR #4:
 ```text
 [passed] M1 compressed overview + shared ledger
 → [rejected] M2 modal product detail
-→ [rejected, removed] C1 fixed product focus rail
+→ [rejected, removed] C1 fixed Product focus rail
 → [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
 → [passed for current scope] Prototype C — Anchor + explicit shared axis
 → [passed for current scope] CND1 — Attached Candidate marks
-→ [blocked] Candidate workspace / Comparison / Decision / Configuration / Current order
+→ [planned, implementation not started] CND2 — Candidate review workspace
+→ [blocked] Candidate comparison / Decision / Configuration / Current order
 ```
 
 Prototype A showed that one shared dimension can support simultaneous multi-Product reading, but retained cross-axis memory work and a weak price axis.
@@ -156,6 +159,6 @@ CND1 adds identity-only Candidate membership beside reading state. Available Pro
 
 The final CND1 re-review corrected stale-ID counting, Candidate-dependent Product typography, repeated live-region announcements, changing toggle labels, an unused row-wide state mirror, and a premature detached-list projection. A 320px/390px Chromium proxy reports zero Candidate on/off geometry differences and no overflow. Typecheck, Candidate domain tests, app-state continuity tests, structure contracts, and the static build pass.
 
-CND1 is accepted for the current scope. Candidate workspace, Comparison, Decision, Configuration, Current order, and every transaction state remain blocked until a separate bounded plan is approved.
+CND2 is now the active plan-review-gated slice. It authorizes only a canonical derived Candidate review view with explicit menu return, Product locator, and Candidate removal. Comparison, Decision, Configuration, Current order, transaction state, ranking, and recommendation remain blocked.
 
-See [`docs/workstreams.md`](docs/workstreams.md), [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md), and [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) for the active sequence and evidence.
+See [`docs/workstreams.md`](docs/workstreams.md), [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md), and [`docs/candidate-workspace-plan.md`](docs/candidate-workspace-plan.md) for the active sequence and evidence.
