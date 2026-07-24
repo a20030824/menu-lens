@@ -106,12 +106,11 @@ export const createMenuOverview = (
       const anchorName = state.anchorReading.kind === "active"
         ? activeCategory?.products.find((product) => product.id === state.anchorReading.productId)?.name
         : null;
-      const anchorContext = anchorName
-        ? `　基準：${anchorName}`
+      contextLabel.textContent = anchorName
+        ? `基準：${anchorName}　${activeCategory?.name ?? "分類聚焦"}`
         : state.anchorReading.kind === "selecting"
-          ? "　選擇比較基準"
-          : "";
-      contextLabel.textContent = `${categoryContext}${anchorContext}`;
+          ? `選擇比較基準　${activeCategory?.name ?? "分類聚焦"}`
+          : categoryContext;
     } else if (state.expansion.kind === "all") {
       contextLabel.textContent = activeCategory
         ? `全部 ${model.productCount} 道　${activeIndex + 1} / ${model.categoryCount}　${activeCategory.name}`
