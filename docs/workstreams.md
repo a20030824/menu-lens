@@ -135,7 +135,7 @@ Insufficient evidence:
 - only one dimension was visible at a time;
 - switching dimensions reintroduced cross-axis remembering.
 
-Prototype A remains historical evidence. Its selector is not active in the Prototype C path.
+Prototype A remains historical evidence. Its selector UI has been removed from the active application tree; its pure projection module remains compiled and tested.
 
 ## Prototype B — Anchor-only relation
 
@@ -269,6 +269,31 @@ horizontal scrolling           none
 ```
 
 This is implementation evidence, not participant evidence.
+
+### Re-review corrections
+
+The C re-review found and corrected three concrete implementation issues:
+
+1. reopening the same category incorrectly reset an explicitly selected axis;
+2. selecting an anchor from a row moved focus to an offscreen top control while preserving the old scroll position;
+3. pressing Escape from a row had the same offscreen-focus problem.
+
+Current focus behavior:
+
+```text
+choose anchor in row
+→ focus chosen row relation
+
+Escape from row selection
+→ focus same canonical row
+
+Top Cancel or Clear
+→ focus top anchor control
+```
+
+All row-local focus uses a programmatic `tabIndex=-1` relation target with the complete accessible relation phrase and `preventScroll`. No extra Tab stop or scroll correction is introduced.
+
+Prototype A's unused selector UI module was also removed. Pure A/B projection evidence remains compiled and tested.
 
 ## Prototype C review gate
 
