@@ -363,7 +363,7 @@ Fitting text does not prove comfortable mobile reading. Actual readability remai
 - axis switching does not replace the axis-button DOM;
 - Escape cancels selecting state only.
 
-Focus restoration is now source-local:
+Focus restoration is source-local:
 
 ```text
 select a row as anchor
@@ -606,5 +606,7 @@ Without teaching the interaction, ask a participant to:
 ```
 
 Automated checks and designer reverse review show that the implementation satisfies its formal contracts and corrects Prototype B's silent semantic omission. They do not prove unfamiliar-user comprehension or reduced task effort.
+
+No further application change is justified by the current evidence. The next valid step is unfamiliar-user review against the documented task, not Candidate implementation or additional speculative polish.
 
 Candidate and every later decision or transaction state remain blocked until Prototype C receives an explicit review disposition.
