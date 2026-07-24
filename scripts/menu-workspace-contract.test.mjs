@@ -5,6 +5,7 @@ const normalized = (path) => readFileSync(new URL(path, import.meta.url), "utf8"
   .trim();
 
 const css = normalized("../src/styles/menu-workspace.css");
+const appSource = normalized("../src/app/App.ts");
 const categorySource = normalized("../src/app/menu-category.ts");
 const overviewSource = normalized("../src/app/menu-overview.ts");
 
@@ -80,6 +81,21 @@ assertIncludes(
   "the fixed axis row must remain attached to the canonical ledger",
 );
 assertIncludes(
+  categorySource,
+  "relation.tabIndex = -1;",
+  "each canonical relation lane must accept programmatic focus after its selection button is replaced",
+);
+assertIncludes(
+  categorySource,
+  'target.setAttribute("aria-label", relation.accessibleLabel);',
+  "the focused active relation lane must expose the complete anchor-relative phrase",
+);
+assertIncludes(
+  categorySource,
+  "focusProductRelation: (productId) => relationTargets.get(productId)?.focus({ preventScroll: true }),",
+  "category focus restoration must stay on the chosen canonical row without moving the viewport",
+);
+assertIncludes(
   overviewSource,
   "? `${axisLabels[state.semanticAxis]}｜${anchorName}`",
   "the existing sticky context must lead with active axis and anchor identity",
@@ -88,6 +104,16 @@ assertIncludes(
   overviewSource,
   'contextLabel.title = contextLabel.textContent ?? "";',
   "truncated sticky context must retain its full text",
+);
+assertIncludes(
+  overviewSource,
+  "focusProductRelation: (categoryId, productId) =>",
+  "the overview must expose row-local focus restoration",
+);
+assertIncludes(
+  appSource,
+  "overview.focusProductRelation(categoryId, productId);",
+  "selecting an anchor must retain visible focus on the chosen row instead of moving focus offscreen",
 );
 
 [
