@@ -1,8 +1,12 @@
 import type { Category, Menu, Product } from "../domain/menu-types.js";
 import { referenceMenu } from "../domain/reference-menu.js";
-import { axisValueFor, pricePositionFor } from "./menu-relations.js";
+import {
+  availableReadingAxesFor,
+  axisValueFor,
+  pricePositionFor,
+} from "./menu-relations.js";
 
-type TestCase = Readonly<{ name: string; run: () => void }>;
+ type TestCase = Readonly<{ name: string; run: () => void }>;
 const tests: TestCase[] = [];
 const test = (name: string, run: () => void): void => { tests.push({ name, run }); };
 function assert(condition: unknown, message: string): asserts condition { if (!condition) throw new Error(message); }
@@ -18,6 +22,9 @@ const minimumProduct = categoryProducts.reduce((minimum, product) =>
 const maximumProduct = categoryProducts.reduce((maximum, product) =>
   product.price > maximum.price ? product : maximum,
 );
+
+const productsFor = (categoryId: string): ReadonlyArray<Product> =>
+  referenceMenu.products.filter((product) => product.categoryId === categoryId);
 
 test("price position uses one category min–max scale", () => {
   assert(pricePositionFor(minimumProduct, categoryProducts).position === 0, "minimum price must start the scale");
@@ -75,6 +82,37 @@ test("missing and low-confidence metadata remain unknown", () => {
     assert(value.kind === "text" && value.label === "未提供", "unsupported metadata must not be guessed");
     assert(value.status === "unknown", "unknown metadata must stay explicit");
   });
+});
+
+test("the deployed reference menu contains executable unknown-axis evidence", () => {
+  const fish = referenceMenu.products.find((product) => product.id === "black-bean-steamed-seabass");
+  assert(fish !== undefined, "reference fixture must include the steamed seabass");
+  const peers = productsFor(fish.categoryId);
+  const value = axisValueFor(referenceMenu, fish, peers, "portion");
+  assert(value.kind === "text" && value.label === "未提供", "the live portion axis must expose one unknown product");
+  assert(value.status === "unknown", "the live unknown example must remain explicitly unknown");
+});
+
+test("only axes with category-local relational evidence are offered", () => {
+  const personal = productsFor("personal-mains");
+  const personalAxes = availableReadingAxesFor(referenceMenu, personal);
+  assert(personalAxes.includes("price"), "personal mains must expose price differences");
+  assert(personalAxes.includes("preparation"), "personal mains must expose preparation differences");
+  assert(!personalAxes.includes("portion"), "uniform one-person portions must not become a repeated row mode");
+  assert(!personalAxes.includes("role"), "a category label repeated in every row is not relational evidence");
+
+  const shared = productsFor("shared-dishes");
+  const sharedAxes = availableReadingAxesFor(referenceMenu, shared);
+  assert(sharedAxes.includes("price"), "shared dishes must expose price differences");
+  assert(sharedAxes.includes("portion"), "shared dishes must expose known and unknown portion differences");
+  assert(sharedAxes.includes("preparation"), "shared dishes must expose preparation differences");
+  assert(!sharedAxes.includes("role"), "uniform shared-main roles must not be offered as a row mode");
+
+  const desserts = productsFor("desserts");
+  assert(
+    JSON.stringify(availableReadingAxesFor(referenceMenu, desserts)) === JSON.stringify(["default"]),
+    "a two-product category cannot satisfy the three-product relational gate",
+  );
 });
 
 test("sold-out products retain axis evidence and canonical position", () => {
