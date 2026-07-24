@@ -73,7 +73,7 @@ assertIncludes(
 );
 assertIncludes(
   overviewSource,
-  "contextLabel.title = contextLabel.textContent;",
+  'contextLabel.title = contextLabel.textContent ?? "";',
   "truncated sticky anchor context must retain its full text",
 );
 
