@@ -1,5 +1,4 @@
-import type { CategoryId } from "../domain/menu-types.js";
-import type { MenuReadingAxis } from "../customer/menu-relations.js";
+import type { CategoryId, ProductId } from "../domain/menu-types.js";
 import {
   categoryIsExpanded,
   type CompleteMenuModel,
@@ -22,12 +21,16 @@ export type MenuOverviewView = Readonly<{
   element: HTMLElement;
   render: (state: MenuReadingState) => void;
   sectionFor: (categoryId: CategoryId) => HTMLElement | null;
+  focusAnchorControl: (categoryId: CategoryId) => void;
 }>;
 
 export const createMenuOverview = (
   model: CompleteMenuModel,
   onSelectCategory: (categoryId: CategoryId) => void,
-  onSelectAxis: (axis: MenuReadingAxis) => void,
+  onBeginAnchorSelection: () => void,
+  onCancelAnchorSelection: () => void,
+  onSelectAnchor: (productId: ProductId) => void,
+  onClearAnchor: () => void,
   onShowOverview: () => void,
   onShowAll: () => void,
 ): MenuOverviewView => {
@@ -61,7 +64,15 @@ export const createMenuOverview = (
 
   const stack = element("div", "category-stack");
   const sections = model.categories.map((category, index) =>
-    createMenuCategorySection(category, index, onSelectCategory, onSelectAxis),
+    createMenuCategorySection(
+      category,
+      index,
+      onSelectCategory,
+      onBeginAnchorSelection,
+      onCancelAnchorSelection,
+      onSelectAnchor,
+      onClearAnchor,
+    ),
   );
   sections.forEach((section) => stack.append(section.element));
 
@@ -105,7 +116,9 @@ export const createMenuOverview = (
       section.setState(
         categoryIsExpanded(state, section.categoryId),
         isCurrent,
-        state.expansion.kind === "category" && isCurrent ? state.readingAxis : "default",
+        state.expansion.kind === "category" && isCurrent
+          ? state.anchorReading
+          : { kind: "idle" },
         state.expansion.kind === "category" && isCurrent,
       );
     });
@@ -116,5 +129,7 @@ export const createMenuOverview = (
     render,
     sectionFor: (categoryId) =>
       sections.find((section) => section.categoryId === categoryId)?.element ?? null,
+    focusAnchorControl: (categoryId) =>
+      sections.find((section) => section.categoryId === categoryId)?.focusAnchorControl(),
   };
 };
