@@ -10,7 +10,7 @@ Current sequence:
 [useful but insufficient] Prototype A — Axis-only score
 → [useful but insufficient] Prototype B — Anchor-only relation
 → [passed for current scope] Prototype C — Anchor + explicit shared axis
-→ [implemented, awaiting review] CND1 — Attached Candidate marks
+→ [implemented, awaiting product-owner review] CND1 — Attached Candidate marks
 ```
 
 Prototype B remains historical evidence. Its automatic semantic-token rendering is not active.
