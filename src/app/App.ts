@@ -142,7 +142,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     };
     state = openCandidateWorkspace(state, menu);
     render();
-    window.scrollTo({ top: 0, behavior: "auto" });
+    window.scrollTo({ top: 0, behavior: "instant" });
     candidateWorkspace.focusHeading();
   };
 
@@ -151,7 +151,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     state = closeCandidateWorkspace(state);
     render();
     if (returnContext) {
-      window.scrollTo({ top: returnContext.scrollY, behavior: "auto" });
+      window.scrollTo({ top: returnContext.scrollY, behavior: "instant" });
       if (candidateCount(menu, state.candidates) === 0) overview.focusCandidateSummary();
       else returnContext.focusElement?.focus({ preventScroll: true });
     } else {
