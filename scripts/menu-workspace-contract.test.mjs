@@ -33,6 +33,9 @@ if (css.includes(".candidate-summary { position: sticky")) {
 if (css.includes('.product-row[data-candidate="true"] .product-row__name')) {
   throw new Error("Candidate membership must not change Product-name metrics or wrapping");
 }
+if (categorySource.includes("button.textContent =") || categorySource.includes("移出考慮") || categorySource.includes("列入考慮")) {
+  throw new Error("an aria-pressed Candidate toggle must keep one stable visible and accessible label");
+}
 
 assertIncludes(
   css,
@@ -116,6 +119,16 @@ assertIncludes(
 );
 assertIncludes(
   categorySource,
+  'const button = element("button", "candidate-toggle", "考慮") as HTMLButtonElement;',
+  "Candidate controls must keep one stable visible label",
+);
+assertIncludes(
+  categorySource,
+  'button.setAttribute("aria-label", `考慮「${product.name}」`);',
+  "Candidate controls must keep one stable accessible name that includes the visible label",
+);
+assertIncludes(
+  categorySource,
   'button.setAttribute("aria-pressed", "false");',
   "Candidate controls must expose initial membership state",
 );
@@ -128,11 +141,6 @@ assertIncludes(
   categorySource,
   'button.setAttribute("aria-pressed", String(isMarked));',
   "Candidate toggling must update the existing button instead of replacing it",
-);
-assertIncludes(
-  categorySource,
-  "button.textContent = isMarked ? \"考慮中\" : \"考慮\";",
-  "Candidate button must use explicit reversible language",
 );
 assertIncludes(
   categorySource,
@@ -161,8 +169,23 @@ assertIncludes(
 );
 assertIncludes(
   overviewSource,
-  'candidateSummary.textContent = candidateCount === 0 ? "尚無考慮項目 · 不影響點餐" : `考慮中 ${candidateCount} 道 · 尚未點餐`;',
-  "Candidate summary must state the non-order boundary",
+  'const candidateSummary = element("p", "candidate-summary", "尚無考慮項目 · 不影響點餐");',
+  "the empty Candidate summary must exist before the live region enters the document",
+);
+assertIncludes(
+  overviewSource,
+  "let renderedCandidateCount = 0;",
+  "Candidate summary rendering must remember the last announced count",
+);
+assertIncludes(
+  overviewSource,
+  "if (renderedCandidateCount !== candidateCount) {",
+  "unrelated reading renders must not mutate and reannounce the Candidate live region",
+);
+assertIncludes(
+  overviewSource,
+  'candidateSummary.textContent = candidateCount === 0 ? "尚無考慮項目 · 不影響點餐" : `考慮中 ${candidateCount} 道 · 尚未點餐`; renderedCandidateCount = candidateCount;',
+  "Candidate summary must update only when its count changes",
 );
 assertIncludes(
   overviewSource,
