@@ -49,16 +49,28 @@ test("preparation relation emits faster, slower, and equal states", () => {
   assert(preparationRelationToken(referenceMenu, cheaper, unknownPortion).label === "同節奏", "equal trusted preparation values stay equal");
 });
 
-test("composed relation uses price plus at most one deterministic semantic token", () => {
-  const portionFirst = anchorRelationFor(referenceMenu, anchor, cheaper, formatPrice);
-  assert(portionFirst.kind === "relative", "non-anchor products must produce relative evidence");
-  assert(portionFirst.tokens.length === 2, "visible output is bounded to two tokens");
-  assert(portionFirst.tokens[0]?.kind === "price", "price must be the first token");
-  assert(portionFirst.tokens[1]?.kind === "portion", "portion difference must take priority");
+test("composed relation uses price plus the most discriminating semantic token", () => {
+  const tiedDifference = anchorRelationFor(referenceMenu, anchor, cheaper, formatPrice);
+  assert(tiedDifference.kind === "relative", "non-anchor products must produce relative evidence");
+  assert(tiedDifference.tokens.length === 2, "visible output is bounded to two tokens");
+  assert(tiedDifference.tokens[0]?.kind === "price", "price must be the first token");
+  assert(tiedDifference.tokens[1]?.kind === "portion", "portion wins a tied one-step difference");
+
+  const largerPreparationDifference = anchorRelationFor(referenceMenu, anchor, faster, formatPrice);
+  assert(largerPreparationDifference.kind === "relative", "non-anchor products must remain relative");
+  assert(largerPreparationDifference.tokens[1]?.kind === "preparation", "a two-step preparation difference must not be hidden by a one-step portion difference");
+  assert(largerPreparationDifference.tokens[1]?.label === "較快", "the soft-shell crab must expose its exceptional faster preparation");
 
   const preparationFallback = anchorRelationFor(referenceMenu, cheaper, faster, formatPrice);
-  assert(preparationFallback.kind === "relative", "non-anchor products must remain relative");
+  assert(preparationFallback.kind === "relative", "equal portion products must remain comparable");
   assert(preparationFallback.tokens[1]?.kind === "preparation", "preparation appears when portion is equal");
+});
+
+test("unknown portion remains visible instead of becoming a directional claim", () => {
+  const relation = anchorRelationFor(referenceMenu, anchor, unknownPortion, formatPrice);
+  assert(relation.kind === "relative", "unknown product remains in comparison");
+  assert(relation.tokens[1]?.kind === "portion", "the uncertain dimension must remain explicit");
+  assert(relation.tokens[1]?.label === "份量未知", "low-confidence portion must stay unknown");
 });
 
 test("the anchor row is factual and recommendation language never appears", () => {
