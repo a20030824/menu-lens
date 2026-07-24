@@ -20,7 +20,7 @@ Current sequence:
 → [blocked] Decision / Configuration / Current order
 ```
 
-Prototype C was accepted for the current implementation scope by product-owner decision. No unfamiliar-participant evidence is claimed.
+Prototype C was accepted for the current implementation scope by product-owner decision. No unfamiliar-participant evidence is claimed or required as a gate for this slice.
 
 ## Research question
 
@@ -319,7 +319,7 @@ The contract prevents Candidate-dependent Product-name font metrics, width chang
 
 The current code keeps the existing mobile cue column at `7.2rem`. The button plus `資訊有限` status fits inside the padded cue column at the current font sizes.
 
-No claim of real-device comfort or participant comprehension is made.
+This is structural implementation evidence. No additional real-device or unfamiliar-participant claim is made.
 
 ## Accessibility contract
 
@@ -494,22 +494,24 @@ Result:
 PASS — formal and structure evidence
 ```
 
-## Remaining risks
+## Remaining product questions
 
-CND1 does not yet prove:
+Product-owner review should decide:
 
-- whether `考慮` is naturally understood as serious consideration;
-- whether the noninteractive count feels useful rather than like a dead cart entry point;
-- whether the additional row lane makes the dense menu feel too tall;
-- whether people expect a Candidate workspace immediately after marking several Products;
-- whether a future comparison entry should appear after two Candidates or remain separately invoked.
+- whether `考慮` is the retained visible term;
+- whether the noninteractive count provides enough orientation;
+- whether the additional row lane is an acceptable density cost;
+- whether CND1 is accepted for the current scope;
+- only after acceptance, which bounded next slice should be planned.
 
-These risks should inform product-owner review and the next bounded slice. They do not authorize Candidate workspace or comparison yet.
+These questions do not authorize Candidate workspace or Comparison automatically.
 
 ## Current disposition
 
 ```text
 [implemented, awaiting review] CND1 — Attached Candidate marks
 ```
+
+This review gate is a product-owner disposition, not a required unfamiliar-participant study.
 
 Candidate workspace, bounded comparison, Decision, Configuration, Current order, quantity, modifiers, totals, and submission remain blocked.
