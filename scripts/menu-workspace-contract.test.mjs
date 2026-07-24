@@ -68,8 +68,8 @@ assertIncludes(
 );
 assertIncludes(
   overviewSource,
-  "? `　基準：${anchorName}`",
-  "the existing sticky menu context must keep the active anchor name visible after its row scrolls away",
+  "? `基準：${anchorName}　${activeCategory?.name ?? \"分類聚焦\"}`",
+  "the existing sticky menu context must lead with the anchor name before narrow-screen truncation",
 );
 assertIncludes(
   overviewSource,
