@@ -7,6 +7,7 @@ const normalized = (path) => readFileSync(new URL(path, import.meta.url), "utf8"
 const appSource = normalized("../src/app/App.ts");
 const overviewSource = normalized("../src/app/menu-overview.ts");
 const workspaceSource = normalized("../src/app/candidate-workspace.ts");
+const cssSource = normalized("../src/styles/menu-workspace.css");
 
 const assertIncludes = (source, fragment, message) => {
   if (!source.includes(fragment.replace(/\s+/g, " ").trim())) throw new Error(message);
@@ -14,6 +15,15 @@ const assertIncludes = (source, fragment, message) => {
 
 if (workspaceSource.includes("statuses.hidden")) {
   throw new Error("empty Candidate status lanes must reserve geometry without relying on the hidden attribute");
+}
+if (cssSource.includes(".candidate-workspace__statuses[hidden]")) {
+  throw new Error("CND2 must not retain an unused hidden-status CSS branch after status lanes become persistent");
+}
+if (appSource.includes('window.scrollTo({ top: 0, behavior: "auto" })')) {
+  throw new Error("workspace opening must not inherit global smooth scrolling through behavior:auto");
+}
+if (appSource.includes('window.scrollTo({ top: returnContext.scrollY, behavior: "auto" })')) {
+  throw new Error("ordinary Back must restore the captured scroll position instantly before restoring focus");
 }
 
 assertIncludes(
@@ -38,6 +48,16 @@ assertIncludes(
 );
 assertIncludes(
   appSource,
+  'window.scrollTo({ top: 0, behavior: "instant" });',
+  "workspace opening must start at the top without inheriting global smooth scrolling",
+);
+assertIncludes(
+  appSource,
+  'window.scrollTo({ top: returnContext.scrollY, behavior: "instant" });',
+  "ordinary Back must restore the exact captured scroll position before focus",
+);
+assertIncludes(
+  appSource,
   "if (candidateCount(menu, state.candidates) === 0) overview.focusCandidateSummary();",
   "Back after final removal must not try to focus the disabled hidden entry button",
 );
@@ -47,4 +67,4 @@ assertIncludes(
   "a sold-out Candidate locator must focus the canonical relation lane when no Candidate toggle exists",
 );
 
-console.log("✓ CND2 reverse-review focus and geometry contract");
+console.log("✓ CND2 reverse-review focus, scroll, and geometry contract");
