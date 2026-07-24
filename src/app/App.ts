@@ -1,7 +1,12 @@
 import type { CategoryId, Menu, ProductId } from "../domain/menu-types.js";
 import type { SemanticAxis } from "../customer/menu-anchor-axis.js";
+import { createCandidateWorkspaceModel } from "../customer/candidate-workspace.js";
 import {
+  closeCandidateWorkspace,
   createInitialMenuAppState,
+  openCandidateWorkspace,
+  removeAppCandidate,
+  showCandidateInMenu,
   toggleAppCandidate,
   updateAppReading,
   type MenuAppState,
@@ -21,6 +26,7 @@ import {
   showAllCategories,
   showMenuOverview,
 } from "../customer/menu-reading.js";
+import { createCandidateWorkspace, type CandidateWorkspaceView } from "./candidate-workspace.js";
 import { createMenuOverview, type MenuOverviewView } from "./menu-overview.js";
 
 const element = <K extends keyof HTMLElementTagNameMap>(
@@ -42,9 +48,26 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   const model = createCompleteMenuModel(menu);
   let state: MenuAppState = createInitialMenuAppState(menu);
   let overview: MenuOverviewView;
+  let candidateWorkspace: CandidateWorkspaceView;
+  let candidateReturnContext:
+    | Readonly<{ scrollY: number; focusElement: HTMLElement | null }>
+    | null = null;
 
-  const render = (): void =>
-    overview.render(state.reading, state.candidates, candidateCount(menu, state.candidates));
+  const render = (): void => {
+    const count = candidateCount(menu, state.candidates);
+    overview.render(state.reading, state.candidates, count);
+    candidateWorkspace.render(state.candidates);
+
+    overview.element.hidden = state.surface.kind !== "menu";
+    candidateWorkspace.element.hidden = state.surface.kind !== "candidates";
+    if (state.surface.kind === "menu") {
+      overview.element.removeAttribute("inert");
+      candidateWorkspace.element.setAttribute("inert", "");
+    } else {
+      overview.element.setAttribute("inert", "");
+      candidateWorkspace.element.removeAttribute("inert");
+    }
+  };
 
   const focusedProductId = (): ProductId | null => {
     const focused = document.activeElement;
@@ -111,6 +134,59 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     render();
   };
 
+  const openCandidates = (): void => {
+    if (candidateCount(menu, state.candidates) === 0) return;
+    candidateReturnContext = {
+      scrollY: window.scrollY,
+      focusElement: document.activeElement instanceof HTMLElement ? document.activeElement : null,
+    };
+    state = openCandidateWorkspace(state, menu);
+    render();
+    window.scrollTo({ top: 0, behavior: "auto" });
+    candidateWorkspace.focusHeading();
+  };
+
+  const closeCandidates = (): void => {
+    const returnContext = candidateReturnContext;
+    state = closeCandidateWorkspace(state);
+    render();
+    if (returnContext) {
+      window.scrollTo({ top: returnContext.scrollY, behavior: "auto" });
+      returnContext.focusElement?.focus({ preventScroll: true });
+    } else {
+      overview.focusCandidateEntry();
+    }
+    candidateReturnContext = null;
+  };
+
+  const removeCandidateFromWorkspace = (productId: ProductId): void => {
+    const orderedProductIds = createCandidateWorkspaceModel(menu, state.candidates).groups.flatMap(
+      (group) => group.products.map((product) => product.id),
+    );
+    const removedIndex = orderedProductIds.indexOf(productId);
+    const returnFocusProductId = removedIndex < 0
+      ? null
+      : orderedProductIds[removedIndex + 1] ?? orderedProductIds[removedIndex - 1] ?? null;
+    state = removeAppCandidate(state, productId);
+    render();
+    if (returnFocusProductId) candidateWorkspace.focusRemoval(returnFocusProductId);
+    else candidateWorkspace.focusHeading();
+  };
+
+  const locateCandidateInMenu = (productId: ProductId): void => {
+    const product = menu.products.find((entry) => entry.id === productId);
+    if (!product) return;
+    state = showCandidateInMenu(state, menu, productId);
+    render();
+    const row = overview.productRowFor(product.categoryId, productId);
+    row?.scrollIntoView({
+      block: "center",
+      behavior: categoryScrollBehavior(reducedMotion()),
+    });
+    overview.focusProductCandidate(product.categoryId, productId);
+    candidateReturnContext = null;
+  };
+
   const showOverviewFromContext = (): void => {
     state = updateAppReading(state, showMenuOverview(state.reading));
     render();
@@ -134,8 +210,16 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
     clearCurrentAnchor,
     chooseSemanticAxis,
     toggleCandidate,
+    openCandidates,
     showOverviewFromContext,
     showAll,
+  );
+  candidateWorkspace = createCandidateWorkspace(
+    menu,
+    model,
+    closeCandidates,
+    locateCandidateInMenu,
+    removeCandidateFromWorkspace,
   );
 
   const shell = element("div", "menu-shell");
@@ -165,7 +249,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
 
   const workspace = element("div", "reading-workspace");
   workspace.id = "complete-menu";
-  workspace.append(overview.element);
+  workspace.append(overview.element, candidateWorkspace.element);
   headerInner.append(summaryCopy, metrics);
   header.append(headerInner);
   shell.append(header, workspace);
@@ -174,6 +258,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
 
   document.addEventListener("keydown", (event) => {
     if (
+      state.surface.kind !== "menu" ||
       state.reading.anchorReading.kind !== "selecting" ||
       !isAnchorSelectionCancelKey(event.key)
     ) return;
@@ -184,7 +269,7 @@ export const mountMenuApp = (root: HTMLElement, menu: Menu): void => {
   let scrollFrame: number | null = null;
   const syncAllModePosition = (): void => {
     scrollFrame = null;
-    if (state.reading.expansion.kind !== "all") return;
+    if (state.surface.kind !== "menu" || state.reading.expansion.kind !== "all") return;
     const marker = window.innerHeight * 0.32;
     let activeCategoryId = model.categories[0]?.id ?? null;
     model.categories.forEach((category) => {
