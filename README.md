@@ -62,7 +62,7 @@ full menu
 → current order
 ```
 
-Prototype C establishes the accepted relational-reading substrate. CND1 establishes reversible Candidate membership directly on canonical Product rows. CND2 establishes a derived Candidate review workspace that can retrieve, revisit, and dismiss Candidates while preserving the prior menu context and without creating comparison or order state.
+Prototype C establishes the accepted relational-reading substrate. CND1 establishes reversible Candidate membership directly on canonical Product rows. CND2 establishes a derived Candidate review workspace that can retrieve, revisit, and dismiss Candidates while preserving the prior menu context and without creating comparison or order state. CMP1 now plans a bounded, difference-oriented comparison for two or three Candidates without introducing Decision or transaction state.
 
 ### Later, only after the decision spine works
 
@@ -127,6 +127,7 @@ Use [`docs/handoff.md`](docs/handoff.md) when opening or closing a separate work
 - [`docs/prototype-c-anchor-axis-plan.md`](docs/prototype-c-anchor-axis-plan.md) — Prototype C implementation, evidence, accepted limitations, and final current-scope disposition
 - [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md) — CND1 implementation, final re-review corrections, narrow-screen evidence, and accepted disposition
 - [`docs/candidate-workspace-plan.md`](docs/candidate-workspace-plan.md) — CND2 implementation, final re-review corrections, evidence boundary, and accepted disposition
+- [`docs/candidate-comparison-plan.md`](docs/candidate-comparison-plan.md) — CMP1 state boundary, mobile comparison grammar, evidence projection, test plan, and implementation gate
 - [`docs/merchant-data-strategy.md`](docs/merchant-data-strategy.md) — progressive metadata, category defaults, confidence, governance, and graceful degradation
 - [`docs/demo-scope.md`](docs/demo-scope.md) — reference restaurant, primary flow, exclusions, and build sequence
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — formative tasks, observations, local events, and falsification signals
@@ -146,7 +147,8 @@ The customer decision spine is active on Draft PR #4:
 → [passed for current scope] Prototype C — Anchor + explicit shared axis
 → [passed for current scope] CND1 — Attached Candidate marks
 → [passed for current scope] CND2 — Candidate review workspace
-→ [blocked] Candidate comparison / Decision / Configuration / Current order
+→ [planned, implementation not started] CMP1 — Bounded Candidate comparison
+→ [blocked] Decision / Configuration / Current order
 ```
 
 Prototype A showed that one shared dimension can support simultaneous multi-Product reading, but retained cross-axis memory work and a weak price axis.
@@ -163,6 +165,8 @@ CND2's reviews corrected final-removal Back focus, sold-out locator focus, unnec
 
 CND2 is accepted for the current scope. Complete branch-runtime Chromium verification at 320px and 390px, real-device fit, unfamiliar-participant comprehension, and measured usability gain remain explicitly unclaimed limitations.
 
-Candidate comparison, Decision, Configuration, Current order, transaction state, ranking, and recommendation remain blocked until a separate bounded plan is approved.
+CMP1 is planned but not implemented. It proposes a third bounded `main` surface, an identity-only selection of at most three current Candidates, canonical-order selection, a difference-only vertical mobile comparison grammar, explicit missing and low-confidence evidence, and exact return to the Candidate workspace. It does not include a winner, Decision, Configuration, quantity, modifier selection, total, order action, recommendation, ranking, or horizontal specification matrix.
 
-See [`docs/workstreams.md`](docs/workstreams.md), [`docs/candidate-marks-plan.md`](docs/candidate-marks-plan.md), and [`docs/candidate-workspace-plan.md`](docs/candidate-workspace-plan.md) for the active sequence and evidence.
+CMP1 implementation must not begin until the plan receives explicit product-owner approval. Decision, Configuration, Current order, transaction state, ranking, and recommendation remain blocked.
+
+See [`docs/workstreams.md`](docs/workstreams.md), [`docs/candidate-workspace-plan.md`](docs/candidate-workspace-plan.md), and [`docs/candidate-comparison-plan.md`](docs/candidate-comparison-plan.md) for the active sequence and evidence.
